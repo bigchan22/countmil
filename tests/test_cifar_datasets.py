@@ -45,6 +45,20 @@ class CIFARDatasetTests(unittest.TestCase):
             self.assertEqual(tuple(batch["instances"].shape), (2, 4, 3, 32, 32))
             self.assertTrue(batch["mask"].all())
 
+            aug = CIFARHistogramBags(
+                root=root,
+                dataset="CIFAR100",
+                split="train",
+                num_bags=1,
+                bag_size=4,
+                bag_size_std=0,
+                seed=1,
+                augment=True,
+            )
+            aug_item = aug[0]
+            self.assertEqual(tuple(aug_item["instances"].shape), (4, 3, 32, 32))
+            self.assertEqual(aug_item["class_counts"].tolist(), item["class_counts"].tolist())
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -17,6 +17,12 @@ train_bags: {train_bags}
 seed: {seed}
 backbone: {backbone}
 pretrained: {pretrained}
+augment: {augment}
+optimizer: {optimizer}
+lr: {lr}
+weight_decay: {weight_decay}
+momentum: {momentum}
+scheduler: {scheduler}
 """
 
 
@@ -37,6 +43,12 @@ def main() -> None:
     parser.add_argument("--objectives", nargs="+", default=["pvc", "kl", "mse"])
     parser.add_argument("--backbone", choices=["small_cnn", "resnet18"], default="small_cnn")
     parser.add_argument("--pretrained", action="store_true")
+    parser.add_argument("--augment", action="store_true")
+    parser.add_argument("--optimizer", choices=["adam", "sgd"], default="adam")
+    parser.add_argument("--lr", type=float, default=5e-4)
+    parser.add_argument("--weight-decay", type=float, default=1e-4)
+    parser.add_argument("--momentum", type=float, default=0.9)
+    parser.add_argument("--scheduler", choices=["none", "cosine", "ma_cosine"], default="none")
     args = parser.parse_args()
 
     tag = args.tag or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -58,6 +70,12 @@ def main() -> None:
                     seed=seed,
                     backbone=args.backbone,
                     pretrained=str(args.pretrained).lower(),
+                    augment=str(args.augment).lower(),
+                    optimizer=args.optimizer,
+                    lr=args.lr,
+                    weight_decay=args.weight_decay,
+                    momentum=args.momentum,
+                    scheduler=args.scheduler,
                 )
                 for objective in args.objectives:
                     name = f"{args.dataset.lower()}_{args.label_level}_hist_{objective}_n{bag_mean}_train{train_bags}_s{seed}"

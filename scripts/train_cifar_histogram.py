@@ -64,6 +64,46 @@ def pvc_loss(class_probs: torch.Tensor, counts: torch.Tensor, mask: torch.Tensor
     return torch.stack(losses, dim=-1).mean()
 
 
+class MaCosineSchedule:
+    """Ma et al. LLP-PVC schedule: eta = eta0 cos(7 pi k / 16K)."""
+
+    def __init__(self, optimizer: torch.optim.Optimizer, epochs: int) -> None:
+        self.optimizer = optimizer
+        self.epochs = max(1, int(epochs))
+        self.base_lrs = [group["lr"] for group in optimizer.param_groups]
+
+    def step(self, epoch: int) -> None:
+        scale = math.cos(7.0 * math.pi * float(epoch) / (16.0 * float(self.epochs)))
+        for group, base_lr in zip(self.optimizer.param_groups, self.base_lrs):
+            group["lr"] = base_lr * scale
+
+
+def _make_optimizer(model: torch.nn.Module, cfg: dict[str, Any], args: argparse.Namespace) -> torch.optim.Optimizer:
+    lr = float(cfg["lr"])
+    weight_decay = float(cfg["weight_decay"])
+    optimizer_name = str(cfg["optimizer"]).lower()
+    if optimizer_name == "adam":
+        return torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay, betas=(0.9, 0.999))
+    if optimizer_name == "sgd":
+        return torch.optim.SGD(model.parameters(), lr=lr, weight_decay=weight_decay, momentum=float(cfg["momentum"]))
+    raise ValueError(f"unknown optimizer: {optimizer_name}")
+
+
+def _make_scheduler(
+    optimizer: torch.optim.Optimizer,
+    cfg: dict[str, Any],
+    args: argparse.Namespace,
+) -> MaCosineSchedule | torch.optim.lr_scheduler.CosineAnnealingLR | None:
+    scheduler_name = str(cfg["scheduler"]).lower()
+    if scheduler_name in {"none", ""}:
+        return None
+    if scheduler_name == "ma_cosine":
+        return MaCosineSchedule(optimizer, args.epochs)
+    if scheduler_name == "cosine":
+        return torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
+    raise ValueError(f"unknown scheduler: {scheduler_name}")
+
+
 def _evaluate(model: torch.nn.Module, loader: DataLoader, device: torch.device, objective: str) -> dict[str, float]:
     model.eval()
     total_loss = 0.0
@@ -132,8 +172,12 @@ def main() -> None:
     parser.add_argument("--test-bags", type=int, default=1000)
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--lr", type=float, default=5e-4)
-    parser.add_argument("--weight-decay", type=float, default=1e-4)
+    parser.add_argument("--lr", type=float, default=None)
+    parser.add_argument("--weight-decay", type=float, default=None)
+    parser.add_argument("--optimizer", choices=["adam", "sgd"], default=None)
+    parser.add_argument("--momentum", type=float, default=None)
+    parser.add_argument("--scheduler", choices=["none", "cosine", "ma_cosine"], default=None)
+    parser.add_argument("--augment", action="store_true")
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--run-root", default="runs")
@@ -150,6 +194,12 @@ def main() -> None:
         "objective": "pvc",
         "backbone": "small_cnn",
         "pretrained": False,
+        "augment": False,
+        "lr": 5e-4,
+        "weight_decay": 1e-4,
+        "optimizer": "adam",
+        "momentum": 0.9,
+        "scheduler": "none",
         "seed": 0,
     }
     cfg.update(_parse_simple_yaml(args.config))
@@ -162,12 +212,19 @@ def main() -> None:
         "bag_size_mean": args.bag_size_mean,
         "bag_size_std": args.bag_size_std,
         "train_bags": args.train_bags,
+        "lr": args.lr,
+        "weight_decay": args.weight_decay,
+        "optimizer": args.optimizer,
+        "momentum": args.momentum,
+        "scheduler": args.scheduler,
         "seed": args.seed,
     }.items():
         if value is not None:
             cfg[key] = value
     if args.pretrained:
         cfg["pretrained"] = True
+    if args.augment:
+        cfg["augment"] = True
 
     seed = int(cfg["seed"])
     objective = str(cfg["objective"])
@@ -183,6 +240,7 @@ def main() -> None:
         bag_size=int(cfg["bag_size_mean"]),
         bag_size_std=float(cfg["bag_size_std"]),
         seed=seed,
+        augment=bool(cfg["augment"]),
     )
     test_ds = CIFARHistogramBags(
         root=cfg["dataset_root"],
@@ -193,6 +251,7 @@ def main() -> None:
         bag_size=int(cfg["bag_size_mean"]),
         bag_size_std=float(cfg["bag_size_std"]),
         seed=seed + 10_000,
+        augment=False,
     )
     num_classes = train_ds.num_classes
     run_dir = make_run_dir(args.run_root, "cifar_histogram", objective, f"{cfg['dataset']}_{cfg['label_level']}", seed)
@@ -204,7 +263,8 @@ def main() -> None:
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, collate_fn=collate_cifar_bags)
     test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, collate_fn=collate_cifar_bags)
     model = make_cifar_classifier(str(cfg["backbone"]), num_classes=num_classes, pretrained=bool(cfg["pretrained"])).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay, betas=(0.9, 0.999))
+    optimizer = _make_optimizer(model, cfg, args)
+    scheduler = _make_scheduler(optimizer, cfg, args)
 
     best = {"instance_acc": -math.inf}
     for epoch in range(1, args.epochs + 1):
@@ -231,6 +291,8 @@ def main() -> None:
             optimizer.step()
             total_loss += float(loss.item()) * x.shape[0]
             total_seen += x.shape[0]
+        if scheduler is not None:
+            scheduler.step(epoch)
 
         metrics = _evaluate(model, test_loader, device, objective)
         if device.type == "cuda":
@@ -238,7 +300,7 @@ def main() -> None:
             peak_mb = torch.cuda.max_memory_allocated(device) / (1024**2)
         else:
             peak_mb = 0.0
-        metrics.update({"epoch": epoch, "train_loss": total_loss / max(total_seen, 1)})
+        metrics.update({"epoch": epoch, "train_loss": total_loss / max(total_seen, 1), "lr": optimizer.param_groups[0]["lr"]})
         metrics.update({"epoch_seconds": time.perf_counter() - start, "peak_cuda_mem_mb": peak_mb})
         with metrics_path.open("a") as f:
             f.write(json.dumps(metrics, sort_keys=True) + "\n")
@@ -246,7 +308,7 @@ def main() -> None:
             f"epoch={epoch:03d} train_loss={metrics['train_loss']:.4f} "
             f"test_loss={metrics['loss']:.4f} hist_mae={metrics['hist_count_mae']:.3f} "
             f"inst_acc={metrics['instance_acc']:.4f} time={metrics['epoch_seconds']:.2f}s "
-            f"mem={metrics['peak_cuda_mem_mb']:.1f}MB"
+            f"mem={metrics['peak_cuda_mem_mb']:.1f}MB lr={metrics['lr']:.3g}"
         )
         if metrics["instance_acc"] > best["instance_acc"]:
             best = metrics

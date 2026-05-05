@@ -105,6 +105,7 @@ class CIFARHistogramBags(Dataset):
         bag_size: int = 50,
         bag_size_std: Optional[float] = None,
         seed: int = 0,
+        augment: bool = False,
     ) -> None:
         if bag_size < 1:
             raise ValueError("bag_size must be positive")
@@ -113,6 +114,7 @@ class CIFARHistogramBags(Dataset):
         self.bag_size = int(bag_size)
         self.bag_size_std = bag_size_std
         self.seed = int(seed)
+        self.augment = bool(augment)
 
     def __len__(self) -> int:
         return self.num_bags
@@ -132,14 +134,29 @@ class CIFARHistogramBags(Dataset):
         )
         return max(1, int(round(float(sample.item()))))
 
+    def _augment_images(self, images: torch.Tensor, gen: torch.Generator) -> torch.Tensor:
+        padded = torch.nn.functional.pad(images, (4, 4, 4, 4), mode="reflect")
+        out = torch.empty_like(images)
+        for i in range(images.shape[0]):
+            top = int(torch.randint(0, 9, (1,), generator=gen).item())
+            left = int(torch.randint(0, 9, (1,), generator=gen).item())
+            crop = padded[i, :, top : top + 32, left : left + 32]
+            if bool(torch.randint(0, 2, (1,), generator=gen).item()):
+                crop = crop.flip(-1)
+            out[i] = crop
+        return out
+
     def __getitem__(self, idx: int) -> dict[str, torch.Tensor]:
         gen = self._generator(idx)
         bag_size = self._sample_bag_size(gen)
         indices = torch.randint(0, self.images.shape[0], (bag_size,), generator=gen)
         labels = self.labels[indices]
         counts = torch.bincount(labels, minlength=self.num_classes).long()
+        instances = self.images[indices]
+        if self.augment:
+            instances = self._augment_images(instances, gen)
         return {
-            "instances": self.images[indices],
+            "instances": instances,
             "labels": labels,
             "class_counts": counts,
             "class_proportions": counts.float() / labels.numel(),

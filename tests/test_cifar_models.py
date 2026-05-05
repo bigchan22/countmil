@@ -16,6 +16,12 @@ class CIFARModelTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             make_cifar_classifier("small_cnn", num_classes=10, pretrained=True)
 
+    def test_resnet18_factory_handles_bags_without_pretrained_download(self):
+        model = make_cifar_classifier("resnet18", num_classes=10, pretrained=False)
+        x = torch.rand(2, 3, 3, 32, 32)
+        logits = model(x)
+        self.assertEqual(tuple(logits.shape), (2, 3, 10))
+
 
 if __name__ == "__main__":
     unittest.main()
