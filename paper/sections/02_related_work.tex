@@ -1,0 +1,30 @@
+\section{Related Work}
+
+\paragraph{Multiple-instance learning and count loss.}
+Classical multiple-instance learning (MIL) supervises bags rather than instances~\cite{dietterich1997mil,maron1998mil,andrew2002misvm,carbonneau2018milsurvey}.
+The standard positive-bag assumption is a noisy OR over hidden instance labels: a bag is positive when at least one instance is positive.
+Neural MIL models learn bag-level predictors end-to-end~\cite{wang2018minn}, and attention-based MIL~\cite{ilse2018attention} learns a bag representation through learned attention weights.
+These models are strong baselines for bag prediction, but attention weights are not guaranteed to be calibrated instance posteriors.
+Count-based extensions use the number of positive instances as a stronger bag label.
+Shukla et al.~\cite{shukla2023count} formulate count-based weak supervision around the differentiable probability that exactly $k$ Bernoulli outputs are true, and use dynamic programming to compute the resulting count loss.
+Related count supervision has also appeared in temporal localization~\cite{schroeter2019occurrence}.
+Recent unified weak-supervision frameworks also cite count loss as a representative count-probability method, but pursue broader latent-label inference problems~\cite{wang2026fastbus}.
+Our binary Bernoulli likelihood is not new in this setting: it recovers the count probability used by Shukla et al.
+We therefore use binary Count-MIL as a sanity check and baseline connection rather than as a novelty claim.
+Our contribution is the finite-support convolutional generalization and its use for signed, ordinal, posterior, and histogram aggregates.
+
+\paragraph{Learning from label proportions.}
+Learning from label proportions (LLP) observes class proportions or histograms over bags~\cite{quadrianto2009llp,yu2014llp}.
+Early and applied work studied probabilistic or application-specific proportion learning~\cite{sun2017probabilistic,bortsova2018emphysema}, while later deep LLP methods considered multiclass training, adversarial training, consistency regularization, pseudo-labeling, and two-stage objectives~\cite{hsu2019multiclass,dulacarnold2019deep,liu2019llpgan,tsai2020consistency,liu2021twostage,yang2021featurelabel,ma2025hil}.
+Recent theoretical and risk-consistent LLP work includes mutual-contamination reductions, label-noise reductions, unbiased risk estimators, and optimistic-rate analyses~\cite{scott2020mutual,zhang2022labelnoise,busa2023easyllp,wei2023uum,li2024dsq,applebaum2025generalupm,busafekete2025sample}.
+Simple proportion matching trains predicted bag proportions to match observed proportions, but it can over-smooth instance predictions.
+LLP-PVC~\cite{ma2026llppvc} reframes label proportions as proportional-value classification and uses efficient divide-and-conquer count likelihood computation.
+Our histogram one-vs-rest count likelihood is closely related to this PVC view: for each class, the class count is a Bernoulli aggregate over one-vs-rest instance probabilities.
+This connection is useful but also sets a boundary on our claim.
+We do not present class-histogram count likelihood as an invention independent of LLP-PVC; instead, we use LLP/PVC-style experiments to position the method and emphasize aggregate labels beyond ordinary class proportions, including scalar ordinal sums and signed cancellation.
+
+\paragraph{Efficient aggregate inference.}
+Dynamic programming computes Bernoulli count probabilities exactly but can become expensive for large bags and many classes.
+Convolutional formulations admit parallel and FFT-based backends~\cite{cooley1965fft}.
+We implement sequential convolution for moderate-size training experiments and an FFT-tree backend for large-bag multiclass one-vs-rest count benchmarks.
+This makes the computational comparison a backend question: the same aggregate likelihood can be evaluated by dynamic programming, direct convolution, or FFT-tree convolution depending on support size and hardware.

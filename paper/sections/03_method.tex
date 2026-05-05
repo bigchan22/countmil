@@ -1,0 +1,126 @@
+\section{Method}
+
+\subsection{Finite-Support Aggregate Likelihood}
+
+Let a bag contain instances $x_1,\ldots,x_n$.
+For each instance, a neural predictor emits a categorical distribution over latent integer contributions:
+\begin{equation}
+  d_i(k) = p_\theta(z_i = k \mid x_i), \qquad k \in \{a,\ldots,b\}.
+\end{equation}
+The observed bag label is an aggregate
+\begin{equation}
+  Y = \sum_{i=1}^n z_i.
+\end{equation}
+The exact bag likelihood is the coefficient of $Y$ in the convolution of atomic PMFs:
+\begin{equation}
+  p_\theta(Y=y \mid x_{1:n})
+  =
+  \left(d_1 * d_2 * \cdots * d_n\right)(y).
+\end{equation}
+Training minimizes the negative log likelihood
+\begin{equation}
+  \mathcal{L}_{\mathrm{agg}}(\theta)
+  =
+  -\log p_\theta(Y=y \mid x_{1:n}).
+\end{equation}
+The support of the aggregate PMF is finite and contiguous:
+\begin{equation}
+  \mathrm{supp}(Y) = \{na, na+1,\ldots, nb\}.
+\end{equation}
+All experiments use exact likelihoods over this support; approximations enter only through the neural instance model, not through sampling latent assignments.
+
+\subsection{Special Cases}
+
+\paragraph{Binary counts.}
+For Bernoulli target indicators,
+\begin{equation}
+  d_i = (1-p_i, p_i), \qquad Y=\sum_i z_i.
+\end{equation}
+The probability of observing count $y$ is the coefficient of $t^y$ in
+\begin{equation}
+  \prod_{i=1}^n \left((1-p_i) + p_i t\right).
+\end{equation}
+This recovers the standard binary count likelihood.
+
+\paragraph{Signed counts.}
+For known signs $s_i \in \{-1,+1\}$ and latent target indicators $z_i \in \{0,1\}$,
+\begin{equation}
+  Y = \sum_i s_i z_i.
+\end{equation}
+Each atom has support $\{-1,0,+1\}$ after incorporating the sign:
+\begin{equation}
+  d_i =
+  \begin{cases}
+    (1-p_i)\delta_0 + p_i\delta_{+1}, & s_i=+1,\\
+    (1-p_i)\delta_0 + p_i\delta_{-1}, & s_i=-1.
+  \end{cases}
+\end{equation}
+This setting exposes cancellation: many distinct latent assignments can yield the same observed aggregate, especially when $Y=0$.
+
+\paragraph{Ordinal sums.}
+For hidden ordinal values $z_i \in \{0,\ldots,K-1\}$, the observed label can be a scalar sum such as a digit sum.
+Unlike expected-sum regression, the likelihood uses the full induced distribution over possible sums.
+If a model predicts digit probabilities $p_\theta(z_i=k\mid x_i)$, the likelihood compares the observed sum against the full convolved PMF rather than only the mean $\sum_i \mathbb{E}[z_i]$.
+
+\paragraph{Histogram labels and one-vs-rest counts.}
+For multiclass histograms, each class count can be treated as a one-vs-rest Bernoulli count.
+Let $p_{ic}$ be the predicted probability of class $c$ for instance $i$, and let $h_c$ be the observed count of class $c$ in the bag.
+The one-vs-rest count objective is
+\begin{equation}
+  \mathcal{L}_{\mathrm{hist}}(\theta)
+  =
+  -\frac{1}{C}\sum_{c=1}^C
+  \log
+  \left[
+    \prod_{i=1}^n \left((1-p_{ic}) + p_{ic}t\right)
+  \right]_{t^{h_c}},
+\end{equation}
+where $[\cdot]_{t^{h_c}}$ denotes coefficient extraction.
+This yields a PVC-style objective closely related to LLP-PVC, while sharing the same finite-support convolution backend.
+
+\subsection{Posterior Marginals}
+
+For binary counts, we compute count-conditioned posterior marginals
+\begin{equation}
+  q_i = p_\theta(z_i=1 \mid \sum_j z_j = y, x_{1:n}),
+\end{equation}
+using prefix/suffix count distributions.
+Let $F_{i-1}(k)$ be the probability that the first $i-1$ instances contain $k$ positives, and let $B_{i+1}(k)$ be the probability that instances $i+1,\ldots,n$ contain $k$ positives.
+Then
+\begin{equation}
+  q_i
+  =
+  \frac{
+    p_i \sum_k F_{i-1}(k) B_{i+1}(y-1-k)
+  }{
+    \sum_k F_{i-1}(k) \left((1-p_i)B_{i+1}(y-k) + p_iB_{i+1}(y-1-k)\right)
+  }.
+\end{equation}
+These marginals are used as additional information extracted from the count label after likelihood training.
+They support instance recovery diagnostics, uncertainty analysis, and optional pseudo-label inspection, but they are not part of the core training objective in this paper.
+
+\subsection{Computational Backends}
+
+We implement several exact backends:
+\begin{itemize}
+  \item sequential finite-support convolution for moderate bags;
+  \item dynamic programming for Bernoulli count baselines;
+  \item grouped GPU convolution for signed binary aggregates;
+  \item balanced FFT-tree convolution for large-bag and multiclass one-vs-rest count likelihoods.
+\end{itemize}
+
+\begin{table}[t]
+\centering
+\caption{Exact aggregate backends.  $n$ is bag size, $K$ is atomic support width, $S=n(K-1)+1$ is aggregate support width, and $C$ is number of one-vs-rest classes.}
+\label{tab:backends}
+\begin{tabular}{llll}
+\toprule
+Backend & Setting & Work per bag & Use in this paper \\
+\midrule
+DP & Bernoulli count & $O(nS)$ & Shukla-style count baseline \\
+Sequential convolution & finite support & $O(nKS)$ & main moderate-bag experiments \\
+Grouped convolution & signed Bernoulli & $O(nS)$, batched groups & signed GPU implementation \\
+FFT-tree & finite support / OVR & $O(CS\log S\log n)$ & large-bag runtime, PVC-style histograms \\
+\bottomrule
+\end{tabular}
+\end{table}

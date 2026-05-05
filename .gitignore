@@ -12,3 +12,13 @@ runs_*/
 *.pth
 *.ckpt
 *.safetensors
+
+# LaTeX build artifacts
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.log
+paper/*.out
+paper/*.synctex.gz

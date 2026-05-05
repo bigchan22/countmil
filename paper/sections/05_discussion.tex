@@ -1,0 +1,12 @@
+\section{Discussion}
+
+The experiments support a hierarchy of aggregate supervision.
+Scalar expected-value matching is often too weak to identify hidden instance structure, whereas exact aggregate likelihood can recover accurate instance predictors from the same scalar labels.
+Histogram labels are substantially richer, and standard LLP/PVC-style baselines can already be strong.
+This distinction is important for positioning: our goal is not to replace every LLP method, but to provide a unified likelihood framework for aggregate labels beyond ordinary class proportions.
+
+Several limitations remain.
+Large bags can expose calibration issues even when instance ranking is accurate.
+Cancellation-heavy signed aggregates are genuinely ambiguous and require more data.
+CIFAR-scale experiments require stronger backbones and training protocols for fair comparison to recent LLP work.
+\TODO{Update limitations after final CIFAR-10 ResNet-18 results.}

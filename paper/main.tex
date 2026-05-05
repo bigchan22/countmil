@@ -1,0 +1,55 @@
+\documentclass{article}
+
+\IfFileExists{neurips_2026.sty}{
+  \usepackage{neurips_2026}
+}{
+  \usepackage[margin=1in]{geometry}
+  \usepackage[numbers]{natbib}
+}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage[protrusion=true,expansion=false]{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\newcommand{\method}{FS-Conv}
+\newcommand{\TODO}[1]{\textcolor{red}{[TODO: #1]}}
+
+\title{Finite-Support Convolutional Likelihoods for Aggregate-Supervised Multiple-Instance Learning}
+
+\author{
+  Anonymous Authors
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Weakly supervised multiple-instance learning often provides supervision only through aggregate labels, such as whether a bag contains a target class or how many target instances it contains.
+Existing count-based MIL objectives handle Bernoulli counts, but many natural weak labels are richer: signed counts, cancellation-prone aggregates, class histograms, or ordinal sums.
+We propose a finite-support convolutional view of aggregate likelihoods for Count-MIL.
+Each instance emits a latent discrete contribution distribution, and the bag-level likelihood is obtained by convolving these atomic probability mass functions.
+This formulation recovers the standard Bernoulli count likelihood as a special case while extending directly to signed and ordinal aggregate labels.
+We further derive count-conditioned posterior marginals for instance recovery and implement the likelihood with GPU-parallel convolution, including an FFT-tree backend for large multiclass one-vs-rest count likelihoods.
+Experiments on MNIST-family bag benchmarks evaluate binary counts, digit-sum supervision, signed cancellation-heavy counts, posterior instance recovery, and multiclass LLP-style histogram supervision, with comparisons to dynamic-programming count loss, attention MIL, expected-sum regression, and proportion-matching baselines.
+\TODO{Replace final sentence with locked aggregate/CIFAR results.}
+\end{abstract}
+
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_method}
+\input{sections/04_experiments}
+\input{sections/05_discussion}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\appendix
+\input{sections/appendix}
+
+\end{document}

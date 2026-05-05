@@ -1,0 +1,23 @@
+{
+  "best": {
+    "epoch": 50,
+    "epoch_seconds": 0.7804122939705849,
+    "hist_count_mae": 0.393289178609848,
+    "hist_proportion_mae": 0.008031988516449928,
+    "instance_digit_acc": 0.9612585306167603,
+    "loss": 0.008234779577702285,
+    "peak_cuda_mem_mb": 5998.55078125,
+    "train_loss": 0.008153559640049934
+  },
+  "config": {
+    "bag_size_mean": 50,
+    "bag_size_std": 10,
+    "dataset": "MNIST",
+    "dataset_root": "data",
+    "experiment": "mnist_histogram_llp",
+    "loss": "kl",
+    "seed": 1,
+    "train_bags": 1000
+  },
+  "run_dir": "runs/server4090_histogram_llp/mnist_histogram_llp_kl_n50_train1000_s1/mnist_histogram_llp/kl/MNIST/20260505T104939Z_gpusystem_s1"
+}

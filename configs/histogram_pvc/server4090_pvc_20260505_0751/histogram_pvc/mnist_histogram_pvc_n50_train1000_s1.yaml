@@ -1,0 +1,8 @@
+experiment: mnist_histogram_pvc
+method: ovr_count_likelihood
+dataset_root: data
+dataset: MNIST
+bag_size_mean: 50
+bag_size_std: 10
+train_bags: 1000
+seed: 1

@@ -1,0 +1,24 @@
+{
+  "best": {
+    "epoch": 50,
+    "epoch_seconds": 5.496090840548277,
+    "expected_sum_mae": 1.5609655380249023,
+    "instance_digit_acc": 0.9905508756637573,
+    "nll": 1.3089232711791992,
+    "peak_cuda_mem_mb": 6453.03955078125,
+    "sum_acc": 0.6370000243186951,
+    "sum_mae": 1.5230000019073486,
+    "train_nll": 0.429803919506073
+  },
+  "config": {
+    "bag_size_mean": 50,
+    "bag_size_std": 10,
+    "dataset": "MNIST",
+    "dataset_root": "data",
+    "experiment": "mnist_digit_sum",
+    "method": "finite_support_conv",
+    "seed": 1,
+    "train_bags": 5000
+  },
+  "run_dir": "runs/neurips_pilot_preleave_20260504_1619_bs192/digit_sum_n50_train5000_s1/mnist_digit_sum/conv/MNIST/20260505T023736Z_gpusystem_s1"
+}

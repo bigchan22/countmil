@@ -1,0 +1,163 @@
+\section{Experiments}
+
+\subsection{Experimental Setup}
+
+We evaluate aggregate-supervised instance learning under five groups of experiments:
+\begin{enumerate}
+  \item exactness and runtime microbenchmarks;
+  \item binary MNIST-Bags count supervision;
+  \item MNIST digit-sum supervision;
+  \item signed Count-MIL with cancellation-heavy bags;
+  \item multiclass histogram LLP/PVC comparisons and CIFAR pilots.
+\end{enumerate}
+Unless otherwise stated, MNIST-family experiments use LeNet-style instance networks, bags are sampled on the fly, and we report means over three random seeds.
+Hidden instance labels are never used for training; they are used only for evaluation.
+
+\subsection{Binary CountMIL}
+
+Plain count-likelihood training recovers high hidden-instance AUC across bag sizes.
+We tested posterior-based training variants during development, but they did not improve the main likelihood result reliably and are not treated as part of the core method.
+
+\begin{table}[t]
+\centering
+\caption{Binary MNIST-Bags.  Count likelihood recovers strong bag and instance predictors.}
+\label{tab:binary-countmil}
+\begin{tabular}{llccc}
+\toprule
+Bag size / train bags & Objective & Bag AUC & Instance AUC & Count MAE \\
+\midrule
+$10/1000$ & NLL & $1.000$ & $0.999$ & $0.115$ \\
+$10/5000$ & NLL & $1.000$ & $0.999$ & $0.090$ \\
+$50/1000$ & NLL & $1.000$ & $0.998$ & $0.686$ \\
+$50/5000$ & NLL & $1.000$ & $0.999$ & $0.460$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Digit-Sum Supervision}
+
+Initial results show that exact finite-support likelihood recovers hidden digit predictors far better than expected-value matching.
+For MNIST bags with $n=10$, exact likelihood achieves about 98--99\% hidden digit accuracy, while expected-sum baselines are much weaker in partial 3090 results.
+
+\begin{table}[t]
+\centering
+\caption{MNIST digit-sum with exact finite-support likelihood.  The model observes only the scalar bag sum during training.}
+\label{tab:digit-sum}
+\begin{tabular}{lcc}
+\toprule
+Bag size / train bags & Instance digit accuracy & Sum MAE \\
+\midrule
+$10/1000$ & $0.982$ & $0.612$ \\
+$10/5000$ & $0.992$ & $0.277$ \\
+$50/1000$ & $0.693$ & $4.901$ \\
+$50/5000$ & $0.887$ & $2.229$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The expected-sum baselines running on the 3090 server are designed to isolate whether matching only $\sum_i \mathbb{E}[z_i]$ is sufficient.
+Partial results for $n=10$, train bags $1000$ show expected-sum MAE around $2.3$--$2.5$ and hidden digit accuracy around $22$--$29\%$, far below the exact likelihood in Table~\ref{tab:digit-sum}.
+
+\subsection{Signed CountMIL}
+
+Signed random bags are easy for the likelihood; cancellation-heavy bags are substantially harder but still yield strong instance ranking, especially with more training bags.
+
+\begin{table}[t]
+\centering
+\caption{Signed MNIST Count-MIL.  Cancellation-heavy bags are substantially harder, especially for large bags with limited training data.}
+\label{tab:signed}
+\begin{tabular}{llccc}
+\toprule
+Bag size / train bags & Signs & Instance AUC & Signed MAE & Zero-count accuracy \\
+\midrule
+$10/1000$ & random & $0.995$ & $0.095$ & $0.933$ \\
+$10/1000$ & cancellation & $0.998$ & $0.071$ & $0.965$ \\
+$10/5000$ & random & $0.999$ & $0.045$ & $0.969$ \\
+$10/5000$ & cancellation & $0.999$ & $0.046$ & $0.979$ \\
+$50/1000$ & random & $0.999$ & $0.243$ & $0.772$ \\
+$50/1000$ & cancellation & $0.969$ & $1.689$ & $0.420$ \\
+$50/5000$ & random & $0.999$ & $0.198$ & $0.814$ \\
+$50/5000$ & cancellation & $0.993$ & $1.118$ & $0.591$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{FashionMNIST Robustness}
+
+FashionMNIST confirms that attention baselines can achieve strong bag prediction while providing much weaker hidden-instance recovery than count likelihood training.
+The A5000 FashionMNIST grid completed without errors.
+Binary CountMIL achieves hidden-instance AUC around $0.997$--$0.998$, while attention and gated-attention baselines reach strong bag prediction but only about $0.70$--$0.74$ instance AUC.
+Signed CountMIL also preserves high instance AUC around $0.996$--$0.998$.
+Digit-sum is weaker on FashionMNIST, whereas histogram LLP is much stronger for category recovery.
+We therefore use FashionMNIST primarily as a robustness result for instance recovery rather than as the cleanest ordinal-sum demonstration.
+
+\subsection{Histogram LLP and PVC}
+
+Histogram supervision is much richer than scalar sums, and LLP baselines are strong on MNIST-family data.
+We use these experiments to clarify where exact aggregate likelihood adds value and where existing LLP-style objectives are already competitive.
+Partial 3090 results for MNIST histogram LLP with $n=10$, train bags $1000$ show hidden digit accuracy of $97.7\%$ for KL/CE proportion matching and $96.2\%$ for MSE.
+This confirms that histogram labels are much more informative than scalar sums.
+The 4090 server is currently running the full histogram LLP grid, followed by the PVC/count-likelihood comparison.
+
+\subsection{CIFAR Experiments}
+
+CIFAR-10 with ResNet-18 is the direct comparison setting for LLP-PVC.
+We evaluate both randomly initialized and ImageNet-pretrained ResNet-18 backbones because the representation source has a large effect on LLP performance.
+The from-scratch run completes the same pipeline without external pretrained features, while the pretrained run matches the backbone condition used by LLP-PVC.
+
+\begin{table}[t]
+\centering
+\caption{CIFAR-10 histogram supervision with ResNet-18.  From-scratch results are complete.  Pretrained PVC numbers are preliminary snapshots from the running Ma-style 500-epoch experiment and should be replaced by final checkpoint results.}
+\label{tab:cifar10}
+\begin{tabular}{llccc}
+\toprule
+Bag size & Backbone/objective & Hist. MAE & Prop. MAE & Instance acc. \\
+\midrule
+$16$ & scratch KL & $0.806$ & $0.0522$ & $0.513$ \\
+$16$ & scratch MSE & $0.825$ & $0.0533$ & $0.476$ \\
+$16$ & scratch PVC & $0.838$ & $0.0524$ & $0.527$ \\
+$64$ & scratch KL & $1.856$ & $0.0292$ & $0.490$ \\
+$64$ & scratch MSE & $2.013$ & $0.0316$ & $0.270$ \\
+$64$ & scratch PVC & $1.855$ & $0.0290$ & $0.496$ \\
+$128$ & scratch KL & $2.860$ & $0.0224$ & $0.457$ \\
+$128$ & scratch MSE & $2.829$ & $0.0222$ & $0.226$ \\
+$128$ & scratch PVC & $2.707$ & $0.0211$ & $0.488$ \\
+\midrule
+$16$ & pretrained PVC, running & $\approx 0.26$ & $\approx 0.016$ & $\approx 0.90$ \\
+$64$ & pretrained PVC, running & $\approx 0.69$ & $\approx 0.011$ & $\approx 0.90$ \\
+\midrule
+$16$ & LLP-PVC reported & -- & -- & $0.845$ \\
+$64$ & LLP-PVC reported & -- & -- & $0.789$ \\
+$128$ & LLP-PVC reported & -- & -- & $0.760$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The completed from-scratch results are much weaker than LLP-PVC, showing that the CIFAR comparison is not meaningful unless the backbone protocol is matched.
+In contrast, the running pretrained PVC experiment already reaches about $90\%$ instance accuracy for bag sizes $16$ and $64$ in early epochs, above the reported LLP-PVC accuracies for those bag sizes.
+We treat these pretrained numbers as promising but provisional until all 500-epoch jobs finish and final checkpoint metrics are aggregated.
+
+CIFAR-100 coarse-histogram pilots currently show nontrivial learning above chance but are not yet strong enough as headline results.
+The completed CIFAR-100 coarse pilot used 20 coarse classes, bag size $50$, train bags $1000$, and two seeds.
+PVC and KL reach about $30\%$ hidden coarse-class accuracy, clearly above the $5\%$ random baseline, but the result is not yet competitive enough for a main claim.
+We therefore use CIFAR-10 for direct LLP-PVC comparison and treat CIFAR-100 as a harder exploratory setting.
+
+\subsection{Runtime}
+
+Our FFT-tree backend computes batched multiclass one-vs-rest count PMFs on GPU and gives large practical speedups over CPU dynamic programming in large-bag benchmarks.
+
+\begin{table}[t]
+\centering
+\caption{Runtime for multiclass one-vs-rest count PMFs with batch size $256$ and $C=10$ classes.  CPU DP is compared to GPU FFT-tree convolution.}
+\label{tab:runtime}
+\begin{tabular}{rrrr}
+\toprule
+Bag size & CPU DP (s) & GPU FFT-tree (s) & Max abs. error \\
+\midrule
+$64$ & $8.246$ & $0.00097$ & $3.4{\times}10^{-7}$ \\
+$128$ & $17.230$ & $0.00097$ & $4.2{\times}10^{-7}$ \\
+$256$ & $36.785$ & $0.00121$ & $5.1{\times}10^{-7}$ \\
+$512$ & $54.040$ & $0.00134$ & $6.6{\times}10^{-7}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
