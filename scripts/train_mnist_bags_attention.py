@@ -90,6 +90,7 @@ def main() -> None:
     parser.add_argument("--config", default=None)
     parser.add_argument("--gated", action="store_true")
     parser.add_argument("--dataset-root", default=None)
+    parser.add_argument("--dataset", default=None)
     parser.add_argument("--target-digit", type=int, default=None)
     parser.add_argument("--bag-size-mean", type=int, default=None)
     parser.add_argument("--bag-size-std", type=float, default=None)
@@ -108,6 +109,7 @@ def main() -> None:
     cfg = {
         "method": "attention",
         "dataset_root": "data",
+        "dataset": "MNIST",
         "target_digit": 9,
         "bag_size_mean": 10,
         "bag_size_std": 2.0,
@@ -119,6 +121,7 @@ def main() -> None:
     cfg.update(_parse_simple_yaml(args.config))
     for key, value in {
         "dataset_root": args.dataset_root,
+        "dataset": args.dataset,
         "target_digit": args.target_digit,
         "bag_size_mean": args.bag_size_mean,
         "bag_size_std": args.bag_size_std,
@@ -135,7 +138,8 @@ def main() -> None:
     method = "gated_attention" if bool(cfg["gated"]) else "attention"
     set_seed(seed)
     device = torch.device(args.device if args.device == "cpu" or torch.cuda.is_available() else "cpu")
-    run_dir = make_run_dir(args.run_root, "mnist_bags", method, "MNIST", seed)
+    dataset_name = str(cfg["dataset"])
+    run_dir = make_run_dir(args.run_root, "mnist_bags", method, dataset_name, seed)
     write_run_metadata(run_dir, {**cfg, "epochs": args.epochs, "batch_size": args.batch_size}, seed)
     results_dir = Path(args.results_dir)
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -143,6 +147,7 @@ def main() -> None:
 
     train_ds = MNISTBags(
         root=cfg["dataset_root"],
+        dataset=dataset_name,
         split="train",
         num_bags=int(cfg["train_bags"]),
         bag_size=int(cfg["bag_size_mean"]),
@@ -153,6 +158,7 @@ def main() -> None:
     )
     test_ds = MNISTBags(
         root=cfg["dataset_root"],
+        dataset=dataset_name,
         split="test",
         num_bags=int(args.test_bags),
         bag_size=int(cfg["bag_size_mean"]),
