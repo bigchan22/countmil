@@ -25,8 +25,16 @@ Do not claim binary Count Loss is new. Binary Bernoulli counts recover the Shukl
 Main 4090 server is running the primary 72-job pilot. Extra servers should fill comparison gaps:
 
 - 3090 server: expected-sum baselines and multiclass histogram LLP for MNIST.
-- A5000 server: shorter FashionMNIST robustness jobs and benchmark replication.
+- A5000 server: download CIFAR-100 first, then run shorter FashionMNIST robustness jobs and benchmark replication.
 
 Use `docs/REMOTE_EXPERIMENTS.md` for concrete commands.
 
 The most important paper comparisons still missing are the MNIST digit-sum expected-sum baselines and multiclass histogram LLP/proportion-matching baselines.
+
+For CIFAR-100, start with dataset staging only:
+
+```bash
+tmux new-session -d -s countmil_a5000_cifar100_download 'bash scripts/download_cifar100_archive.sh > logs/cifar100_download.log 2>&1'
+```
+
+CIFAR-100 training should wait until the multi-constraint CIFAR bag dataset and trainer are implemented.
