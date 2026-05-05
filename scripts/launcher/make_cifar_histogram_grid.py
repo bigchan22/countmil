@@ -15,6 +15,8 @@ bag_size_mean: {bag_mean}
 bag_size_std: {bag_std}
 train_bags: {train_bags}
 seed: {seed}
+backbone: {backbone}
+pretrained: {pretrained}
 """
 
 
@@ -33,6 +35,8 @@ def main() -> None:
     parser.add_argument("--train-bags", type=int, nargs="+", default=[1000, 5000])
     parser.add_argument("--bag-settings", nargs="+", default=["50:10", "100:20"])
     parser.add_argument("--objectives", nargs="+", default=["pvc", "kl", "mse"])
+    parser.add_argument("--backbone", choices=["small_cnn", "resnet18"], default="small_cnn")
+    parser.add_argument("--pretrained", action="store_true")
     args = parser.parse_args()
 
     tag = args.tag or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -52,6 +56,8 @@ def main() -> None:
                     bag_std=bag_std,
                     train_bags=train_bags,
                     seed=seed,
+                    backbone=args.backbone,
+                    pretrained=str(args.pretrained).lower(),
                 )
                 for objective in args.objectives:
                     name = f"{args.dataset.lower()}_{args.label_level}_hist_{objective}_n{bag_mean}_train{train_bags}_s{seed}"

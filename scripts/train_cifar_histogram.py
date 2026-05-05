@@ -21,7 +21,7 @@ from torch.utils.data import DataLoader
 from countmil.aggregators import AggregatePMF, aggregate_nll, finite_support_convolution_fft_tree
 from countmil.baselines.proportion_matching import multiclass_proportion_matching_loss
 from countmil.datasets import CIFARHistogramBags, collate_cifar_bags
-from countmil.models import CIFARSmallClassifier
+from countmil.models import make_cifar_classifier
 from countmil.training.run import make_run_dir, write_run_metadata
 from countmil.training.seed import set_seed
 
@@ -64,7 +64,7 @@ def pvc_loss(class_probs: torch.Tensor, counts: torch.Tensor, mask: torch.Tensor
     return torch.stack(losses, dim=-1).mean()
 
 
-def _evaluate(model: CIFARSmallClassifier, loader: DataLoader, device: torch.device, objective: str) -> dict[str, float]:
+def _evaluate(model: torch.nn.Module, loader: DataLoader, device: torch.device, objective: str) -> dict[str, float]:
     model.eval()
     total_loss = 0.0
     total_bags = 0
@@ -124,6 +124,8 @@ def main() -> None:
     parser.add_argument("--dataset-root", default=None)
     parser.add_argument("--dataset", choices=["CIFAR10", "CIFAR100"], default=None)
     parser.add_argument("--label-level", choices=["coarse", "fine"], default=None)
+    parser.add_argument("--backbone", choices=["small_cnn", "resnet18"], default=None)
+    parser.add_argument("--pretrained", action="store_true")
     parser.add_argument("--bag-size-mean", type=int, default=None)
     parser.add_argument("--bag-size-std", type=float, default=None)
     parser.add_argument("--train-bags", type=int, default=None)
@@ -146,6 +148,8 @@ def main() -> None:
         "bag_size_std": 10.0,
         "train_bags": 5000,
         "objective": "pvc",
+        "backbone": "small_cnn",
+        "pretrained": False,
         "seed": 0,
     }
     cfg.update(_parse_simple_yaml(args.config))
@@ -154,6 +158,7 @@ def main() -> None:
         "dataset_root": args.dataset_root,
         "dataset": args.dataset,
         "label_level": args.label_level,
+        "backbone": args.backbone,
         "bag_size_mean": args.bag_size_mean,
         "bag_size_std": args.bag_size_std,
         "train_bags": args.train_bags,
@@ -161,6 +166,8 @@ def main() -> None:
     }.items():
         if value is not None:
             cfg[key] = value
+    if args.pretrained:
+        cfg["pretrained"] = True
 
     seed = int(cfg["seed"])
     objective = str(cfg["objective"])
@@ -196,7 +203,7 @@ def main() -> None:
 
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, collate_fn=collate_cifar_bags)
     test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, collate_fn=collate_cifar_bags)
-    model = CIFARSmallClassifier(num_classes=num_classes).to(device)
+    model = make_cifar_classifier(str(cfg["backbone"]), num_classes=num_classes, pretrained=bool(cfg["pretrained"])).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay, betas=(0.9, 0.999))
 
     best = {"instance_acc": -math.inf}

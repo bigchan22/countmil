@@ -1,6 +1,6 @@
 """Selector and instance-level model definitions."""
 
-from .cifar_cnn import CIFARSmallClassifier
+from .cifar_cnn import CIFARResNet18Classifier, CIFARSmallClassifier, make_cifar_classifier
 from .mnist_cnn import (
     AttentionMILMNIST,
     MNISTCountLossCNN,
@@ -11,7 +11,9 @@ from .mnist_cnn import (
 
 __all__ = [
     "AttentionMILMNIST",
+    "CIFARResNet18Classifier",
     "CIFARSmallClassifier",
+    "make_cifar_classifier",
     "MNISTCountLossCNN",
     "MNISTDigitClassifier",
     "MNISTFeatureExtractor",
