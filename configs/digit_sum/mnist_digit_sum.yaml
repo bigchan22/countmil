@@ -1,0 +1,8 @@
+experiment: mnist_digit_sum
+method: finite_support_conv
+dataset_root: data
+dataset: MNIST
+split: train
+bag_size: 10
+support: [0, 9]
+seed: 0

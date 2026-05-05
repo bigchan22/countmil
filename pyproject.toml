@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "countmil"
+version = "0.1.0"
+description = "Finite-support convolutional aggregate likelihoods for weakly supervised Count-MIL"
+requires-python = ">=3.9"
+dependencies = [
+  "torch",
+  "numpy",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+

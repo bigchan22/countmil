@@ -1,0 +1,5 @@
+experiment: lr_case_study
+method: signed_conv_countmil
+source: refs/prior_code/old_countmil_repo
+status: not_ported
+

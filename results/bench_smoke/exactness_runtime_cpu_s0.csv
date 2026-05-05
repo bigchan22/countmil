@@ -1,0 +1,10 @@
+atom_type,method,batch,n_atoms,support_width,device,backward,seconds,max_abs_err_vs_dp
+binary,dp,64,8,9,cpu,False,0.0005456879734992981,0.0
+binary,conv,64,8,9,cpu,False,0.00022944435477256775,0.0
+ordinal_10,conv,64,8,73,cpu,False,0.0012618154287338257,
+binary,dp,64,16,17,cpu,False,0.0007173903286457062,0.0
+binary,conv,64,16,17,cpu,False,0.0005482695996761322,0.0
+ordinal_10,conv,64,16,145,cpu,False,0.0026217661798000336,
+binary,dp,64,32,33,cpu,False,0.001400686800479889,0.0
+binary,conv,64,32,33,cpu,False,0.0011411160230636597,0.0
+ordinal_10,conv,64,32,289,cpu,False,0.005636993795633316,

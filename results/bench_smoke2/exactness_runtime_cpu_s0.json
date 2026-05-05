@@ -1,0 +1,100 @@
+[
+  {
+    "atom_type": "binary",
+    "method": "dp",
+    "batch": 32,
+    "n_atoms": 8,
+    "support_width": 9,
+    "device": "cpu",
+    "backward": false,
+    "seconds": 0.00049610435962677,
+    "peak_cuda_mem_mb": 0.0,
+    "max_abs_err_vs_dp": 0.0
+  },
+  {
+    "atom_type": "binary",
+    "method": "conv",
+    "batch": 32,
+    "n_atoms": 8,
+    "support_width": 9,
+    "device": "cpu",
+    "backward": false,
+    "seconds": 0.00022032856941223145,
+    "peak_cuda_mem_mb": 0.0,
+    "max_abs_err_vs_dp": 0.0
+  },
+  {
+    "atom_type": "ordinal_10",
+    "method": "conv",
+    "batch": 32,
+    "n_atoms": 8,
+    "support_width": 73,
+    "device": "cpu",
+    "backward": false,
+    "seconds": 0.0011929422616958618,
+    "peak_cuda_mem_mb": 0.0,
+    "max_abs_err_vs_dp": null
+  },
+  {
+    "atom_type": "signed_binary_grouped",
+    "method": "grouped_conv",
+    "batch": 32,
+    "n_atoms": 8,
+    "num_groups": 4,
+    "support_width": 5,
+    "device": "cpu",
+    "backward": false,
+    "seconds": 0.002034652978181839,
+    "peak_cuda_mem_mb": 0.0,
+    "max_abs_err_vs_dp": null
+  },
+  {
+    "atom_type": "binary",
+    "method": "dp",
+    "batch": 32,
+    "n_atoms": 16,
+    "support_width": 17,
+    "device": "cpu",
+    "backward": false,
+    "seconds": 0.0007256455719470978,
+    "peak_cuda_mem_mb": 0.0,
+    "max_abs_err_vs_dp": 0.0
+  },
+  {
+    "atom_type": "binary",
+    "method": "conv",
+    "batch": 32,
+    "n_atoms": 16,
+    "support_width": 17,
+    "device": "cpu",
+    "backward": false,
+    "seconds": 0.0005385316908359528,
+    "peak_cuda_mem_mb": 0.0,
+    "max_abs_err_vs_dp": 0.0
+  },
+  {
+    "atom_type": "ordinal_10",
+    "method": "conv",
+    "batch": 32,
+    "n_atoms": 16,
+    "support_width": 145,
+    "device": "cpu",
+    "backward": false,
+    "seconds": 0.0023070387542247772,
+    "peak_cuda_mem_mb": 0.0,
+    "max_abs_err_vs_dp": null
+  },
+  {
+    "atom_type": "signed_binary_grouped",
+    "method": "grouped_conv",
+    "batch": 32,
+    "n_atoms": 16,
+    "num_groups": 4,
+    "support_width": 9,
+    "device": "cpu",
+    "backward": false,
+    "seconds": 0.0012953504920005798,
+    "peak_cuda_mem_mb": 0.0,
+    "max_abs_err_vs_dp": null
+  }
+]

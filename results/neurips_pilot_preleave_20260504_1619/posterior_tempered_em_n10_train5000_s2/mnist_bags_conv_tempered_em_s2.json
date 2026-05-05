@@ -1,0 +1,31 @@
+{
+  "best": {
+    "bag_acc": 0.996999979019165,
+    "bag_auc": 0.999948,
+    "count_acc": 0.8899999856948853,
+    "count_mae": 0.12399999797344208,
+    "epoch": 48,
+    "epoch_seconds": 83.00149181112647,
+    "instance_acc": 0.9872374534606934,
+    "instance_auc": 0.9994558929065336,
+    "nll": 0.5109439125061035,
+    "peak_cuda_mem_mb": 455.49462890625,
+    "train_nll": 0.001753458514995873
+  },
+  "config": {
+    "bag_size_mean": 10,
+    "bag_size_std": 2,
+    "balanced_binary": true,
+    "dataset": "MNIST",
+    "dataset_root": "data",
+    "em_temperature": 0.5,
+    "entropy_weight": 0.01,
+    "experiment": "mnist_bags",
+    "method": "conv",
+    "objective": "tempered_em",
+    "seed": 2,
+    "target_digit": 9,
+    "train_bags": 5000
+  },
+  "run_dir": "runs/neurips_pilot_preleave_20260504_1619/posterior_tempered_em_n10_train5000_s2/mnist_bags/conv_tempered_em/MNIST/20260504T220436Z_gpusystem_s2"
+}

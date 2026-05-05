@@ -1,0 +1,5 @@
+atom_type,backward,batch,device,max_abs_err_vs_dp,method,n_atoms,num_groups,peak_cuda_mem_mb,repeats,seconds,support_width,warmup
+binary,True,16,cpu,0.0,dp,8,,0.0,2,0.0014175157994031906,9,1
+binary,True,16,cpu,0.0,conv,8,,0.0,2,0.0011073146015405655,9,1
+ordinal_10,True,16,cpu,,conv,8,,0.0,2,0.008622046560049057,73,1
+signed_binary_grouped,True,16,cpu,,grouped_conv,8,4,0.0,2,0.0041653793305158615,5,1

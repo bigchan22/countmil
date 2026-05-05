@@ -1,0 +1,30 @@
+{
+  "best": {
+    "epoch": 43,
+    "epoch_seconds": 90.67125140503049,
+    "expected_signed_count_mae": 0.04294217377901077,
+    "instance_acc": 0.9964824318885803,
+    "instance_auc": 0.9989248912982043,
+    "nll": 0.21136155158281325,
+    "peak_cuda_mem_mb": 455.49560546875,
+    "signed_count_acc": 0.9649999737739563,
+    "signed_count_mae": 0.03500000014901161,
+    "train_nll": 0.0008620247247628867,
+    "zero_expected_abs_error": 0.02940499037504196,
+    "zero_fraction": 0.45100000500679016,
+    "zero_signed_count_acc": 0.9778270721435547
+  },
+  "config": {
+    "bag_size_mean": 10,
+    "bag_size_std": 2,
+    "cancellation_heavy": false,
+    "dataset": "MNIST",
+    "dataset_root": "data",
+    "experiment": "signed_mnist",
+    "method": "signed_conv_countmil",
+    "seed": 0,
+    "target_digit": 9,
+    "train_bags": 5000
+  },
+  "run_dir": "runs/neurips_pilot_preleave_20260504_1619/signed_random_n10_train5000_s0/signed_mnist/conv/MNIST/20260504T183410Z_gpusystem_s0"
+}

@@ -1,0 +1,11 @@
+experiment: mnist_bags
+method: conv
+objective: nll
+target_digit: 9
+balanced_binary: true
+dataset_root: data
+dataset: MNIST
+bag_size_mean: 50
+bag_size_std: 10
+train_bags: 5000
+seed: 0

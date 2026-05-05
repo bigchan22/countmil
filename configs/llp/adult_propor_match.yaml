@@ -1,0 +1,7 @@
+experiment: llp
+method: conv_countmil
+dataset: adult
+bag_sizes: [8, 32, 128, 512]
+compare_to: [proportion_matching, shukla_dp, propor]
+seed: 0
+

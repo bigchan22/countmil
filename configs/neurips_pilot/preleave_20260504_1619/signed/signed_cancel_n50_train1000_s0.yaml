@@ -1,0 +1,10 @@
+experiment: signed_mnist
+method: signed_conv_countmil
+target_digit: 9
+cancellation_heavy: true
+dataset_root: data
+dataset: MNIST
+bag_size_mean: 50
+bag_size_std: 10
+train_bags: 1000
+seed: 0

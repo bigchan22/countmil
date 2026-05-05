@@ -1,0 +1,2 @@
+best.epoch,best.epoch_seconds,best.expected_sum_mae,best.instance_digit_acc,best.nll,best.peak_cuda_mem_mb,best.sum_acc,best.sum_mae,best.train_nll,config.bag_size_mean,config.bag_size_std,config.dataset,config.dataset_root,config.seed,config.train_bags,run_dir,source
+5,0.6007108949124813,4.196590423583984,0.33276382088661194,3.07528857421875,432.44482421875,0.06499999761581421,4.160999774932861,3.1095429363250733,10,2.0,MNIST,data,0,1000,runs_digit_sum_pilot/mnist_digit_sum/conv/MNIST/20260504T161359Z_gpusystem_s0,results/mnist_digit_sum_pilot/mnist_digit_sum_conv_s0.json

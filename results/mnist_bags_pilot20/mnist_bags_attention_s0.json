@@ -1,0 +1,26 @@
+{
+  "best": {
+    "bag_acc": 0.972000002861023,
+    "bag_auc": 0.995904,
+    "bag_bce": 0.08940972873568535,
+    "epoch": 20,
+    "epoch_seconds": 0.24893296509981155,
+    "instance_auc": 0.6365752459151336,
+    "peak_cuda_mem_mb": 433.09423828125,
+    "train_bce": 0.025044313348829745
+  },
+  "config": {
+    "bag_size_mean": 10,
+    "bag_size_std": 2,
+    "balanced_binary": true,
+    "dataset": "MNIST",
+    "dataset_root": "data",
+    "experiment": "mnist_bags",
+    "gated": false,
+    "method": "attention",
+    "seed": 0,
+    "target_digit": 9,
+    "train_bags": 500
+  },
+  "run_dir": "runs_pilot20/mnist_bags/attention/MNIST/20260504T160428Z_gpusystem_s0"
+}

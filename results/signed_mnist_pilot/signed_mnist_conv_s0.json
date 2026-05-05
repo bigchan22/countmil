@@ -1,0 +1,28 @@
+{
+  "best": {
+    "epoch": 5,
+    "epoch_seconds": 0.5012426115572453,
+    "expected_signed_count_mae": 0.3134293258190155,
+    "instance_acc": 0.971055269241333,
+    "instance_auc": 0.9788819202627342,
+    "nll": 0.6214420375823975,
+    "peak_cuda_mem_mb": 431.97607421875,
+    "signed_count_acc": 0.7689999938011169,
+    "signed_count_mae": 0.2409999966621399,
+    "train_nll": 0.7216871004104615,
+    "zero_expected_abs_error": 0.14262767136096954,
+    "zero_fraction": 0.453000009059906,
+    "zero_signed_count_acc": 0.9271523356437683
+  },
+  "config": {
+    "bag_size_mean": 10,
+    "bag_size_std": 2.0,
+    "cancellation_heavy": true,
+    "dataset": "MNIST",
+    "dataset_root": "data",
+    "seed": 0,
+    "target_digit": 9,
+    "train_bags": 1000
+  },
+  "run_dir": "runs_signed_mnist_pilot/signed_mnist/conv/MNIST/20260504T161730Z_gpusystem_s0"
+}
