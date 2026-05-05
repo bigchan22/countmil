@@ -37,7 +37,8 @@ $50/5000$ & NLL & $1.000$ & $0.999$ & $0.460$ \\
 \subsection{Digit-Sum Supervision}
 
 Initial results show that exact finite-support likelihood recovers hidden digit predictors far better than expected-value matching.
-For MNIST bags with $n=10$, exact likelihood achieves about 98--99\% hidden digit accuracy, while expected-sum baselines are much weaker in partial 3090 results.
+For MNIST bags with $n=10$, exact likelihood achieves about 98--99\% hidden digit accuracy.
+The partial 3090 expected-sum baseline results show that matching only the expected aggregate is much weaker in the low-data regime, but can become competitive for small bags when the number of training bags increases.
 
 \begin{table}[t]
 \centering
@@ -56,7 +57,28 @@ $50/5000$ & $0.887$ & $2.229$ \\
 \end{table}
 
 The expected-sum baselines running on the 3090 server are designed to isolate whether matching only $\sum_i \mathbb{E}[z_i]$ is sufficient.
-Partial results for $n=10$, train bags $1000$ show expected-sum MAE around $2.3$--$2.5$ and hidden digit accuracy around $22$--$29\%$, far below the exact likelihood in Table~\ref{tab:digit-sum}.
+Partial completed results are shown in Table~\ref{tab:digit-sum-baselines}.
+For $n=10$ and $1000$ training bags, expected-value matching yields expected-sum MAE around $2.3$--$2.5$ and hidden digit accuracy around $22$--$29\%$, far below the exact likelihood in Table~\ref{tab:digit-sum}.
+With $5000$ training bags, however, MAE and Huber baselines improve sharply and recover high instance accuracy for this small-bag setting.
+We therefore interpret the result as evidence for the data efficiency of exact scalar-sum likelihood, not as evidence that expected-value baselines universally fail.
+
+\begin{table}[t]
+\centering
+\caption{Partial expected-sum regression baselines on MNIST digit-sum bags from the 3090 server.  The $n=10$, train $5000$ rows currently contain one completed seed and should be replaced by final averages when available.}
+\label{tab:digit-sum-baselines}
+\begin{tabular}{llcccc}
+\toprule
+Bag/train & Loss & Seeds & Exp. MAE & Rounded acc. & Digit acc. \\
+\midrule
+$10/1000$ & Huber & $3$ & $2.330$ & $0.136$ & $0.278$ \\
+$10/1000$ & MAE & $3$ & $2.337$ & $0.141$ & $0.286$ \\
+$10/1000$ & MSE & $3$ & $2.535$ & $0.133$ & $0.226$ \\
+$10/5000$ & Huber & $1$ & $0.548$ & $0.784$ & $0.988$ \\
+$10/5000$ & MAE & $1$ & $0.430$ & $0.835$ & $0.989$ \\
+$10/5000$ & MSE & $1$ & $1.022$ & $0.386$ & $0.730$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Signed CountMIL}
 
@@ -95,19 +117,39 @@ We therefore use FashionMNIST primarily as a robustness result for instance reco
 
 Histogram supervision is much richer than scalar sums, and LLP baselines are strong on MNIST-family data.
 We use these experiments to clarify where exact aggregate likelihood adds value and where existing LLP-style objectives are already competitive.
-Partial 3090 results for MNIST histogram LLP with $n=10$, train bags $1000$ show hidden digit accuracy of $97.7\%$ for KL/CE proportion matching and $96.2\%$ for MSE.
-This confirms that histogram labels are much more informative than scalar sums.
+Partial 3090 results for MNIST histogram LLP are shown in Table~\ref{tab:histogram-llp-partial}.
+KL and CE proportion matching reach $97.7\%$ hidden digit accuracy with $1000$ bags and $99.1\%$ with one completed $5000$-bag seed.
+This confirms that histogram labels are much more informative than scalar sums; it also supports treating LLP/PVC as strong baselines rather than straw men.
 The 4090 server is currently running the full histogram LLP grid, followed by the PVC/count-likelihood comparison.
+
+\begin{table}[t]
+\centering
+\caption{Partial MNIST histogram LLP baselines from the 3090 server.  The $n=10$, train $5000$ rows currently contain one completed seed and should be replaced by final averages when available.}
+\label{tab:histogram-llp-partial}
+\begin{tabular}{llcccc}
+\toprule
+Bag/train & Loss & Seeds & Count MAE & Prop. MAE & Digit acc. \\
+\midrule
+$10/1000$ & CE & $3$ & $0.0648$ & $0.00650$ & $0.977$ \\
+$10/1000$ & KL & $3$ & $0.0648$ & $0.00650$ & $0.977$ \\
+$10/1000$ & MSE & $3$ & $0.1632$ & $0.01657$ & $0.962$ \\
+$10/5000$ & CE & $1$ & $0.0246$ & $0.00241$ & $0.991$ \\
+$10/5000$ & KL & $1$ & $0.0246$ & $0.00241$ & $0.991$ \\
+$10/5000$ & MSE & $1$ & $0.1252$ & $0.01268$ & $0.974$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{CIFAR Experiments}
 
 CIFAR-10 with ResNet-18 is the direct comparison setting for LLP-PVC.
-We evaluate both randomly initialized and ImageNet-pretrained ResNet-18 backbones because the representation source has a large effect on LLP performance.
-The from-scratch run completes the same pipeline without external pretrained features, while the pretrained run matches the backbone condition used by LLP-PVC.
+Ma et al. report CIFAR-10 results with a ResNet-18 backbone, and their appendix specifies ImageNet-pretrained initialization.
+We therefore evaluate both randomly initialized and ImageNet-pretrained ResNet-18 backbones because the representation source has a large effect on LLP performance.
+The from-scratch run completes the same pipeline without external pretrained features, while the pretrained run matches the backbone initialization specified for LLP-PVC.
 
 \begin{table}[t]
 \centering
-\caption{CIFAR-10 histogram supervision with ResNet-18.  From-scratch results are complete.  Pretrained PVC numbers are preliminary snapshots from the running Ma-style 500-epoch experiment and should be replaced by final checkpoint results.}
+\caption{CIFAR-10 histogram supervision with ResNet-18.  From-scratch results are complete.  The ImageNet-pretrained PVC rows follow the backbone initialization specified in the LLP-PVC appendix, but are preliminary snapshots from the running 500-epoch experiment and should be replaced by final checkpoint results.}
 \label{tab:cifar10}
 \begin{tabular}{llccc}
 \toprule
@@ -133,7 +175,7 @@ $128$ & LLP-PVC reported & -- & -- & $0.760$ \\
 \end{tabular}
 \end{table}
 
-The completed from-scratch results are much weaker than LLP-PVC, showing that the CIFAR comparison is not meaningful unless the backbone protocol is matched.
+The completed from-scratch results are much weaker than LLP-PVC, showing that the CIFAR comparison is not meaningful unless the backbone initialization protocol is matched.
 In contrast, the running pretrained PVC experiment already reaches about $90\%$ instance accuracy for bag sizes $16$ and $64$ in early epochs, above the reported LLP-PVC accuracies for those bag sizes.
 We treat these pretrained numbers as promising but provisional until all 500-epoch jobs finish and final checkpoint metrics are aggregated.
 
