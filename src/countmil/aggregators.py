@@ -75,6 +75,60 @@ def finite_support_convolution(atom_pmfs: torch.Tensor, support_min: int = 0) ->
     return AggregatePMF(probs.reshape(*batch_shape, probs.shape[-1]), support)
 
 
+def _next_power_of_two(n: int) -> int:
+    return 1 << (int(n) - 1).bit_length()
+
+
+def _fft_convolve_same_batch(left: torch.Tensor, right: torch.Tensor, out_width: int) -> torch.Tensor:
+    fft_width = _next_power_of_two(left.shape[-1] + right.shape[-1] - 1)
+    left_f = torch.fft.rfft(left, n=fft_width, dim=-1)
+    right_f = torch.fft.rfft(right, n=fft_width, dim=-1)
+    out = torch.fft.irfft(left_f * right_f, n=fft_width, dim=-1)
+    return out[..., :out_width]
+
+
+def finite_support_convolution_fft_tree(atom_pmfs: torch.Tensor, support_min: int = 0) -> AggregatePMF:
+    """Convolve finite-support atomic PMFs with a balanced FFT product tree.
+
+    This computes the same aggregate PMF as `finite_support_convolution`, but
+    reduces all atoms through pairwise FFT polynomial products. It is intended
+    for runtime comparisons and larger supports where sequential convolution is
+    unnecessarily serial.
+    """
+
+    if atom_pmfs.ndim < 2:
+        raise ValueError("atom_pmfs must have shape (..., N, K)")
+    if atom_pmfs.shape[-1] < 1:
+        raise ValueError("atomic support must be non-empty")
+
+    atoms, batch_shape = _flatten_batch(atom_pmfs)
+    batch, n_atoms, width = atoms.shape
+    if n_atoms == 0:
+        return AggregatePMF(atoms.new_ones(*batch_shape, 1), 0)
+
+    true_width = n_atoms * (width - 1) + 1
+    polys = atoms
+    current_width = width
+    while polys.shape[1] > 1:
+        n_polys = polys.shape[1]
+        n_pairs = n_polys // 2
+        pair_width = 2 * current_width - 1
+        pieces = []
+        if n_pairs:
+            left = polys[:, 0 : 2 * n_pairs : 2]
+            right = polys[:, 1 : 2 * n_pairs : 2]
+            pieces.append(_fft_convolve_same_batch(left, right, pair_width))
+        if n_polys % 2:
+            carry = F.pad(polys[:, -1:], (0, pair_width - current_width))
+            pieces.append(carry)
+        polys = torch.cat(pieces, dim=1)
+        current_width = pair_width
+
+    probs = polys[:, 0, :true_width]
+    support = n_atoms * int(support_min)
+    return AggregatePMF(probs.reshape(*batch_shape, true_width), support)
+
+
 def binary_count_dp(probs: torch.Tensor) -> AggregatePMF:
     """Exact Bernoulli count PMF using the Shukla-style DP recurrence."""
 

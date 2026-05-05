@@ -7,6 +7,7 @@ from .aggregators import (
     brute_force_binary_count,
     brute_force_finite_support,
     finite_support_convolution,
+    finite_support_convolution_fft_tree,
     grouped_signed_binary_convolution,
 )
 
@@ -17,5 +18,6 @@ __all__ = [
     "brute_force_binary_count",
     "brute_force_finite_support",
     "finite_support_convolution",
+    "finite_support_convolution_fft_tree",
     "grouped_signed_binary_convolution",
 ]

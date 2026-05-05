@@ -95,12 +95,30 @@ tmux new-session -d -s countmil_a5000_fashion "GPUS='0 1 2 3' EPOCHS=30 BATCH_SI
 
 Do not launch CIFAR-100 training yet: this repo currently has download support, but not the CIFAR-100 multi-constraint bag dataset/trainer. The intended next implementation is a CIFAR-100 bag sampler with observed coarse-class count vectors and hidden fine labels.
 
+Once CIFAR-100 is verified, launch a conservative CIFAR-100 coarse-histogram pilot:
+
+```bash
+TAG=serverA5000_cifar100_$(date -u +%Y%m%d_%H%M)
+PYTHONPATH=src .venv/bin/python scripts/launcher/make_cifar_histogram_grid.py \
+  --tag "$TAG" \
+  --dataset CIFAR100 \
+  --label-level coarse \
+  --train-bags 1000 \
+  --seeds 0 1 \
+  --bag-settings 50:10 \
+  --objectives pvc kl mse
+tmux new-session -d -s countmil_a5000_cifar100_hist "GPUS='0 1 2 3' EPOCHS=20 BATCH_SIZE=24 TEST_BAGS=1000 RUN_ROOT=runs/serverA5000_cifar100_hist RESULTS_ROOT=results/serverA5000_cifar100_hist LOG_DIR=logs/serverA5000_cifar100_hist PYTHONPATH=src scripts/launcher/run_neurips_manifest.sh configs/cifar_histogram/$TAG/manifest.tsv"
+```
+
+This is a pilot, not the final CIFAR grid. If memory is stable, increase to `BATCH_SIZE=32` or add `--train-bags 5000 --bag-settings 50:10 100:20`.
+
 ## Monitoring
 
 ```bash
 tmux ls
 tmux capture-pane -pt countmil_3090_digit_sum_baselines -S -80
 tmux capture-pane -pt countmil_a5000_cifar100_download -S -80
+tmux capture-pane -pt countmil_a5000_cifar100_hist -S -80
 nvidia-smi
 PYTHONPATH=src .venv/bin/python scripts/aggregate_results.py --input results/server3090_digit_sum_baselines --output results/server3090_digit_sum_baselines/aggregate.csv
 ```

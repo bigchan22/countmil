@@ -11,7 +11,12 @@ import time
 
 import torch
 
-from countmil.aggregators import binary_count_dp, finite_support_convolution, grouped_signed_binary_convolution
+from countmil.aggregators import (
+    binary_count_dp,
+    finite_support_convolution,
+    finite_support_convolution_fft_tree,
+    grouped_signed_binary_convolution,
+)
 
 
 def _sync(device: torch.device) -> None:
@@ -61,7 +66,9 @@ def _binary_case(
         compare_atoms = torch.stack([1.0 - compare_probs, compare_probs], dim=-1)
         dp_compare = binary_count_dp(compare_probs).probs
         conv_compare = finite_support_convolution(compare_atoms).probs
+        fft_compare = finite_support_convolution_fft_tree(compare_atoms).probs
         max_abs_err = (dp_compare - conv_compare).abs().max().item()
+        fft_max_abs_err = (dp_compare - fft_compare).abs().max().item()
 
     dp_base = torch.randn(batch, n_atoms, device=device)
 
@@ -79,6 +86,15 @@ def _binary_case(
         return finite_support_convolution(atoms).probs
 
     _, conv_s, conv_mem = _time_call(conv_fn, device, backward, repeats, warmup)
+
+    fft_base = torch.randn(batch, n_atoms, device=device)
+
+    def fft_fn() -> torch.Tensor:
+        probs = torch.sigmoid(fft_base.detach().requires_grad_(backward))
+        atoms = torch.stack([1.0 - probs, probs], dim=-1)
+        return finite_support_convolution_fft_tree(atoms).probs
+
+    _, fft_s, fft_mem = _time_call(fft_fn, device, backward, repeats, warmup)
 
     return [
         {
@@ -109,6 +125,20 @@ def _binary_case(
             "peak_cuda_mem_mb": conv_mem,
             "max_abs_err_vs_dp": max_abs_err,
         },
+        {
+            "atom_type": "binary",
+            "method": "fft_tree",
+            "batch": batch,
+            "n_atoms": n_atoms,
+            "support_width": n_atoms + 1,
+            "device": str(device),
+            "backward": backward,
+            "repeats": repeats,
+            "warmup": warmup,
+            "seconds": fft_s,
+            "peak_cuda_mem_mb": fft_mem,
+            "max_abs_err_vs_dp": fft_max_abs_err,
+        },
     ]
 
 
@@ -128,6 +158,11 @@ def _ordinal_case(
         return finite_support_convolution(atoms).probs
 
     conv, conv_s, conv_mem = _time_call(conv_fn, device, backward, repeats, warmup)
+    def fft_fn() -> torch.Tensor:
+        atoms = torch.softmax(base.detach().requires_grad_(backward), dim=-1)
+        return finite_support_convolution_fft_tree(atoms).probs
+
+    fft, fft_s, fft_mem = _time_call(fft_fn, device, backward, repeats, warmup)
     return [
         {
             "atom_type": f"ordinal_{width}",
@@ -142,7 +177,21 @@ def _ordinal_case(
             "seconds": conv_s,
             "peak_cuda_mem_mb": conv_mem,
             "max_abs_err_vs_dp": None,
-        }
+        },
+        {
+            "atom_type": f"ordinal_{width}",
+            "method": "fft_tree",
+            "batch": batch,
+            "n_atoms": n_atoms,
+            "support_width": fft.shape[-1],
+            "device": str(device),
+            "backward": backward,
+            "repeats": repeats,
+            "warmup": warmup,
+            "seconds": fft_s,
+            "peak_cuda_mem_mb": fft_mem,
+            "max_abs_err_vs_dp": (conv - fft).abs().max().item() if conv.shape == fft.shape else None,
+        },
     ]
 
 
@@ -183,12 +232,87 @@ def _signed_grouped_case(
     ]
 
 
+def _multiclass_ovr_case(
+    batch: int,
+    n_atoms: int,
+    num_classes: int,
+    device: torch.device,
+    backward: bool,
+    repeats: int,
+    warmup: int,
+) -> list[dict]:
+    rows = []
+
+    cpu_base = torch.randn(batch, n_atoms, num_classes, device="cpu")
+
+    def cpu_dp_fn() -> torch.Tensor:
+        probs = torch.softmax(cpu_base.detach().requires_grad_(backward), dim=-1)
+        ovr = probs.transpose(1, 2).reshape(batch * num_classes, n_atoms)
+        return binary_count_dp(ovr).probs.reshape(batch, num_classes, n_atoms + 1)
+
+    _, cpu_dp_s, _ = _time_call(cpu_dp_fn, torch.device("cpu"), backward, repeats, warmup)
+    rows.append(
+        {
+            "atom_type": f"multiclass_ovr_{num_classes}",
+            "method": "cpu_dp",
+            "batch": batch,
+            "n_atoms": n_atoms,
+            "num_classes": num_classes,
+            "support_width": n_atoms + 1,
+            "device": "cpu",
+            "backward": backward,
+            "repeats": repeats,
+            "warmup": warmup,
+            "seconds": cpu_dp_s,
+            "peak_cuda_mem_mb": 0.0,
+            "max_abs_err_vs_dp": 0.0,
+        }
+    )
+
+    base = torch.randn(batch, n_atoms, num_classes, device=device)
+    with torch.no_grad():
+        compare_probs = torch.softmax(base.detach(), dim=-1)
+        compare_ovr = compare_probs.transpose(1, 2)
+        compare_atoms = torch.stack([1.0 - compare_ovr, compare_ovr], dim=-1)
+        fft_compare = finite_support_convolution_fft_tree(compare_atoms, support_min=0).probs
+        cpu_compare = binary_count_dp(compare_ovr.cpu().reshape(batch * num_classes, n_atoms)).probs
+        cpu_compare = cpu_compare.reshape(batch, num_classes, n_atoms + 1).to(fft_compare.device)
+        max_abs_err = (cpu_compare - fft_compare).abs().max().item()
+
+    def fft_fn() -> torch.Tensor:
+        probs = torch.softmax(base.detach().requires_grad_(backward), dim=-1)
+        ovr = probs.transpose(1, 2)
+        atoms = torch.stack([1.0 - ovr, ovr], dim=-1)
+        return finite_support_convolution_fft_tree(atoms, support_min=0).probs
+
+    fft, fft_s, fft_mem = _time_call(fft_fn, device, backward, repeats, warmup)
+    rows.append(
+        {
+            "atom_type": f"multiclass_ovr_{num_classes}",
+            "method": "fft_tree",
+            "batch": batch,
+            "n_atoms": n_atoms,
+            "num_classes": num_classes,
+            "support_width": fft.shape[-1],
+            "device": str(device),
+            "backward": backward,
+            "repeats": repeats,
+            "warmup": warmup,
+            "seconds": fft_s,
+            "peak_cuda_mem_mb": fft_mem,
+            "max_abs_err_vs_dp": max_abs_err,
+        }
+    )
+    return rows
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-dir", default="results/bench")
     parser.add_argument("--batch", type=int, default=256)
     parser.add_argument("--bag-sizes", type=int, nargs="+", default=[8, 16, 32, 64, 128])
     parser.add_argument("--ordinal-width", type=int, default=10)
+    parser.add_argument("--num-classes", type=int, default=10)
     parser.add_argument("--signed-groups", type=int, default=16)
     parser.add_argument("--repeats", type=int, default=5)
     parser.add_argument("--warmup", type=int, default=2)
@@ -204,6 +328,7 @@ def main() -> None:
     for n_atoms in args.bag_sizes:
         rows.extend(_binary_case(args.batch, n_atoms, device, args.backward, args.repeats, args.warmup))
         rows.extend(_ordinal_case(args.batch, n_atoms, args.ordinal_width, device, args.backward, args.repeats, args.warmup))
+        rows.extend(_multiclass_ovr_case(args.batch, n_atoms, args.num_classes, device, args.backward, args.repeats, args.warmup))
         rows.extend(
             _signed_grouped_case(
                 args.batch,

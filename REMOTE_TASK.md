@@ -37,4 +37,10 @@ For CIFAR-100, start with dataset staging only:
 tmux new-session -d -s countmil_a5000_cifar100_download 'bash scripts/download_cifar100_archive.sh > logs/cifar100_download.log 2>&1'
 ```
 
-CIFAR-100 training should wait until the multi-constraint CIFAR bag dataset and trainer are implemented.
+CIFAR-100 coarse-histogram training is now available through:
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/launcher/make_cifar_histogram_grid.py --tag "$TAG" --dataset CIFAR100 --label-level coarse
+```
+
+Start with the conservative pilot from `docs/REMOTE_EXPERIMENTS.md` before scaling to larger bags or more seeds.

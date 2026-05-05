@@ -8,6 +8,7 @@ from countmil.aggregators import (
     brute_force_binary_count,
     brute_force_finite_support,
     finite_support_convolution,
+    finite_support_convolution_fft_tree,
     grouped_signed_binary_convolution,
 )
 
@@ -19,9 +20,11 @@ class AggregatorTests(unittest.TestCase):
         dp = binary_count_dp(probs)
         atoms = torch.stack([1.0 - probs, probs], dim=-1)
         conv = finite_support_convolution(atoms, support_min=0)
+        fft = finite_support_convolution_fft_tree(atoms, support_min=0)
 
         self.assertTrue(torch.allclose(brute.probs, dp.probs, atol=1e-12))
         self.assertTrue(torch.allclose(dp.probs, conv.probs, atol=1e-12))
+        self.assertTrue(torch.allclose(dp.probs, fft.probs, atol=1e-12))
         self.assertEqual(conv.support_min, 0)
         self.assertEqual(conv.support_max, 4)
 
@@ -44,7 +47,9 @@ class AggregatorTests(unittest.TestCase):
         )
         brute = brute_force_finite_support(atoms, support_min=0)
         conv = finite_support_convolution(atoms, support_min=0)
+        fft = finite_support_convolution_fft_tree(atoms, support_min=0)
         self.assertTrue(torch.allclose(brute.probs, conv.probs, atol=1e-12))
+        self.assertTrue(torch.allclose(brute.probs, fft.probs, atol=1e-12))
         self.assertEqual(conv.support_min, 0)
         self.assertEqual(conv.support_max, 6)
 
@@ -55,7 +60,9 @@ class AggregatorTests(unittest.TestCase):
         )
         brute = brute_force_finite_support(atoms, support_min=-1)
         conv = finite_support_convolution(atoms, support_min=-1)
+        fft = finite_support_convolution_fft_tree(atoms, support_min=-1)
         self.assertTrue(torch.allclose(brute.probs, conv.probs, atol=1e-12))
+        self.assertTrue(torch.allclose(brute.probs, fft.probs, atol=1e-12))
         self.assertEqual(conv.support_min, -3)
         self.assertEqual(conv.support_max, 3)
 
@@ -119,7 +126,8 @@ class AggregatorTests(unittest.TestCase):
         dp_loss = aggregate_nll(binary_count_dp(probs), torch.tensor([2])).mean()
         atoms = torch.stack([1.0 - probs, probs], dim=-1)
         conv_loss = aggregate_nll(finite_support_convolution(atoms), torch.tensor([2])).mean()
-        loss = dp_loss + conv_loss
+        fft_loss = aggregate_nll(finite_support_convolution_fft_tree(atoms), torch.tensor([2])).mean()
+        loss = dp_loss + conv_loss + fft_loss
         loss.backward()
         self.assertTrue(torch.isfinite(logits.grad).all())
 
