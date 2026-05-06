@@ -29,12 +29,32 @@ The support of the aggregate PMF is finite and contiguous:
 \end{equation}
 All experiments use exact likelihoods over this support; approximations enter only through the neural instance model, not through sampling latent assignments.
 
+\subsection{Training Objective}
+
+For each minibatch, the instance model first produces atomic PMFs for every instance in every bag.
+The aggregate layer then deterministically maps these atoms to an exact PMF over the observed bag label.
+The training loss is the negative log probability assigned to the observed aggregate,
+\begin{equation}
+  \mathcal{L}(\theta)
+  =
+  -\frac{1}{B}\sum_{b=1}^B
+  \log
+  \left(d_{b1} * \cdots * d_{bn_b}\right)(y_b).
+\end{equation}
+Gradients are backpropagated through the convolutional aggregate layer into the instance network.
+Instance labels are never used for training in the weak-supervision experiments; they are used only for evaluation of hidden instance recovery.
+This is different from expected-value regression baselines, which regress the scalar expectation $\sum_i \mathbb{E}[z_i]$ to the aggregate label and therefore discard the higher-order distributional information in the count or sum.
+
 \subsection{Special Cases}
 
 \paragraph{Binary counts.}
 For Bernoulli target indicators,
 \begin{equation}
   d_i = (1-p_i, p_i), \qquad Y=\sum_i z_i.
+\end{equation}
+Equivalently, each instance contributes a length-two one-dimensional kernel over support $\{0,1\}$:
+\begin{equation}
+  \kappa_i = [1-p_i,\; p_i].
 \end{equation}
 The probability of observing count $y$ is the coefficient of $t^y$ in
 \begin{equation}
@@ -55,16 +75,33 @@ Each atom has support $\{-1,0,+1\}$ after incorporating the sign:
     (1-p_i)\delta_0 + p_i\delta_{-1}, & s_i=-1.
   \end{cases}
 \end{equation}
+In array order $[-1,0,+1]$, the corresponding signed kernels are
+\begin{equation}
+  \kappa_i^{(+)} = [0,\;1-p_i,\;p_i],
+  \qquad
+  \kappa_i^{(-)} = [p_i,\;1-p_i,\;0].
+\end{equation}
 This setting exposes cancellation: many distinct latent assignments can yield the same observed aggregate, especially when $Y=0$.
 
 \paragraph{Ordinal sums.}
 For hidden ordinal values $z_i \in \{0,\ldots,K-1\}$, the observed label can be a scalar sum such as a digit sum.
 Unlike expected-sum regression, the likelihood uses the full induced distribution over possible sums.
 If a model predicts digit probabilities $p_\theta(z_i=k\mid x_i)$, the likelihood compares the observed sum against the full convolved PMF rather than only the mean $\sum_i \mathbb{E}[z_i]$.
+The one-dimensional kernel for instance $i$ is the full class-probability vector
+\begin{equation}
+  \kappa_i = [p_{i0}, p_{i1}, \ldots, p_{i,K-1}],
+\end{equation}
+so the aggregate support has width $n(K-1)+1$.
+For MNIST digit-sum, $K=10$ and the observed bag label is the sum of hidden digit values.
 
 \paragraph{Histogram labels and one-vs-rest counts.}
 For multiclass histograms, each class count can be treated as a one-vs-rest Bernoulli count.
 Let $p_{ic}$ be the predicted probability of class $c$ for instance $i$, and let $h_c$ be the observed count of class $c$ in the bag.
+For every class $c$, we form Bernoulli count kernels
+\begin{equation}
+  \kappa_{ic} = [1-p_{ic},\;p_{ic}]
+\end{equation}
+and compute a classwise count likelihood.
 The one-vs-rest count objective is
 \begin{equation}
   \mathcal{L}_{\mathrm{hist}}(\theta)
@@ -101,19 +138,48 @@ They support instance recovery diagnostics, uncertainty analysis, and optional p
 
 \subsection{Computational Backends}
 
-We implement several exact backends:
+All of the above objectives are one-dimensional convolutions over integer aggregate support.
+If $m^{(i)}$ denotes the aggregate PMF after processing the first $i$ atoms, then
+\begin{equation}
+  m^{(i)}(s)
+  =
+  \sum_{r=a}^{b} m^{(i-1)}(s-r)d_i(r),
+  \qquad
+  m^{(0)}=\delta_0.
+\end{equation}
+This recurrence is the same probability law whether implemented as dynamic programming, shifted dense tensor accumulation, grouped \texttt{conv1d}, or FFT polynomial multiplication.
+The implementation uses several exact backends:
 \begin{itemize}
-  \item sequential finite-support convolution for moderate bags;
-  \item dynamic programming for Bernoulli count baselines;
-  \item grouped GPU convolution for signed binary aggregates;
-  \item balanced FFT-tree convolution for large-bag and multiclass one-vs-rest count likelihoods.
+  \item Sequential finite-support convolution accumulates shifted copies of the current PMF and is used for moderate binary, signed, and ordinal-sum experiments.
+  \item Dynamic programming is used as a Shukla-style Bernoulli count baseline; it computes the same binary count coefficients as the convolutional view.
+  \item Grouped GPU convolution packs signed Bernoulli groups into channels and applies grouped \texttt{conv1d}.
+  \item Balanced FFT-tree convolution multiplies the atomic polynomials pairwise and is used for large-bag runtime experiments and multiclass one-vs-rest histogram/PVC likelihoods.
 \end{itemize}
+
+\paragraph{Grouped signed \texttt{conv1d}.}
+The literal GPU \texttt{conv1d} backend is used for grouped signed binary aggregates.
+Each active group starts as a point mass at zero on support $[-K_{\max},K_{\max}]$.
+For one signed instance, the backend applies a length-three channelwise kernel and padding one.
+Because PyTorch's \texttt{conv1d} operator is cross-correlation rather than mathematical convolution, the code stores the kernel in the order
+\begin{equation}
+  [p_i\mathbf{1}\{s_i=+1\},\;1-p_i,\;p_i\mathbf{1}\{s_i=-1\}],
+\end{equation}
+so the left kernel entry shifts probability mass toward larger aggregate values and the right entry shifts mass toward smaller values.
+This is only an implementation orientation; in mathematical support order $[-1,0,+1]$ the signed kernels are the atoms shown above.
+
+\paragraph{Multiclass and histogram implementation.}
+For digit-sum, the atom width is the number of ordinal labels, e.g. ten for MNIST digits.
+For histogram/PVC experiments, we avoid a full $C$-dimensional joint histogram over classes and instead compute $C$ one-vs-rest one-dimensional count likelihoods in parallel.
+This keeps the aggregate support one-dimensional for each class and makes large bags practical on GPU.
+The FFT-tree backend is especially useful for this setting because the same pairwise polynomial products are batched over classes and bags.
+Padding or masked positions are represented by deterministic zero-contribution atoms, such as $[1,0]$ for Bernoulli counts, $[0,1,0]$ for signed support $[-1,0,+1]$, and $[1,0,\ldots,0]$ for ordinal sums.
 
 \begin{table}[t]
 \centering
+\small
 \caption{Exact aggregate backends.  $n$ is bag size, $K$ is atomic support width, $S=n(K-1)+1$ is aggregate support width, and $C$ is number of one-vs-rest classes.}
 \label{tab:backends}
-\begin{tabular}{llll}
+\begin{tabular}{p{0.18\linewidth}p{0.24\linewidth}p{0.20\linewidth}p{0.25\linewidth}}
 \toprule
 Backend & Setting & Work per bag & Use in this paper \\
 \midrule
