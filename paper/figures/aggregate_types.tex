@@ -1,0 +1,18 @@
+\begin{tikzpicture}[
+  font=\small,
+  box/.style={draw, rounded corners=2pt, minimum width=3.4cm, minimum height=1.05cm, align=center, inner sep=4pt},
+  note/.style={font=\footnotesize, align=center},
+  arrow/.style={-Latex, thick}
+]
+  \node[box] (binary) at (0,0) {Binary count\\[-1pt]\footnotesize $\{0,1\}\rightarrow Y=\sum_i z_i$};
+  \node[box] (sum) at (4.15,0) {Integer sum\\[-1pt]\footnotesize $\{0,\ldots,9\}\rightarrow Y=\sum_i z_i$};
+  \node[box] (signed) at (0,-1.75) {Signed count\\[-1pt]\footnotesize $\{-1,0,+1\}\rightarrow Y=\sum_i s_i z_i$};
+  \node[box] (hist) at (4.15,-1.75) {Histogram\\[-1pt]\footnotesize $\{0,1\}\times C\rightarrow h_c=\sum_i \mathbf{1}[z_i=c]$};
+
+  \node[note] (pmf) at (2.075,-3.0) {same operation: convolve atomic PMFs, then score the observed aggregate};
+
+  \draw[arrow] (binary.south) -- (pmf.north west);
+  \draw[arrow] (sum.south) -- (pmf.north);
+  \draw[arrow] (signed.south) -- (pmf.north west);
+  \draw[arrow] (hist.south) -- (pmf.north east);
+\end{tikzpicture}

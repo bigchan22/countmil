@@ -4,7 +4,7 @@
 We study weakly supervised bags of instances.
 A training example is a bag $B=(x_1,\ldots,x_n)$ together with an observed bag label $y$.
 The instance-level variables that explain $y$ are hidden during training and are used only for evaluation.
-The label $y$ may be a binary count, a signed count, an ordinal sum, or a class histogram.
+The label $y$ may be a binary count, a signed count, an integer-valued sum, or a class histogram.
 The common structure is that each instance contributes a finite-support discrete value and the bag label is a sum of these contributions.
 
 The unifying object is the \emph{atomic support}.
@@ -37,7 +37,7 @@ and the observed aggregate is
   \label{eq:aggregate-sum}
 \end{equation}
 For most experiments $d=1$.
-For histograms, $d$ can be the number of classes, although our scalable PVC implementation uses one-dimensional one-vs-rest counts.
+For histograms, $d$ can be the number of classes, although our scalable implementation uses one-dimensional one-vs-rest count likelihoods.
 The learner observes $(x_{1:n},a_{1:n},y)$ when side information is present, but not the individual $C_i$ values.
 
 \begin{proposition}[Finite-support convolution law]
@@ -70,7 +70,7 @@ and its probability mass function is the discrete convolution
 \end{equation}
 \end{proposition}
 
-The proposition is a standard probability identity, but making it explicit clarifies the modeling choice.
+Proposition~\ref{prop:finite-support-convolution} is a standard probability identity, but making it explicit clarifies the modeling choice.
 Once the atomic contribution distributions $d_i$ are predicted by a neural network, the bag-label distribution is determined exactly by convolution.
 Different weak-label tasks differ mainly in the support $\mathcal{S}_i$ and in which side information is observed.
 
@@ -84,14 +84,15 @@ Different weak-label tasks differ mainly in the support $\mathcal{S}_i$ and in w
 Task & Atomic size $S$ & Contribution support & Bag label & Aggregate width \\
 \midrule
 Binary count & $2$ & $\{0,1\}$ & number of positives & $n+1$ \\
-Ordinal sum & $K$ & $\{0,\ldots,K-1\}$ & scalar sum & $n(K-1)+1$ \\
+Integer-valued sum & $K$ & $\{0,\ldots,K-1\}$ & scalar sum & $n(K-1)+1$ \\
 Signed count & $3$ & $\{-1,0,+1\}$ & signed sum & $2n+1$ \\
 Multiplicity & $m_i+1$ & $\{0,\ldots,m_i\}$ & total multiplicity & $\sum_i m_i+1$ \\
-OVR/PVC histogram & $2$ per class & $\{0,1\}$ & count of class $c$ & $n+1$ per class \\
+OVR histogram & $2$ per class & $\{0,1\}$ & count of class $c$ & $n+1$ per class \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Binary Count-MIL is therefore the simplest case of Eq.~\eqref{eq:aggregate-sum}; it is not new by itself.
-The broader formulation is useful because signed cancellation, ordinal sums, multiplicity counts, and one-vs-rest histograms can be handled by changing the finite-support atom while keeping the same convolutional bag-prediction principle.
-Bags in our experiments are sampled on the fly with replacement from the corresponding train or test split, so an image may appear in multiple bags, but train and test bags are drawn from disjoint dataset splits.
+The broader formulation is useful because signed counts, integer-valued sums, multiplicity counts, and one-vs-rest histograms can be handled by changing the finite-support atom while keeping the same convolutional bag-prediction principle.
+In our experiments, bags are sampled on the fly with replacement from the corresponding train or test split.
+Thus an image may appear in multiple bags, but train and test bags are always drawn from disjoint dataset splits.

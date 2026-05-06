@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="430" viewBox="0 0 720 430">
+<rect width="100%" height="100%" fill="white"/>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#222}.axis{stroke:#222;stroke-width:1.2}.grid{stroke:#d9d9d9;stroke-width:1}.small{font-size:12px}.label{font-size:14px}.title{font-size:17px;font-weight:700}</style>
+<text x="74" y="24" class="title">Hidden digit recovery from ordinal sum labels</text>
+<text x="74" y="42" class="small">Training observes only bag-level digit sums; instance labels are evaluation only</text>
+<line x1="74" y1="352.00" x2="690" y2="352.00" class="grid"/>
+<text x="64" y="356.00" text-anchor="end" class="small">0.00</text>
+<line x1="74" y1="274.50" x2="690" y2="274.50" class="grid"/>
+<text x="64" y="278.50" text-anchor="end" class="small">0.25</text>
+<line x1="74" y1="197.00" x2="690" y2="197.00" class="grid"/>
+<text x="64" y="201.00" text-anchor="end" class="small">0.50</text>
+<line x1="74" y1="119.50" x2="690" y2="119.50" class="grid"/>
+<text x="64" y="123.50" text-anchor="end" class="small">0.75</text>
+<line x1="74" y1="42.00" x2="690" y2="42.00" class="grid"/>
+<text x="64" y="46.00" text-anchor="end" class="small">1.00</text>
+<line x1="74" y1="42" x2="74" y2="352" class="axis"/>
+<line x1="74" y1="352" x2="690" y2="352" class="axis"/>
+<rect x="108.00" y="47.58" width="38" height="304.42" fill="#1f5a99"/>
+<rect x="156.00" y="281.94" width="38" height="70.06" fill="#c13d32"/>
+<text x="127.00" y="41.58" text-anchor="middle" class="small">0.982</text>
+<text x="175.00" y="275.94" text-anchor="middle" class="small">0.226</text>
+<text x="151.00" y="376" text-anchor="middle" class="small">n10</text>
+<text x="151.00" y="392" text-anchor="middle" class="small">train1000</text>
+<rect x="262.00" y="44.48" width="38" height="307.52" fill="#1f5a99"/>
+<rect x="310.00" y="120.74" width="38" height="231.26" fill="#c13d32"/>
+<text x="281.00" y="38.48" text-anchor="middle" class="small">0.992</text>
+<text x="329.00" y="114.74" text-anchor="middle" class="small">0.746</text>
+<text x="305.00" y="376" text-anchor="middle" class="small">n10</text>
+<text x="305.00" y="392" text-anchor="middle" class="small">train5000</text>
+<rect x="416.00" y="137.17" width="38" height="214.83" fill="#1f5a99"/>
+<rect x="464.00" y="275.12" width="38" height="76.88" fill="#c13d32"/>
+<text x="435.00" y="131.17" text-anchor="middle" class="small">0.693</text>
+<text x="483.00" y="269.12" text-anchor="middle" class="small">0.248</text>
+<text x="459.00" y="376" text-anchor="middle" class="small">n50</text>
+<text x="459.00" y="392" text-anchor="middle" class="small">train1000</text>
+<rect x="570.00" y="77.03" width="38" height="274.97" fill="#1f5a99"/>
+<rect x="618.00" y="98.73" width="38" height="253.27" fill="#c13d32"/>
+<text x="589.00" y="71.03" text-anchor="middle" class="small">0.887</text>
+<text x="637.00" y="92.73" text-anchor="middle" class="small">0.817</text>
+<text x="613.00" y="376" text-anchor="middle" class="small">n50</text>
+<text x="613.00" y="392" text-anchor="middle" class="small">train5000</text>
+<text x="382.00" y="414" text-anchor="middle" class="label">Bag size / train bags</text>
+<text transform="translate(22 197.00) rotate(-90)" text-anchor="middle" class="label">Hidden instance accuracy</text>
+<rect x="493" y="44" width="190" height="54" fill="white" stroke="#cccccc"/>
+<rect x="505" y="56" width="16" height="16" fill="#1f5a99"/><text x="529" y="69" class="small">Exact likelihood</text>
+<rect x="505" y="80" width="16" height="16" fill="#c13d32"/><text x="529" y="93" class="small">MSE expected-sum</text>
+</svg>

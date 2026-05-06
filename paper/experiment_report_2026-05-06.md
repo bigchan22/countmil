@@ -67,7 +67,7 @@ Interpretation: binary count likelihood is a strong sanity check and baseline co
 
 ## MNIST Digit-Sum Likelihood
 
-Purpose: test scalar ordinal aggregate labels beyond binary counts.
+Purpose: test scalar integer-valued aggregate labels beyond binary counts.
 
 Training:
 
@@ -160,6 +160,31 @@ Tail-5 means over five seeds:
 
 Interpretation: this is a strong positive robustness result for the A1/UltraMNIST-style aggregate-sum story. The model recovers hidden instance labels at about `97%` accuracy while seeing only aggregate sums during training. The result should be described as an UltraMNIST-style synthetic patch benchmark unless a real UltraMNIST dataset is substituted.
 
+## SVHN Digit-Sum Pretraining Diagnostic
+
+Purpose: test whether the weak SVHN digit-sum result is caused by the aggregate likelihood or by representation quality on natural RGB digits.
+
+Training:
+
+- Dataset: SVHN digit-sum bags.
+- Label: scalar sum of hidden digit values.
+- Objective: exact finite-support sum likelihood over atoms `{0,...,9}`.
+- Train bags: `5000`.
+- Epochs: `40`.
+- Seeds: `0,1`.
+- Compared settings: from-scratch backbone versus ImageNet-pretrained backbone.
+
+Results, mean over two seeds:
+
+| SVHN setting | Instance acc. | Sum acc. | Expected-sum MAE | NLL |
+|---|---:|---:|---:|---:|
+| from scratch, final | 0.2292 | 0.0525 | 5.812 | 7.504 |
+| pretrained, best by NLL | 0.9508 | 0.6117 | 1.670 | 1.339 |
+| pretrained, final | 0.9550 | 0.6525 | 1.344 | 1.685 |
+| pretrained, tail-5 | 0.9522 | 0.6315 | 1.467 | 1.780 |
+
+Interpretation: pretraining changes SVHN digit-sum from weak to strong.  This supports the view that the exact finite-support sum likelihood is viable on natural digit images when the instance representation is strong, and that the earlier from-scratch SVHN result was representation-limited.
+
 ## Signed CountMIL
 
 Purpose: test signed aggregates and cancellation.
@@ -224,14 +249,18 @@ Other FashionMNIST results:
 |---|---:|---|
 | Digit/category sum | 10 | sum MAE 3.362, instance category acc. 0.4718 |
 | Digit/category sum | 50 | sum MAE 7.869, instance category acc. 0.4211 |
+| Expected-sum MSE | 10 | expected-sum MAE 3.512, rounded acc. 0.089, instance category acc. 0.209 |
+| Expected-sum MSE | 50 | expected-sum MAE 8.388, rounded acc. 0.041, instance category acc. 0.207 |
 | Histogram LLP | 10 | count MAE 0.321, instance category acc. 0.8184 |
 | Histogram LLP | 50 | count MAE 0.903, instance category acc. 0.7808 |
+| Histogram LLP MSE | 10 | count MAE 0.407, prop. MAE 0.0417, instance category acc. 0.767 |
+| Histogram LLP MSE | 50 | count MAE 1.679, prop. MAE 0.0344, instance category acc. 0.255 |
 | Signed CountMIL random | 10 | signed MAE 0.113, signed acc. 0.8875, instance AUC 0.9977 |
 | Signed CountMIL cancellation | 10 | signed MAE 0.104, signed acc. 0.8970, instance AUC 0.9979 |
 | Signed CountMIL random | 50 | signed MAE 0.381, signed acc. 0.6545, instance AUC 0.9979 |
 | Signed CountMIL cancellation | 50 | signed MAE 0.951, signed acc. 0.4355, instance AUC 0.9961 |
 
-Interpretation: FashionMNIST is best used as a robustness/instance-recovery result, not as the headline ordinal-sum result.
+Interpretation: FashionMNIST is best used as a robustness/instance-recovery result, not as the headline digit-sum result.  The completed MSE baselines are weak on FashionMNIST, especially for larger bags: scalar expected-sum MSE does not recover the hidden categories, and histogram MSE degrades sharply from mean bag size 10 to 50.
 
 ## MNIST Histogram LLP and PVC
 
@@ -448,7 +477,7 @@ The diagnostic therefore argues against claiming intrinsic large-bag superiority
 
 - Do not claim binary count loss is new.
 - State that binary Bernoulli CountMIL recovers Shukla-style count probability.
-- Use signed and ordinal aggregates as the main novelty beyond binary counts.
+- Use signed and integer-valued aggregates as the main novelty beyond binary counts.
 - Use posterior marginals as an inference/diagnostic tool, not as a central EM training method.
 - Say exact scalar-sum likelihood is more data-efficient than expected-value matching in low-data settings.
 - Say histogram LLP labels are rich and ordinary CE/KL baselines are strong.

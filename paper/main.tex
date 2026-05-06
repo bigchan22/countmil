@@ -55,15 +55,13 @@
 \maketitle
 
 \begin{abstract}
-Weakly supervised multiple-instance learning often provides supervision only through aggregate labels, such as whether a bag contains a target class or how many target instances it contains.
-Existing count-based MIL objectives handle Bernoulli counts, but many natural weak labels are richer: signed counts, cancellation-prone aggregates, class histograms, or ordinal sums.
-We propose a finite-support convolutional view of aggregate likelihoods for Count-MIL.
-Each instance emits a latent discrete contribution distribution, and the bag-level likelihood is obtained by convolving these atomic probability mass functions.
-This formulation recovers the standard Bernoulli count likelihood as a special case while extending directly to signed and ordinal aggregate labels.
-We further derive count-conditioned posterior marginals for instance recovery and implement the likelihood with GPU-parallel convolution, including an FFT-tree backend for large multiclass one-vs-rest count likelihoods.
-Experiments evaluate binary counts, signed cancellation-heavy counts, ordinal sum labels on MNIST/SVHN/UltraMNIST-style benchmarks, posterior instance recovery, and multiclass LLP-style histogram supervision, with comparisons to dynamic-programming count loss, attention MIL, expected-sum regression, and proportion-matching baselines.
-Results show accurate hidden-instance recovery on finite-support aggregate tasks, especially for signed and ordinal aggregate labels, and competitive CIFAR-10 PVC performance under an ImageNet-pretrained ResNet-18 protocol.
-A fixed-instance-budget CIFAR-10 comparison shows that larger bags are not intrinsically better: the apparent $n=64$ gain disappears when the total sampled image exposure is matched.
+Weakly supervised multiple-instance learning often observes only aggregate labels for a bag, while instance labels remain hidden.
+Existing count-based objectives give exact likelihoods for Bernoulli counts, but many aggregate labels have richer finite structure, such as signed counts, integer-valued sums, and class histograms.
+We formulate aggregate-supervised Count-MIL as convolution of instance-level finite-support probability mass functions.
+The resulting bag likelihood recovers the standard Bernoulli count probability as a special case and extends without changing the backbone model to signed and integer-valued aggregate labels.
+We also derive count-conditioned posterior marginals for instance recovery and implement exact aggregate inference with GPU-parallel convolution, including an FFT-tree backend for large one-vs-rest histogram likelihoods.
+Experiments on binary counts, signed counts, digit sums, SVHN/UltraMNIST sum benchmarks, posterior recovery, and histogram LLP settings show that exact finite-support likelihoods can recover accurate hidden-instance predictors from aggregate labels.
+On CIFAR-10, ImageNet-pretrained ResNet-18 features make the one-vs-rest count likelihood competitive with LLP-PVC reference results, while a fixed-instance-budget comparison shows that the large-bag improvement is explained by greater sampled image exposure.
 \end{abstract}
 
 \input{sections/01_introduction}

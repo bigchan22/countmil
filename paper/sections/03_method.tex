@@ -37,7 +37,7 @@ This is the distinction exploited by the digit-sum and signed-count experiments.
 
 For each minibatch, the instance model first produces atomic PMFs for every instance in every bag.
 The aggregate layer then deterministically maps these atoms to an exact PMF over the observed bag label.
-This separation makes the aggregate objective backbone-agnostic: an MLP, CNN, Transformer, or pretrained image encoder can be used as long as it produces per-instance scores from which $\Phi$ can form the required finite-support PMFs.
+This separation makes the aggregate objective backbone-agnostic: an MLP, CNN, transformer, or pretrained image encoder can be used as long as it produces per-instance scores from which $\Phi$ can form the required finite-support PMFs.
 The training loss is the negative log probability assigned to the observed aggregate,
 \begin{equation}
   \mathcal{L}(\theta)
@@ -61,7 +61,7 @@ This is different from expected-value regression baselines, which regress the sc
   \For{$i=1,\ldots,n_b$}
     \State $d_{bi} \gets \Phi(H_{bi}, a_{bi})$ \Comment{atomic PMF on the task support}
   \EndFor
-  \If{histogram/PVC objective}
+  \If{histogram one-vs-rest objective}
     \For{$c=1,\ldots,C$}
       \State $m_{bc} \gets \mathsf{Conv}(\{[1-p_{bic},p_{bic}]\}_{i=1}^{n_b})$
       \State $p_{bc} \gets m_{bc}(h_{bc})$
@@ -81,6 +81,12 @@ This is different from expected-value regression baselines, which regress the sc
 \subsection{Special Cases}
 
 \paragraph{Binary counts.}
+For a binary target concept $c^\star$, define the hidden instance label
+$z_i=\mathbf{1}\{a_i=c^\star\}$, where $a_i$ is the underlying class of
+instance $i$.
+In the binary MNIST experiments, $c^\star$ is a chosen digit, so images of that
+digit are positive and all other MNIST digits are negative; training observes
+only the bag count, not the individual $z_i$.
 For Bernoulli target indicators,
 \begin{equation}
   d_i = (1-p_i, p_i), \qquad Y=\sum_i z_i.
@@ -100,6 +106,10 @@ For known signs $s_i \in \{-1,+1\}$ and latent target indicators $z_i \in \{0,1\
 \begin{equation}
   Y = \sum_i s_i z_i.
 \end{equation}
+Signed MNIST uses the same target-digit construction as binary MNIST, but each
+instance also has an observed sign.
+Non-target digits contribute $0$, while a target-digit image contributes either
+$+1$ or $-1$ according to its sign.
 Each atom has support $\{-1,0,+1\}$ after incorporating the sign:
 \begin{equation}
   d_i =
@@ -116,8 +126,12 @@ In array order $[-1,0,+1]$, the corresponding signed kernels are
 \end{equation}
 This setting exposes cancellation: many distinct latent assignments can yield the same observed aggregate, especially when $Y=0$.
 
-\paragraph{Ordinal sums.}
-For hidden ordinal values $z_i \in \{0,\ldots,K-1\}$, the observed label can be a scalar sum such as a digit sum.
+\paragraph{Integer-valued sums.}
+For hidden finite integer values $z_i \in \{0,\ldots,K-1\}$, the observed bag label is
+\begin{equation}
+  Y = \sum_i z_i,
+\end{equation}
+so the label is a scalar sum rather than a class proportion.
 Unlike expected-sum regression, the likelihood uses the full induced distribution over possible sums.
 If a model predicts digit probabilities $p_\theta(z_i=k\mid x_i)$, the likelihood compares the observed sum against the full convolved PMF rather than only the mean $\sum_i \mathbb{E}[z_i]$.
 The one-dimensional kernel for instance $i$ is the full class-probability vector
@@ -125,16 +139,28 @@ The one-dimensional kernel for instance $i$ is the full class-probability vector
   \kappa_i = [p_{i0}, p_{i1}, \ldots, p_{i,K-1}],
 \end{equation}
 so the aggregate support has width $n(K-1)+1$.
-For MNIST digit-sum, $K=10$ and the observed bag label is the sum of hidden digit values.
+For MNIST digit-sum, $K=10$, $z_i$ is the original digit value in
+$\{0,\ldots,9\}$, and the observed bag label is the sum of those hidden digit
+values.
 
 \paragraph{Histogram labels and one-vs-rest counts.}
 For multiclass histograms, each class count can be treated as a one-vs-rest Bernoulli count.
 Let $p_{ic}$ be the predicted probability of class $c$ for instance $i$, and let $h_c$ be the observed count of class $c$ in the bag.
+This differs from ordinary proportion matching.
+CE, KL, or MSE baselines first average instance probabilities into a predicted bag-proportion vector
+\begin{equation}
+  \bar{p}_c = \frac{1}{n}\sum_{i=1}^n p_{ic},
+  \qquad
+  \hat{q}=(\bar{p}_1,\ldots,\bar{p}_C),
+\end{equation}
+and compare $\hat{q}$ to the observed proportion vector $q=(h_1/n,\ldots,h_C/n)$.
+For example, KL proportion matching minimizes $\sum_c q_c\log(q_c/\bar{p}_c)$, while MSE minimizes $\sum_c(q_c-\bar{p}_c)^2$.
+These losses match only the expected class proportions.
 For every class $c$, we form Bernoulli count kernels
 \begin{equation}
   \kappa_{ic} = [1-p_{ic},\;p_{ic}]
 \end{equation}
-and compute a classwise count likelihood.
+and compute a classwise count likelihood for the observed integer count $h_c$.
 The one-vs-rest count objective is
 \begin{equation}
   \mathcal{L}_{\mathrm{hist}}(\theta)
@@ -146,7 +172,8 @@ The one-vs-rest count objective is
   \right]_{t^{h_c}},
 \end{equation}
 where $[\cdot]_{t^{h_c}}$ denotes coefficient extraction.
-This yields a PVC-style objective closely related to LLP-PVC, while sharing the same finite-support convolution backend.
+This objective is closely related to the count-likelihood component of LLP-PVC, while sharing the same finite-support convolution backend used elsewhere in this paper.
+In the experiments, the one-vs-rest rows denote this classwise count likelihood rather than the full LLP-PVC algorithm.
 Unlike a full joint multiclass histogram likelihood, this one-vs-rest objective does not enforce the dependencies among class counts exactly.
 It is nevertheless a scalable comparison point and exposes the same one-dimensional count backend used by the other aggregate likelihoods.
 
@@ -186,10 +213,10 @@ This recurrence is the same probability law whether implemented as dynamic progr
 The choice of backend is therefore computational rather than statistical: the likelihood being optimized is unchanged, but the hardware profile differs.
 The implementation uses several exact backends:
 \begin{itemize}
-  \item Sequential finite-support convolution accumulates shifted copies of the current PMF and is used for binary, signed, and ordinal-sum experiments.
+  \item Sequential finite-support convolution accumulates shifted copies of the current PMF and is used for binary, signed, and integer-valued sum experiments.
   \item Dynamic programming is used as a Shukla-style Bernoulli count baseline; it computes the same binary count coefficients as the convolutional view.
   \item Grouped GPU convolution packs signed Bernoulli groups into channels and applies grouped \texttt{conv1d}.
-  \item Balanced FFT-tree convolution multiplies the atomic polynomials pairwise and is used for runtime experiments and multiclass one-vs-rest histogram/PVC likelihoods.
+  \item Balanced FFT-tree convolution multiplies the atomic polynomials pairwise and is used for runtime experiments and multiclass one-vs-rest histogram likelihoods.
 \end{itemize}
 
 \paragraph{Grouped signed \texttt{conv1d}.}
@@ -204,11 +231,11 @@ so the left kernel entry shifts probability mass toward larger aggregate values 
 This is only an implementation orientation; in mathematical support order $[-1,0,+1]$ the signed kernels are the atoms shown above.
 
 \paragraph{Multiclass and histogram implementation.}
-For digit-sum, the atom width is the number of ordinal labels, e.g. ten for MNIST digits.
-For histogram/PVC experiments, we avoid a full $C$-dimensional joint histogram over classes and instead compute $C$ one-vs-rest one-dimensional count likelihoods in parallel.
+For digit-sum, the atom width is the number of finite digit values, for example ten for MNIST digits.
+For histogram experiments, we avoid a full $C$-dimensional joint histogram over classes and instead compute $C$ one-vs-rest one-dimensional count likelihoods in parallel.
 This keeps the aggregate support one-dimensional for each class and makes large bags practical on GPU.
-The FFT-tree backend is especially useful for this setting because the same pairwise polynomial products are batched over classes and bags.
-Padding or masked positions are represented by deterministic zero-contribution atoms, such as $[1,0]$ for Bernoulli counts, $[0,1,0]$ for signed support $[-1,0,+1]$, and $[1,0,\ldots,0]$ for ordinal sums.
+The FFT-tree backend is useful for this setting because the same pairwise polynomial products are batched over classes and bags.
+Padding or masked positions are represented by deterministic zero-contribution atoms, such as $[1,0]$ for Bernoulli counts, $[0,1,0]$ for signed support $[-1,0,+1]$, and $[1,0,\ldots,0]$ for integer-valued sums.
 
 \begin{table}[t]
 \centering
@@ -222,7 +249,7 @@ Backend & Setting & Work per bag & Use \\
 DP & Bernoulli count & $O(nT)$ & Shukla-style count baseline \\
 Sequential convolution & finite support & $O(nST)$ & main moderate-bag experiments \\
 Grouped convolution & signed Bernoulli & $O(nT)$, batched groups & signed GPU implementation \\
-FFT-tree & finite support / OVR & $O(CT\log T\log n)$ & runtime, PVC-style histograms \\
+FFT-tree & finite support / OVR & $O(CT\log T\log n)$ & runtime, OVR histograms \\
 \bottomrule
 \end{tabular}
 \end{table}

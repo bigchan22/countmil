@@ -1,0 +1,42 @@
+% Auto-generated from Table~\ref{tab:digit-sum} values in paper/sections/04_experiments.tex
+\begin{tikzpicture}[font=\small]
+  \definecolor{exactBlue}{RGB}{31,90,153}
+  \definecolor{mseRed}{RGB}{193,61,50}
+  \def\plotW{10.0}
+  \def\plotH{4.6}
+  \draw[->] (0,0) -- (\plotW+0.35,0) node[right] {Bag/train};
+  \draw[->] (0,0) -- (0,\plotH+0.35) node[above] {Inst. acc.};
+  \draw[gray!25] (0,0.000) -- (\plotW,0.000);
+  \draw (-0.06,0.000) -- (0,0.000) node[left] {0.00};
+  \draw[gray!25] (0,1.150) -- (\plotW,1.150);
+  \draw (-0.06,1.150) -- (0,1.150) node[left] {0.25};
+  \draw[gray!25] (0,2.300) -- (\plotW,2.300);
+  \draw (-0.06,2.300) -- (0,2.300) node[left] {0.50};
+  \draw[gray!25] (0,3.450) -- (\plotW,3.450);
+  \draw (-0.06,3.450) -- (0,3.450) node[left] {0.75};
+  \draw[gray!25] (0,4.600) -- (\plotW,4.600);
+  \draw (-0.06,4.600) -- (0,4.600) node[left] {1.00};
+  \fill[exactBlue] (0.920,0) rectangle ++(0.280,4.517);
+  \fill[mseRed] (1.300,0) rectangle ++(0.280,1.040);
+  \node[rotate=90, anchor=west, font=\scriptsize] at (1.060,4.567) {0.982};
+  \node[rotate=90, anchor=west, font=\scriptsize] at (1.440,1.090) {0.226};
+  \node[below] at (1.250,-0.08) {$10/1000$};
+  \fill[exactBlue] (3.420,0) rectangle ++(0.280,4.563);
+  \fill[mseRed] (3.800,0) rectangle ++(0.280,3.432);
+  \node[rotate=90, anchor=west, font=\scriptsize] at (3.560,4.613) {0.992};
+  \node[rotate=90, anchor=west, font=\scriptsize] at (3.940,3.482) {0.746};
+  \node[below] at (3.750,-0.08) {$10/5000$};
+  \fill[exactBlue] (5.920,0) rectangle ++(0.280,3.188);
+  \fill[mseRed] (6.300,0) rectangle ++(0.280,1.141);
+  \node[rotate=90, anchor=west, font=\scriptsize] at (6.060,3.238) {0.693};
+  \node[rotate=90, anchor=west, font=\scriptsize] at (6.440,1.191) {0.248};
+  \node[below] at (6.250,-0.08) {$50/1000$};
+  \fill[exactBlue] (8.420,0) rectangle ++(0.280,4.080);
+  \fill[mseRed] (8.800,0) rectangle ++(0.280,3.758);
+  \node[rotate=90, anchor=west, font=\scriptsize] at (8.560,4.130) {0.887};
+  \node[rotate=90, anchor=west, font=\scriptsize] at (8.940,3.808) {0.817};
+  \node[below] at (8.750,-0.08) {$50/5000$};
+  \draw[fill=white, draw=gray!40] (6.55,3.55) rectangle (9.85,4.35);
+  \fill[exactBlue] (6.75,4.08) rectangle ++(0.22,0.14); \node[anchor=west] at (7.08,4.15) {Exact likelihood};
+  \fill[mseRed] (6.75,3.75) rectangle ++(0.22,0.14); \node[anchor=west] at (7.08,3.82) {MSE expected-sum};
+\end{tikzpicture}

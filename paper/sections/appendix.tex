@@ -26,15 +26,15 @@ In the unsigned binary case, the resulting posterior marginals sum to the observ
 
 All weak-supervision experiments sample bags on the fly rather than pregenerating fixed bag files.
 Instance labels are used only for evaluation metrics such as hidden-instance AUC or hidden digit accuracy.
-MNIST-family experiments use the project LeNet-style selector or digit classifier, Adam with learning rate $5\times 10^{-4}$, weight decay $10^{-4}$, and 50 epochs.
+MNIST-family experiments use LeNet-style instance classifiers, Adam with learning rate $5\times 10^{-4}$, weight decay $10^{-4}$, and 50 epochs.
 The main MNIST-family configurations use seeds $0,1,2$, test on 1000 sampled bags, and evaluate mean bag sizes 10 and 50 with standard deviations 2 and 10.
 
-Histogram/PVC experiments treat each class count as a one-vs-rest Bernoulli count likelihood.
+Histogram count-likelihood experiments treat each class count as a one-vs-rest Bernoulli count likelihood.
 The MNIST histogram experiments use batch size 192 for large-bag configurations.
 CIFAR-10 experiments use ResNet-18 backbones.
 The from-scratch CIFAR settings use randomly initialized ResNet-18.
-The pretrained PVC settings use ImageNet-pretrained ResNet-18 with random crop and horizontal flip augmentation, SGD with momentum 0.9, weight decay $10^{-4}$, learning rate $5\times 10^{-4}$, and a Ma-style cosine schedule for 500 epochs.
-The pretrained CIFAR-10 analysis is limited to the evaluated $n=16$ and $n=64$ PVC settings.
+The pretrained one-vs-rest count settings use ImageNet-pretrained ResNet-18 with random crop and horizontal flip augmentation, SGD with momentum 0.9, weight decay $10^{-4}$, learning rate $5\times 10^{-4}$, and a cosine learning-rate schedule for 500 epochs.
+The pretrained CIFAR-10 analysis is limited to the evaluated $n=16$ and $n=64$ one-vs-rest count settings.
 
 \section{Additional Tables}
 \label{app:additional-tables}
