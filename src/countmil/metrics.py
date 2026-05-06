@@ -23,6 +23,27 @@ def expected_value_from_pmf(probs: torch.Tensor, support_min: int) -> torch.Tens
     return (probs * values).sum(dim=-1)
 
 
+def multiclass_ece_from_pmf(probs: torch.Tensor, targets: torch.Tensor, n_bins: int = 15) -> float:
+    """Expected calibration error for aggregate PMF top-1 predictions."""
+
+    if probs.ndim != 2:
+        raise ValueError("probs must have shape (N,T)")
+    targets = targets.to(device=probs.device, dtype=torch.long)
+    conf, pred = probs.max(dim=-1)
+    correct = (pred == targets).to(probs.dtype)
+    boundaries = torch.linspace(0.0, 1.0, n_bins + 1, device=probs.device, dtype=probs.dtype)
+    ece = probs.new_tensor(0.0)
+    for i in range(n_bins):
+        if i == n_bins - 1:
+            mask = (conf >= boundaries[i]) & (conf <= boundaries[i + 1])
+        else:
+            mask = (conf >= boundaries[i]) & (conf < boundaries[i + 1])
+        if mask.any():
+            weight = mask.to(probs.dtype).mean()
+            ece = ece + weight * (conf[mask].mean() - correct[mask].mean()).abs()
+    return float(ece.detach().cpu().item())
+
+
 def binary_auc(scores: torch.Tensor, labels: torch.Tensor) -> float:
     """Compute binary ROC AUC without sklearn.
 

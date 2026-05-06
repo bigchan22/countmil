@@ -1,5 +1,13 @@
 """Dataset builders for CountMIL experiments."""
 
+from .atomic_sum import (
+    MNISTOrdinalSumBags,
+    SVHNOrdinalSumBags,
+    TensorOrdinalSumBags,
+    UltraMNISTOrdinalSumBags,
+    collate_ordinal_sum_bags,
+    load_svhn_family,
+)
 from .cifar import CIFARHistogramBags, collate_cifar_bags, load_cifar_family
 from .mnist import (
     MNISTBags,
@@ -14,14 +22,20 @@ from .mnist import (
 
 __all__ = [
     "CIFARHistogramBags",
+    "MNISTOrdinalSumBags",
     "MNISTBags",
     "MNISTDigitHistogramBags",
     "MNISTDigitSumBags",
+    "SVHNOrdinalSumBags",
     "SignedMNISTBags",
+    "TensorOrdinalSumBags",
+    "UltraMNISTOrdinalSumBags",
     "collate_cifar_bags",
     "collate_mnist_bags",
+    "collate_ordinal_sum_bags",
     "load_cifar_family",
     "load_idx_images",
     "load_idx_labels",
     "load_mnist_family",
+    "load_svhn_family",
 ]

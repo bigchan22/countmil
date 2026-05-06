@@ -33,6 +33,10 @@ The repository is organized around a simple pipeline:
   - `MNISTDigitSumBags`: scalar digit-sum labels.
   - `MNISTDigitHistogramBags`: digit histogram labels.
   - `SignedMNISTBags`: signed target-count labels.
+- `src/countmil/datasets/atomic_sum.py`
+  - `MNISTOrdinalSumBags`: A1-style variable-size MNIST sum bags.
+  - `SVHNOrdinalSumBags`: A1-style SVHN sum bags through torchvision, download opt-in.
+  - `UltraMNISTOrdinalSumBags`: license-safe synthetic UltraMNIST-style RGB patch stand-in.
 - `src/countmil/datasets/cifar.py`
   - `CIFARHistogramBags`: CIFAR-10/100 histogram labels.
 - `src/countmil/models/mnist_cnn.py`
@@ -47,6 +51,7 @@ The repository is organized around a simple pipeline:
 - `scripts/train_mnist_bags.py`: binary Count-MIL, DP vs convolution, plus exploratory posterior objectives.
 - `scripts/train_mnist_bags_attention.py`: attention and gated-attention MIL baselines.
 - `scripts/train_mnist_digit_sum.py`: exact finite-support digit-sum likelihood.
+- `scripts/train_atomic_sum.py`: A1-style ordinal-sum experiment in the main CountMIL code path. It uses the same `finite_support_convolution` backend for MNIST-sum, SVHN-sum, and UltraMNIST-style bags, and reports tail-5 aggregate metrics compatible with the colleague A1 summaries.
 - `scripts/train_mnist_digit_sum_baseline.py`: expected-sum MSE/MAE/Huber baselines.
 - `scripts/train_signed_mnist.py`: signed Count-MIL with random or cancellation-heavy signs.
 - `scripts/train_mnist_histogram_llp.py`: MNIST histogram CE/KL/MSE proportion matching.
@@ -54,6 +59,7 @@ The repository is organized around a simple pipeline:
 - `scripts/train_cifar_histogram.py`: CIFAR histogram PVC or proportion matching.
 - `scripts/bench_exactness_runtime.py`: broad exactness/runtime benchmark.
 - `scripts/bench_multiclass_ovr_fft.py`: focused CPU DP vs GPU FFT-tree benchmark for paper runtime.
+- `scripts/launcher/make_atomic_sum_grid.py`: manifest generator for A1-style ordinal-sum sweeps.
 
 ## Current Result Interpretation
 
