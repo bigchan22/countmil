@@ -4,6 +4,7 @@ The experiments support a hierarchy of aggregate supervision.
 Scalar expected-value matching is weak in low-data digit-sum settings, whereas exact aggregate likelihood can recover accurate instance predictors from the same scalar labels.
 With more training bags and small bags, expected-value baselines can become competitive, so the strongest claim is data efficiency and likelihood fidelity rather than universal dominance.
 Histogram labels are substantially richer, and standard LLP/PVC-style baselines can already be strong.
+On MNIST histogram supervision, however, exact one-vs-rest count likelihood improves over CE/KL proportion matching, especially for larger bags, which suggests that likelihood fidelity still matters even when the aggregate label is rich.
 This distinction is important for positioning: our goal is not to replace every LLP method, but to provide a unified likelihood framework for aggregate labels beyond ordinary class proportions.
 
 Several limitations remain.

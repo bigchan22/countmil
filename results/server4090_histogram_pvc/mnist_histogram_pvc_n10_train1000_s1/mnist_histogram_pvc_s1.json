@@ -1,0 +1,24 @@
+{
+  "best": {
+    "epoch": 50,
+    "epoch_seconds": 0.44958093017339706,
+    "hist_count_mae": 0.03319999948143959,
+    "hist_exact_acc": 0.8270000219345093,
+    "hist_proportion_mae": 0.0032782230991870165,
+    "instance_digit_acc": 0.9821087718009949,
+    "nll": 0.1020448055267334,
+    "peak_cuda_mem_mb": 835.03173828125,
+    "train_nll": 0.04938122844696045
+  },
+  "config": {
+    "bag_size_mean": 10,
+    "bag_size_std": 2,
+    "dataset": "MNIST",
+    "dataset_root": "data",
+    "experiment": "mnist_histogram_pvc",
+    "method": "ovr_count_likelihood",
+    "seed": 1,
+    "train_bags": 1000
+  },
+  "run_dir": "runs/server4090_histogram_pvc/mnist_histogram_pvc_n10_train1000_s1/mnist_histogram_pvc/ovr_count/MNIST/20260505T155319Z_gpusystem_s1"
+}

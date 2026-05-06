@@ -117,25 +117,23 @@ We therefore use FashionMNIST primarily as a robustness result for instance reco
 
 Histogram supervision is much richer than scalar sums, and LLP baselines are strong on MNIST-family data.
 We use these experiments to clarify where exact aggregate likelihood adds value and where existing LLP-style objectives are already competitive.
-Partial 3090 results for MNIST histogram LLP are shown in Table~\ref{tab:histogram-llp-partial}.
-KL and CE proportion matching reach $97.7\%$ hidden digit accuracy with $1000$ bags and $99.1\%$ with one completed $5000$-bag seed.
-This confirms that histogram labels are much more informative than scalar sums; it also supports treating LLP/PVC as strong baselines rather than straw men.
-The 4090 server is currently running the full histogram LLP grid, followed by the PVC/count-likelihood comparison.
+The completed 4090 histogram grid is shown in Table~\ref{tab:histogram-llp-pvc}.
+KL and CE proportion matching are strong, but the one-vs-rest count likelihood/PVC objective consistently improves both hidden digit recovery and histogram count MAE.
+The advantage is clearest for larger bags: at $n=50$ and $1000$ training bags, PVC improves digit accuracy from $96.4\%$ to $98.5\%$ and reduces count MAE from $0.376$ to $0.137$.
+MSE proportion matching is not competitive for large bags.
 
 \begin{table}[t]
 \centering
-\caption{Partial MNIST histogram LLP baselines from the 3090 server.  The $n=10$, train $5000$ rows currently contain one completed seed and should be replaced by final averages when available.}
-\label{tab:histogram-llp-partial}
-\begin{tabular}{llcccc}
+\caption{Completed MNIST histogram supervision results on the 4090 server.  Entries report count MAE / hidden digit accuracy over three seeds.  CE and KL give identical results up to rounding in this grid.}
+\label{tab:histogram-llp-pvc}
+\begin{tabular}{lcccc}
 \toprule
-Bag/train & Loss & Seeds & Count MAE & Prop. MAE & Digit acc. \\
+Bag/train & CE/KL & MSE & PVC & PVC hist. exact \\
 \midrule
-$10/1000$ & CE & $3$ & $0.0648$ & $0.00650$ & $0.977$ \\
-$10/1000$ & KL & $3$ & $0.0648$ & $0.00650$ & $0.977$ \\
-$10/1000$ & MSE & $3$ & $0.1632$ & $0.01657$ & $0.962$ \\
-$10/5000$ & CE & $1$ & $0.0246$ & $0.00241$ & $0.991$ \\
-$10/5000$ & KL & $1$ & $0.0246$ & $0.00241$ & $0.991$ \\
-$10/5000$ & MSE & $1$ & $0.1252$ & $0.01268$ & $0.974$ \\
+$10/1000$ & $.080/ .973$ & $.181/ .955$ & $.032/ .983$ & $.838$ \\
+$10/5000$ & $.030/ .989$ & $.129/ .974$ & $.016/ .992$ & $.918$ \\
+$50/1000$ & $.376/ .964$ & $1.683/ .116$ & $.137/ .985$ & $.436$ \\
+$50/5000$ & $.184/ .988$ & $1.684/ .116$ & $.080/ .992$ & $.659$ \\
 \bottomrule
 \end{tabular}
 \end{table}
