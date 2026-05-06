@@ -104,6 +104,12 @@ def _make_scheduler(
     raise ValueError(f"unknown scheduler: {scheduler_name}")
 
 
+def _is_better_summary(metrics: dict[str, float], best: dict[str, float]) -> bool:
+    """Select checkpoints by observed histogram quality, not hidden labels."""
+
+    return metrics["hist_count_mae"] < best["hist_count_mae"]
+
+
 def _evaluate(model: torch.nn.Module, loader: DataLoader, device: torch.device, objective: str) -> dict[str, float]:
     model.eval()
     total_loss = 0.0
@@ -266,7 +272,8 @@ def main() -> None:
     optimizer = _make_optimizer(model, cfg, args)
     scheduler = _make_scheduler(optimizer, cfg, args)
 
-    best = {"instance_acc": -math.inf}
+    best = {"hist_count_mae": math.inf}
+    final: dict[str, float] = {}
     for epoch in range(1, args.epochs + 1):
         if device.type == "cuda":
             torch.cuda.reset_peak_memory_stats(device)
@@ -310,11 +317,18 @@ def main() -> None:
             f"inst_acc={metrics['instance_acc']:.4f} time={metrics['epoch_seconds']:.2f}s "
             f"mem={metrics['peak_cuda_mem_mb']:.1f}MB lr={metrics['lr']:.3g}"
         )
-        if metrics["instance_acc"] > best["instance_acc"]:
+        final = metrics
+        if _is_better_summary(metrics, best):
             best = metrics
             torch.save({"model": model.state_dict(), "config": cfg, "metrics": metrics}, run_dir / "checkpoint_best.pt")
 
-    summary = {"best": best, "config": {**cfg, "num_classes": num_classes}, "run_dir": str(run_dir)}
+    summary = {
+        "best": best,
+        "final": final,
+        "selection_metric": "hist_count_mae",
+        "config": {**cfg, "num_classes": num_classes},
+        "run_dir": str(run_dir),
+    }
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
     summary_path = results_dir / f"cifar_histogram_{objective}_s{seed}.json"
     summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True))

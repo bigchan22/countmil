@@ -41,6 +41,8 @@ class CIFARDatasetTests(unittest.TestCase):
             item = ds[0]
             self.assertEqual(tuple(item["instances"].shape), (4, 3, 32, 32))
             self.assertEqual(int(item["class_counts"].sum().item()), 4)
+            self.assertEqual(item["class_counts"].tolist(), torch.bincount(item["labels"], minlength=20).tolist())
+            self.assertTrue(torch.allclose(item["class_proportions"], item["class_counts"].float() / 4))
             batch = collate_cifar_bags([ds[0], ds[1]])
             self.assertEqual(tuple(batch["instances"].shape), (2, 4, 3, 32, 32))
             self.assertTrue(batch["mask"].all())
