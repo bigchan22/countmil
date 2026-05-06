@@ -147,35 +147,39 @@ The from-scratch run completes the same pipeline without external pretrained fea
 
 \begin{table}[t]
 \centering
-\caption{CIFAR-10 histogram supervision with ResNet-18.  From-scratch results are complete.  The ImageNet-pretrained PVC rows follow the backbone initialization specified in the LLP-PVC appendix, but are preliminary snapshots from the running 500-epoch experiment and should be replaced by final checkpoint results.}
+\caption{CIFAR-10 histogram supervision with ResNet-18.  From-scratch results are complete.  Pretrained PVC rows follow the ImageNet initialization specified in the LLP-PVC appendix.  The $n=64$, train $250$ row is an in-progress fixed-instance-budget diagnostic.}
 \label{tab:cifar10}
-\begin{tabular}{llccc}
+\begin{tabular}{lllccc}
 \toprule
-Bag size & Backbone/objective & Hist. MAE & Prop. MAE & Instance acc. \\
+Bag & Train bags & Backbone/objective & Hist. MAE & Prop. MAE & Instance acc. \\
 \midrule
-$16$ & scratch KL & $0.806$ & $0.0522$ & $0.513$ \\
-$16$ & scratch MSE & $0.825$ & $0.0533$ & $0.476$ \\
-$16$ & scratch PVC & $0.838$ & $0.0524$ & $0.527$ \\
-$64$ & scratch KL & $1.856$ & $0.0292$ & $0.490$ \\
-$64$ & scratch MSE & $2.013$ & $0.0316$ & $0.270$ \\
-$64$ & scratch PVC & $1.855$ & $0.0290$ & $0.496$ \\
-$128$ & scratch KL & $2.860$ & $0.0224$ & $0.457$ \\
-$128$ & scratch MSE & $2.829$ & $0.0222$ & $0.226$ \\
-$128$ & scratch PVC & $2.707$ & $0.0211$ & $0.488$ \\
+$16$ & $1000$ & scratch KL & $0.806$ & $0.0522$ & $0.513$ \\
+$16$ & $1000$ & scratch MSE & $0.825$ & $0.0533$ & $0.476$ \\
+$16$ & $1000$ & scratch PVC & $0.838$ & $0.0524$ & $0.527$ \\
+$64$ & $1000$ & scratch KL & $1.856$ & $0.0292$ & $0.490$ \\
+$64$ & $1000$ & scratch MSE & $2.013$ & $0.0316$ & $0.270$ \\
+$64$ & $1000$ & scratch PVC & $1.855$ & $0.0290$ & $0.496$ \\
+$128$ & $1000$ & scratch KL & $2.860$ & $0.0224$ & $0.457$ \\
+$128$ & $1000$ & scratch MSE & $2.829$ & $0.0222$ & $0.226$ \\
+$128$ & $1000$ & scratch PVC & $2.707$ & $0.0211$ & $0.488$ \\
 \midrule
-$16$ & pretrained PVC, running & $\approx 0.26$ & $\approx 0.016$ & $\approx 0.90$ \\
-$64$ & pretrained PVC, running & $\approx 0.69$ & $\approx 0.011$ & $\approx 0.90$ \\
+$16$ & $1000$ & pretrained PVC, final & $0.260$ & $0.0162$ & $0.902$ \\
+$64$ & $1000$ & pretrained PVC, final & $0.678$ & $0.0106$ & $0.914$ \\
+$64$ & $250$ & pretrained PVC, running & $\approx 1.10$ & $\approx 0.0171$ & $\approx 0.806$ \\
 \midrule
-$16$ & LLP-PVC reported & -- & -- & $0.845$ \\
-$64$ & LLP-PVC reported & -- & -- & $0.789$ \\
-$128$ & LLP-PVC reported & -- & -- & $0.760$ \\
+$16$ & -- & LLP-PVC reported & -- & -- & $0.845$ \\
+$64$ & -- & LLP-PVC reported & -- & -- & $0.789$ \\
+$128$ & -- & LLP-PVC reported & -- & -- & $0.760$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 The completed from-scratch results are much weaker than LLP-PVC, showing that the CIFAR comparison is not meaningful unless the backbone initialization protocol is matched.
-In contrast, the running pretrained PVC experiment already reaches about $90\%$ instance accuracy for bag sizes $16$ and $64$ in early epochs, above the reported LLP-PVC accuracies for those bag sizes.
-We treat these pretrained numbers as promising but provisional until all 500-epoch jobs finish and final checkpoint metrics are aggregated.
+With ImageNet-pretrained ResNet-18 and the PVC objective, the completed $n=16$ and $n=64$ runs reach about $90.2\%$ and $91.4\%$ final instance accuracy, respectively, above the reported LLP-PVC accuracies for those bag sizes.
+However, the $n=64$, train $1000$ setting exposes four times as many image instances per epoch as $n=16$, train $1000$.
+An in-progress fixed-instance-budget diagnostic, $n=64$ with $250$ train bags, currently reaches only about $80.6\%$ instance accuracy.
+Thus the completed CIFAR-10 results support the usefulness of pretrained PVC/count likelihood under the matched backbone protocol, but they do not yet justify a claim that larger bags are intrinsically easier or more scalable at fixed image-instance exposure.
+The $n=128$ pretrained jobs have not completed and should not be claimed.
 
 CIFAR-100 coarse-histogram pilots currently show nontrivial learning above chance but are not yet strong enough as headline results.
 The completed CIFAR-100 coarse pilot used 20 coarse classes, bag size $50$, train bags $1000$, and two seeds.

@@ -327,19 +327,28 @@ Training:
 - Learning rate: `5e-4`.
 - Scheduler: Ma-style cosine `eta_k = eta_0 cos(7 pi k / 16K)`.
 - Epochs: `500`.
-- Bag sizes running: `16`, `64`, later `128`.
+- Bag sizes completed: `16`, `64`.
+- Bag size not completed: `128`.
 - Train bags: `1000`.
 - Seeds: `0,1`.
+- Checkpoint-selection caveat: source commit `c189355` now selects CIFAR best checkpoints by observed `hist_count_mae`, not hidden `instance_acc`. Completed JSONs produced before this fix should be interpreted using final epoch metrics or by recomputing best-by-hist from `metrics.jsonl`.
 - Caveat: current code scales CIFAR images to `[0,1]`; exact normalization used by Ma should be verified before claiming exact protocol match.
 
-Progress reported from A5000:
+Completed pretrained PVC results:
 
-| Setting | Progress | Instance acc. |
-|---|---:|---:|
-| n16 seed 0 | epoch 100/500 | 0.8973 |
-| n16 seed 1 | epoch 101/500 | 0.9053 |
-| n64 seed 0 | epoch 28/500 | 0.9116 |
-| n64 seed 1 | epoch 27/500 | 0.9142 |
+| Setting | Final inst. acc. | Final hist MAE | Best-by-hist epoch | Best-by-hist inst. acc. | Best-by-hist hist MAE |
+|---|---:|---:|---:|---:|---:|
+| n16 seed 0 | 0.8996 | 0.2662 | 16 | 0.8994 | 0.2594 |
+| n16 seed 1 | 0.9052 | 0.2539 | 25 | 0.9083 | 0.2418 |
+| n64 seed 0 | 0.9126 | 0.6878 | 18 | 0.9118 | 0.6611 |
+| n64 seed 1 | 0.9163 | 0.6691 | 22 | 0.9150 | 0.6469 |
+
+Mean final accuracies:
+
+| Bag size | Train bags | Final inst. acc. | Best-by-hist inst. acc. | Best-by-hist hist MAE |
+|---:|---:|---:|---:|---:|
+| 16 | 1000 | 0.9024 | 0.9038 | 0.2506 |
+| 64 | 1000 | 0.9145 | 0.9134 | 0.6540 |
 
 Ma/LLP-PVC reported CIFAR-10 reference accuracies:
 
@@ -349,7 +358,40 @@ Ma/LLP-PVC reported CIFAR-10 reference accuracies:
 | 64 | 0.789 |
 | 128 | 0.760 |
 
-Interpretation: the running pretrained results are very promising, but should remain provisional until final JSONs/checkpoints finish.
+Interpretation:
+
+- The matched pretrained PVC protocol is strong on CIFAR-10 and exceeds the reported LLP-PVC reference accuracies for `n=16` and `n=64`.
+- The earlier apparent `n64 > n16` advantage is not a fair fixed-instance-budget conclusion: `n16/train1000` sees `16,000` image instances per epoch, while `n64/train1000` sees `64,000`.
+- Therefore, the safe claim is that count/histogram supervision benefits from aggregate-labeled image volume under a strong pretrained representation.
+- Do not claim larger bags are intrinsically better or more scalable than fully supervised learning without matched annotation-budget baselines.
+
+### CIFAR-10 Fixed-Instance-Budget Diagnostic
+
+Purpose: compare `n16/train1000` against `n64/train250`, so both settings expose `16,000` sampled image instances per epoch.
+
+Server: A5000.
+
+Run:
+
+- tmux: `countmil_a5000_cifar10_ma_pvc_n64_train250`
+- Manifest: `configs/cifar_histogram/serverA5000_cifar10_ma_pvc_n64_train250_20260506_0430/manifest.tsv`
+- Results: `results/serverA5000_cifar10_ma_pvc_n64_train250`
+- Logs: `logs/serverA5000_cifar10_ma_pvc_n64_train250`
+- GPUs: `0,1`
+- Epochs: `500`
+- Batch size: `8`
+- Test bags: `1000`
+
+Status at 2026-05-06 06:02 UTC:
+
+| Setting | Progress | Current inst. acc. | Current hist MAE | Best-by-hist epoch | Best-by-hist inst. acc. | Best-by-hist hist MAE |
+|---|---:|---:|---:|---:|---:|---:|
+| n64 train250 seed 0 | epoch 211/500 | 0.8064 | 1.1003 | 41 | 0.8091 | 0.9993 |
+| n64 train250 seed 1 | epoch 212/500 | 0.8056 | 1.0912 | 39 | 0.8035 | 1.0267 |
+
+Mean current accuracy is about `0.806`; mean best hidden-instance accuracy so far is about `0.810`.
+This is far below the completed `n16/train1000` final accuracy of about `0.902`, despite matched sampled image instances per epoch.
+The diagnostic suggests the `n64/train1000` gain is likely driven by larger total instance exposure rather than bag size alone.
 
 ## Current Recommended Paper Claims
 
@@ -360,4 +402,4 @@ Interpretation: the running pretrained results are very promising, but should re
 - Say exact scalar-sum likelihood is more data-efficient than expected-value matching in low-data settings.
 - Say histogram LLP labels are rich and ordinary CE/KL baselines are strong.
 - Say PVC/count likelihood improves over CE/KL proportion matching in completed MNIST histogram experiments, especially for larger bags.
-- Treat CIFAR-10 pretrained ResNet-18 as promising but provisional until final A5000 runs finish.
+- Treat CIFAR-10 pretrained ResNet-18 as strong for completed `n=16` and `n=64`, but avoid overclaiming scalability until fixed-budget diagnostics and `n=128` finish.

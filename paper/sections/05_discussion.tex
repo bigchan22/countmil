@@ -10,5 +10,6 @@ This distinction is important for positioning: our goal is not to replace every 
 Several limitations remain.
 Large bags can expose calibration issues even when instance ranking is accurate.
 Cancellation-heavy signed aggregates are genuinely ambiguous and require more data.
-CIFAR-scale experiments require stronger backbones and training protocols for fair comparison to recent LLP work.
-\TODO{Update limitations after final CIFAR-10 ResNet-18 results.}
+CIFAR-scale experiments require matching the backbone initialization and training protocol used by recent LLP work.
+Our pretrained ResNet-18 PVC runs are strong for $n=16$ and $n=64$, but the fixed-instance-budget diagnostic suggests that part of the apparent large-bag gain comes from seeing more image instances per epoch.
+The current evidence therefore supports a cautious claim about effective use of aggregate-labeled image volume, not a stronger claim about intrinsic large-bag superiority or superiority to fully supervised learning at matched annotation budget.

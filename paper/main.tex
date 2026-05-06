@@ -37,7 +37,7 @@ Each instance emits a latent discrete contribution distribution, and the bag-lev
 This formulation recovers the standard Bernoulli count likelihood as a special case while extending directly to signed and ordinal aggregate labels.
 We further derive count-conditioned posterior marginals for instance recovery and implement the likelihood with GPU-parallel convolution, including an FFT-tree backend for large multiclass one-vs-rest count likelihoods.
 Experiments on MNIST-family bag benchmarks evaluate binary counts, digit-sum supervision, signed cancellation-heavy counts, posterior instance recovery, and multiclass LLP-style histogram supervision, with comparisons to dynamic-programming count loss, attention MIL, expected-sum regression, and proportion-matching baselines.
-\TODO{Replace final sentence with locked aggregate/CIFAR results.}
+Completed results show strong hidden-instance recovery on MNIST-family aggregate tasks and competitive CIFAR-10 PVC performance under a matched ImageNet-pretrained ResNet-18 protocol, while fixed-budget diagnostics caution against attributing all large-bag gains to bag size alone.
 \end{abstract}
 
 \input{sections/01_introduction}
