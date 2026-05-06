@@ -117,6 +117,49 @@ Completed partial results:
 
 Interpretation: expected-value baselines are weak in the low-data scalar-sum setting, but MAE/Huber become competitive for small bags with more training bags. The defensible claim is data efficiency and likelihood fidelity, not universal dominance.
 
+## Atomic-Support Generality: UltraMNIST-Style Bags
+
+Purpose: check that the same finite-support convolutional likelihood works for a variable-size RGB patch setting, not only ordinary MNIST digit-sum bags.
+
+Server: 4090.
+
+Training:
+
+- Dataset: UltraMNIST-style synthetic RGB digit-patch bags from `UltraMNISTOrdinalSumBags`.
+- Label: scalar sum of hidden digit labels.
+- Objective: exact finite-support sum NLL over atoms `{0,...,9}`.
+- Model: `PatchOrdinalClassifier`.
+- Bag size range: `3` to `5`.
+- Train bags: `800`.
+- Test bags: `300`.
+- Epochs: `60`.
+- Seeds: `0,1,2,3,4`.
+- Result directory: `results/atomic_sum_server4090_ultramnist_20260506_1758/`.
+- Aggregated CSV: `results/atomic_sum_server4090_ultramnist_20260506_1758/aggregate.csv`.
+
+Completed status: `5/5` seeds, no tracebacks/OOM/killed errors. GPUs were idle after completion.
+
+Best-checkpoint means over five seeds:
+
+| Metric | Mean | Std. dev. |
+|---|---:|---:|
+| Sum accuracy | 0.9007 | 0.0092 |
+| Instance accuracy | 0.9743 | 0.0031 |
+| Sum MAE | 0.3407 | 0.0379 |
+| Expected-sum MAE | 0.4626 | 0.0317 |
+| NLL | 0.3270 | 0.0155 |
+
+Tail-5 means over five seeds:
+
+| Metric | Mean | Std. dev. |
+|---|---:|---:|
+| Sum accuracy | 0.8944 | 0.0078 |
+| Instance accuracy | 0.9726 | 0.0024 |
+| Expected-sum MAE | 0.4877 | 0.0251 |
+| NLL | 0.3546 | 0.0143 |
+
+Interpretation: this is a strong positive robustness result for the A1/UltraMNIST-style aggregate-sum story. The model recovers hidden instance labels at about `97%` accuracy while seeing only aggregate sums during training. The result should be described as an UltraMNIST-style synthetic patch benchmark unless a real UltraMNIST dataset is substituted.
+
 ## Signed CountMIL
 
 Purpose: test signed aggregates and cancellation.

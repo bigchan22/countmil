@@ -12,6 +12,7 @@ We evaluate aggregate-supervised instance learning under five groups of experime
 \end{enumerate}
 Unless otherwise stated, MNIST-family experiments use LeNet-style instance networks, bags are sampled on the fly, and tables report means over three random seeds.
 Hidden instance labels are never used for training; they are used only for evaluation.
+Column names distinguish training objectives from evaluation metrics: ``Objective'' denotes the loss used for optimization, while count, sum, signed, and histogram errors are mean absolute errors unless explicitly stated otherwise.
 Implementation details are summarized in Appendix~\ref{app:implementation-details}.
 The experiments are ordered from validation cases and new aggregate types to broader LLP/CIFAR comparisons: binary counts establish equivalence to known count loss; digit-sum, SVHN/UltraMNIST sum, and signed-count tasks test atomic-support generality; histogram and CIFAR experiments position the method against LLP/PVC baselines.
 
@@ -26,12 +27,12 @@ This validation case verifies that the convolutional formulation behaves like th
 \label{tab:binary-countmil}
 \begin{tabular}{llccc}
 \toprule
-Bag size / train bags & Objective & Bag AUC & Instance AUC & Count MAE \\
+Bag/train & Objective & Bag AUC & Count MAE & Instance AUC \\
 \midrule
-$10/1000$ & NLL & $1.000$ & $0.999$ & $0.115$ \\
-$10/5000$ & NLL & $1.000$ & $0.999$ & $0.090$ \\
-$50/1000$ & NLL & $1.000$ & $0.998$ & $0.686$ \\
-$50/5000$ & NLL & $1.000$ & $0.999$ & $0.460$ \\
+$10/1000$ & NLL & $1.000$ & $0.115$ & $0.999$ \\
+$10/5000$ & NLL & $1.000$ & $0.090$ & $0.999$ \\
+$50/1000$ & NLL & $1.000$ & $0.686$ & $0.998$ \\
+$50/5000$ & NLL & $1.000$ & $0.460$ & $0.999$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -47,14 +48,14 @@ Expected-sum baselines show that matching only the expected aggregate is substan
 \centering
 \caption{MNIST digit-sum with exact finite-support likelihood.  The model observes only the scalar bag sum during training.}
 \label{tab:digit-sum}
-\begin{tabular}{lcc}
+\begin{tabular}{llcc}
 \toprule
-Bag size / train bags & Instance digit accuracy & Sum MAE \\
+Bag/train & Objective & Sum MAE & Instance acc. \\
 \midrule
-$10/1000$ & $0.982$ & $0.612$ \\
-$10/5000$ & $0.992$ & $0.277$ \\
-$50/1000$ & $0.693$ & $4.901$ \\
-$50/5000$ & $0.887$ & $2.229$ \\
+$10/1000$ & NLL & $0.612$ & $0.982$ \\
+$10/5000$ & NLL & $0.277$ & $0.992$ \\
+$50/1000$ & NLL & $4.901$ & $0.693$ \\
+$50/5000$ & NLL & $2.229$ & $0.887$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -71,7 +72,7 @@ We therefore interpret the result as evidence for the data efficiency of exact s
 \label{tab:digit-sum-baselines}
 \begin{tabular}{llcccc}
 \toprule
-Bag/train & Loss & Seeds & Exp. MAE & Rounded acc. & Digit acc. \\
+Bag/train & Objective & Seeds & Expected-sum MAE & Rounded acc. & Instance acc. \\
 \midrule
 $10/1000$ & Huber & $3$ & $2.330$ & $0.136$ & $0.278$ \\
 $10/1000$ & MAE & $3$ & $2.337$ & $0.141$ & $0.286$ \\
@@ -87,23 +88,22 @@ $10/5000$ & MSE & $1$ & $1.022$ & $0.386$ & $0.730$ \\
 To check that the same aggregator is not specific to MNIST digit sums, we also evaluate a focused set of variable-size bag benchmarks in which only the atomic support and backbone change.
 All use the same finite-support convolutional objective and report the mean over five seeds with a last-five-epoch selector.
 MNIST-sum uses $S=10$ digit atoms on clean handwritten digits; SVHN-sum uses the same $S=10$ ordinal support on natural RGB house-number digits; UltraMNIST uses small RGB digit patches with bag sizes $3$--$5$; and MNIST-signed uses $S=3$ signed atoms.
-Table~\ref{tab:atomic-support-generality} reports the \method{} row together with the strongest non-\method{} point predictor.
+Table~\ref{tab:atomic-support-generality} reports the \method{} row for each aggregate-support variant.
 The results support the intended interpretation of Eq.~\eqref{eq:aggregate-support-width}: changing $S$ and the contribution values creates a new sum-label problem without changing the aggregate likelihood layer.
 
 \begin{table}[t]
 \centering
 \small
-\caption{Atomic-support generality benchmarks.  The same convolutional bag likelihood is used while changing the atomic support size $S$, dataset, and backbone.  Acc. is top-1 aggregate accuracy except for the binary row, which reports hidden instance AUC from the binary validation benchmark.}
+\caption{Atomic-support generality benchmarks.  The same convolutional bag likelihood is used while changing the atomic support size $S$, dataset, and backbone.  Acc. is top-1 aggregate accuracy; MAE is aggregate mean absolute error.}
 \label{tab:atomic-support-generality}
 \begin{tabular}{llcccc}
 \toprule
-Task / data & Atomic support & \method{} acc. & Best base acc. & \method{} MAE & \method{} NLL \\
+Data/task & Atomic support & Objective & Aggregate acc. & Aggregate MAE & NLL \\
 \midrule
-Binary MNIST & $\{0,1\}$ & $.998$ & -- & $.686$ & -- \\
-MNIST-sum & $\{0,\ldots,9\}$ & $.635$ & $.541$ & $1.360$ & $3.290$ \\
-SVHN-sum & $\{0,\ldots,9\}$ & $.245$ & $.116$ & $3.081$ & $3.653$ \\
-UltraMNIST & $\{0,\ldots,9\}$ & $.899$ & $.572$ & $.401$ & $.606$ \\
-MNIST-signed & $\{-1,0,+1\}$ & $.692$ & $.302$ & $.564$ & $3.293$ \\
+MNIST-sum & $\{0,\ldots,9\}$ & NLL & $.635$ & $1.360$ & $3.290$ \\
+SVHN-sum & $\{0,\ldots,9\}$ & NLL & $.245$ & $3.081$ & $3.653$ \\
+UltraMNIST & $\{0,\ldots,9\}$ & NLL & $.901$ & $.341$ & $.327$ \\
+MNIST-signed & $\{-1,0,+1\}$ & NLL & $.692$ & $.564$ & $3.293$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -119,16 +119,16 @@ Random-sign bags provide informative signed aggregates, while cancellation-heavy
 \label{tab:signed}
 \begin{tabular}{llccc}
 \toprule
-Bag size / train bags & Signs & Instance AUC & Signed MAE & Zero-count accuracy \\
+Bag/train & Objective/signs & Signed MAE & Zero-count acc. & Instance AUC \\
 \midrule
-$10/1000$ & random & $0.995$ & $0.095$ & $0.933$ \\
-$10/1000$ & cancellation & $0.998$ & $0.071$ & $0.965$ \\
-$10/5000$ & random & $0.999$ & $0.045$ & $0.969$ \\
-$10/5000$ & cancellation & $0.999$ & $0.046$ & $0.979$ \\
-$50/1000$ & random & $0.999$ & $0.243$ & $0.772$ \\
-$50/1000$ & cancellation & $0.969$ & $1.689$ & $0.420$ \\
-$50/5000$ & random & $0.999$ & $0.198$ & $0.814$ \\
-$50/5000$ & cancellation & $0.993$ & $1.118$ & $0.591$ \\
+$10/1000$ & NLL/random & $0.095$ & $0.933$ & $0.995$ \\
+$10/1000$ & NLL/cancellation & $0.071$ & $0.965$ & $0.998$ \\
+$10/5000$ & NLL/random & $0.045$ & $0.969$ & $0.999$ \\
+$10/5000$ & NLL/cancellation & $0.046$ & $0.979$ & $0.999$ \\
+$50/1000$ & NLL/random & $0.243$ & $0.772$ & $0.999$ \\
+$50/1000$ & NLL/cancellation & $1.689$ & $0.420$ & $0.969$ \\
+$50/5000$ & NLL/random & $0.198$ & $0.814$ & $0.999$ \\
+$50/5000$ & NLL/cancellation & $1.118$ & $0.591$ & $0.993$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -141,6 +141,34 @@ Signed CountMIL also preserves high instance AUC around $0.996$--$0.998$.
 Digit-sum supervision is less informative on FashionMNIST, whereas histogram LLP provides stronger category recovery.
 We therefore use FashionMNIST primarily as a robustness evaluation for instance recovery.
 
+\begin{table}[t]
+\centering
+\small
+\caption{FashionMNIST robustness results.  Missing count errors for attention baselines are not logged because those models optimize bag labels rather than count likelihood.}
+\label{tab:fashionmnist}
+\begin{tabular}{lllccc}
+\toprule
+Data/task & Bag & Objective/method & Aggregate error & Bag AUC & Instance AUC/acc. \\
+\midrule
+Binary count & $10$ & NLL/conv & $0.183$ count MAE & $0.9988$ & $0.9973$ AUC \\
+Binary count & $10$ & bag BCE/attention & -- & $0.9980$ & $0.7034$ AUC \\
+Binary count & $10$ & bag BCE/gated attn. & -- & $0.9979$ & $0.7221$ AUC \\
+Binary count & $50$ & NLL/conv & $0.886$ count MAE & $0.9987$ & $0.9980$ AUC \\
+Binary count & $50$ & bag BCE/attention & -- & $0.9983$ & $0.7434$ AUC \\
+Binary count & $50$ & bag BCE/gated attn. & -- & $0.9984$ & $0.7146$ AUC \\
+\midrule
+Category sum & $10$ & NLL & $3.362$ sum MAE & -- & $0.4718$ acc. \\
+Category sum & $50$ & NLL & $7.869$ sum MAE & -- & $0.4211$ acc. \\
+Histogram LLP & $10$ & CE/KL & $0.321$ count MAE & -- & $0.8184$ acc. \\
+Histogram LLP & $50$ & CE/KL & $0.903$ count MAE & -- & $0.7808$ acc. \\
+Signed count & $10$ & NLL/random & $0.113$ signed MAE & -- & $0.9977$ AUC \\
+Signed count & $10$ & NLL/cancellation & $0.104$ signed MAE & -- & $0.9979$ AUC \\
+Signed count & $50$ & NLL/random & $0.381$ signed MAE & -- & $0.9979$ AUC \\
+Signed count & $50$ & NLL/cancellation & $0.951$ signed MAE & -- & $0.9961$ AUC \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Histogram LLP and PVC}
 
 Histogram supervision is much richer than scalar sums, and LLP baselines are strong on MNIST-family data.
@@ -152,11 +180,11 @@ MSE proportion matching is not competitive for large bags.
 
 \begin{table}[t]
 \centering
-\caption{MNIST histogram supervision results.  Entries report count MAE / hidden digit accuracy over three seeds.  CE and KL give identical results up to rounding.}
+\caption{MNIST histogram supervision results.  Entries report count MAE / hidden instance accuracy over three seeds.  CE and KL give identical results up to rounding.}
 \label{tab:histogram-llp-pvc}
 \begin{tabular}{lcccc}
 \toprule
-Bag/train & CE/KL & MSE & PVC & PVC hist. exact \\
+Bag/train & CE/KL & MSE objective & PVC & PVC hist. exact \\
 \midrule
 $10/1000$ & $.080/ .973$ & $.181/ .955$ & $.032/ .983$ & $.838$ \\
 $10/5000$ & $.030/ .989$ & $.129/ .974$ & $.016/ .992$ & $.918$ \\
@@ -179,7 +207,7 @@ The from-scratch setting evaluates the same pipeline without external pretrained
 \label{tab:cifar10}
 \begin{tabular}{lllccc}
 \toprule
-Bag & Train bags & Backbone/objective & Hist. MAE & Prop. MAE & Instance acc. \\
+Bag & Train bags & Objective/backbone & Count error & Prop. error & Instance acc. \\
 \midrule
 $16$ & $1000$ & scratch KL & $0.806$ & $0.0522$ & $0.513$ \\
 $16$ & $1000$ & scratch MSE & $0.825$ & $0.0533$ & $0.476$ \\
