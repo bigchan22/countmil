@@ -10,7 +10,7 @@ Shukla et al.~\cite{shukla2023count} formulate count-based weak supervision arou
 Related count supervision has also appeared in temporal localization~\cite{schroeter2019occurrence}.
 Recent unified weak-supervision frameworks also cite count loss as a representative count-probability method, but pursue broader latent-label inference problems~\cite{wang2026fastbus}.
 Our binary Bernoulli likelihood is not new in this setting: it recovers the count probability used by Shukla et al.
-We therefore use binary Count-MIL as a sanity check and baseline connection rather than as a novelty claim.
+We therefore use binary Count-MIL as a validation case and baseline connection rather than as a novelty claim.
 Our contribution is the finite-support convolutional generalization and its use for signed, ordinal, posterior, and histogram aggregates.
 
 \paragraph{Learning from label proportions.}
@@ -25,6 +25,7 @@ We do not present class-histogram count likelihood as an invention independent o
 
 \paragraph{Efficient aggregate inference.}
 Dynamic programming computes Bernoulli count probabilities exactly but can become expensive for large bags and many classes.
+Recent LLP/PVC work highlights this practical issue when comparing against count-loss methods~\cite{ma2026llppvc}: exact dynamic programs are mathematically appropriate for Bernoulli counts, but their sequential structure is not the most natural fit for modern GPU training.
 Convolutional formulations admit parallel and FFT-based backends~\cite{cooley1965fft}.
 We implement sequential convolution for moderate-size training experiments and an FFT-tree backend for large-bag multiclass one-vs-rest count benchmarks.
 This makes the computational comparison a backend question: the same aggregate likelihood can be evaluated by dynamic programming, direct convolution, or FFT-tree convolution depending on support size and hardware.

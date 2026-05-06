@@ -16,11 +16,15 @@ pdflatex main
 pdflatex main
 ```
 
-The draft currently compiles as a standard `article` unless `neurips_2026.sty` is present. For NeurIPS 2026 submission, place the official `neurips_2026.sty` in this directory; `main.tex` will load it automatically with the default main-track anonymous submission option.
+`main.tex` follows the NeurIPS 2026 submission shell and loads the official
+`neurips_2026.sty` automatically when it is present. The current repo does not
+include that style file, so local builds use a simple `article` fallback only for
+drafting. For submission, place the unmodified official `neurips_2026.sty` and
+the official `checklist.tex` in `paper/`; do not modify the style file.
 
 Current priorities:
 
 - Fill final result tables from aggregated CSVs.
-- Replace TODO citations, especially Shukla/count loss and LLP-PVC.
-- Add method derivations for posterior marginals and FFT-tree backend.
-- Decide whether CIFAR-10 ResNet-18 results are strong enough for the main paper.
+- Keep claim strength aligned with `experiment_report_2026-05-06.md`.
+- Add full seed-level appendices once provisional baselines finish.
+- Verify the CIFAR-10 pretrained protocol details before making exact protocol-match claims.

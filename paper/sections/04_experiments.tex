@@ -4,23 +4,25 @@
 
 We evaluate aggregate-supervised instance learning under five groups of experiments:
 \begin{enumerate}
-  \item exactness and runtime microbenchmarks;
+  \item exactness and runtime benchmarks;
   \item binary MNIST-Bags count supervision;
-  \item MNIST digit-sum supervision;
+  \item digit-sum and atomic-support generality benchmarks;
   \item signed Count-MIL with cancellation-heavy bags;
-  \item multiclass histogram LLP/PVC comparisons and CIFAR pilots.
+  \item multiclass histogram LLP/PVC comparisons and CIFAR experiments.
 \end{enumerate}
-Unless otherwise stated, MNIST-family experiments use LeNet-style instance networks, bags are sampled on the fly, and we report means over three random seeds.
+Unless otherwise stated, MNIST-family experiments use LeNet-style instance networks, bags are sampled on the fly, and tables report means over three random seeds.
 Hidden instance labels are never used for training; they are used only for evaluation.
+Implementation details are summarized in Appendix~\ref{app:implementation-details}.
+The experiments are ordered from validation cases and new aggregate types to broader LLP/CIFAR comparisons: binary counts establish equivalence to known count loss; digit-sum, SVHN/UltraMNIST sum, and signed-count tasks test atomic-support generality; histogram and CIFAR experiments position the method against LLP/PVC baselines.
 
 \subsection{Binary CountMIL}
 
 Plain count-likelihood training recovers high hidden-instance AUC across bag sizes.
-We tested posterior-based training variants during development, but they did not improve the main likelihood result reliably and are not treated as part of the core method.
+This validation case verifies that the convolutional formulation behaves like the established Bernoulli count probability while sharing the same implementation pattern as the new aggregate types.
 
 \begin{table}[t]
 \centering
-\caption{Binary MNIST-Bags.  Count likelihood recovers strong bag and instance predictors.}
+\caption{Binary MNIST-Bags.  Count likelihood recovers accurate bag and instance predictors.}
 \label{tab:binary-countmil}
 \begin{tabular}{llccc}
 \toprule
@@ -36,9 +38,10 @@ $50/5000$ & NLL & $1.000$ & $0.999$ & $0.460$ \\
 
 \subsection{Digit-Sum Supervision}
 
-Initial results show that exact finite-support likelihood recovers hidden digit predictors far better than expected-value matching.
+Digit-sum isolates ordinal aggregate supervision because the learner observes a single scalar while the hidden instance label has ten possible values.
+Results show that exact finite-support likelihood recovers hidden digit predictors far better than expected-value matching in the low-data small-bag regime.
 For MNIST bags with $n=10$, exact likelihood achieves about 98--99\% hidden digit accuracy.
-The partial 3090 expected-sum baseline results show that matching only the expected aggregate is much weaker in the low-data regime, but can become competitive for small bags when the number of training bags increases.
+Expected-sum baselines show that matching only the expected aggregate is substantially less effective in the low-data regime, but can become competitive for small bags when the number of training bags increases.
 
 \begin{table}[t]
 \centering
@@ -56,15 +59,15 @@ $50/5000$ & $0.887$ & $2.229$ \\
 \end{tabular}
 \end{table}
 
-The expected-sum baselines running on the 3090 server are designed to isolate whether matching only $\sum_i \mathbb{E}[z_i]$ is sufficient.
-Partial completed results are shown in Table~\ref{tab:digit-sum-baselines}.
+The expected-sum baselines are designed to isolate whether matching only $\sum_i \mathbb{E}[z_i]$ is sufficient.
+Results are shown in Table~\ref{tab:digit-sum-baselines}.
 For $n=10$ and $1000$ training bags, expected-value matching yields expected-sum MAE around $2.3$--$2.5$ and hidden digit accuracy around $22$--$29\%$, far below the exact likelihood in Table~\ref{tab:digit-sum}.
 With $5000$ training bags, however, MAE and Huber baselines improve sharply and recover high instance accuracy for this small-bag setting.
 We therefore interpret the result as evidence for the data efficiency of exact scalar-sum likelihood, not as evidence that expected-value baselines universally fail.
 
 \begin{table}[t]
 \centering
-\caption{Partial expected-sum regression baselines on MNIST digit-sum bags from the 3090 server.  The $n=10$, train $5000$ rows currently contain one completed seed and should be replaced by final averages when available.}
+\caption{Expected-sum regression baselines on MNIST digit-sum bags.  The Seeds column reports the number of independent seeds included in each mean.}
 \label{tab:digit-sum-baselines}
 \begin{tabular}{llcccc}
 \toprule
@@ -80,13 +83,39 @@ $10/5000$ & MSE & $1$ & $1.022$ & $0.386$ & $0.730$ \\
 \end{tabular}
 \end{table}
 
-\subsection{Signed CountMIL}
-
-Signed random bags are easy for the likelihood; cancellation-heavy bags are substantially harder but still yield strong instance ranking, especially with more training bags.
+\paragraph{Atomic-support generality.}
+To check that the same aggregator is not specific to MNIST digit sums, we also evaluate a focused set of variable-size bag benchmarks in which only the atomic support and backbone change.
+All use the same finite-support convolutional objective and report the mean over five seeds with a last-five-epoch selector.
+MNIST-sum uses $S=10$ digit atoms on clean handwritten digits; SVHN-sum uses the same $S=10$ ordinal support on natural RGB house-number digits; UltraMNIST uses small RGB digit patches with bag sizes $3$--$5$; and MNIST-signed uses $S=3$ signed atoms.
+Table~\ref{tab:atomic-support-generality} reports the \method{} row together with the strongest non-\method{} point predictor.
+The results support the intended interpretation of Eq.~\eqref{eq:aggregate-support-width}: changing $S$ and the contribution values creates a new sum-label problem without changing the aggregate likelihood layer.
 
 \begin{table}[t]
 \centering
-\caption{Signed MNIST Count-MIL.  Cancellation-heavy bags are substantially harder, especially for large bags with limited training data.}
+\small
+\caption{Atomic-support generality benchmarks.  The same convolutional bag likelihood is used while changing the atomic support size $S$, dataset, and backbone.  Acc. is top-1 aggregate accuracy except for the binary row, which reports hidden instance AUC from the binary validation benchmark.}
+\label{tab:atomic-support-generality}
+\begin{tabular}{llcccc}
+\toprule
+Task / data & Atomic support & \method{} acc. & Best base acc. & \method{} MAE & \method{} NLL \\
+\midrule
+Binary MNIST & $\{0,1\}$ & $.998$ & -- & $.686$ & -- \\
+MNIST-sum & $\{0,\ldots,9\}$ & $.635$ & $.541$ & $1.360$ & $3.290$ \\
+SVHN-sum & $\{0,\ldots,9\}$ & $.245$ & $.116$ & $3.081$ & $3.653$ \\
+UltraMNIST & $\{0,\ldots,9\}$ & $.899$ & $.572$ & $.401$ & $.606$ \\
+MNIST-signed & $\{-1,0,+1\}$ & $.692$ & $.302$ & $.564$ & $3.293$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Signed CountMIL}
+
+Signed counts test an aggregate that is not reducible to ordinary class proportions.
+Random-sign bags provide informative signed aggregates, while cancellation-heavy bags induce more many-to-one constraints around zero; nevertheless, the likelihood yields accurate instance ranking, especially with more training bags.
+
+\begin{table}[t]
+\centering
+\caption{Signed MNIST Count-MIL.  Cancellation-heavy bags reduce aggregate identifiability, especially for large bags with limited training data.}
 \label{tab:signed}
 \begin{tabular}{llccc}
 \toprule
@@ -107,24 +136,23 @@ $50/5000$ & cancellation & $0.993$ & $1.118$ & $0.591$ \\
 \subsection{FashionMNIST Robustness}
 
 FashionMNIST confirms that attention baselines can achieve strong bag prediction while providing much weaker hidden-instance recovery than count likelihood training.
-The A5000 FashionMNIST grid completed without errors.
 Binary CountMIL achieves hidden-instance AUC around $0.997$--$0.998$, while attention and gated-attention baselines reach strong bag prediction but only about $0.70$--$0.74$ instance AUC.
 Signed CountMIL also preserves high instance AUC around $0.996$--$0.998$.
-Digit-sum is weaker on FashionMNIST, whereas histogram LLP is much stronger for category recovery.
-We therefore use FashionMNIST primarily as a robustness result for instance recovery rather than as the cleanest ordinal-sum demonstration.
+Digit-sum supervision is less informative on FashionMNIST, whereas histogram LLP provides stronger category recovery.
+We therefore use FashionMNIST primarily as a robustness evaluation for instance recovery.
 
 \subsection{Histogram LLP and PVC}
 
 Histogram supervision is much richer than scalar sums, and LLP baselines are strong on MNIST-family data.
 We use these experiments to clarify where exact aggregate likelihood adds value and where existing LLP-style objectives are already competitive.
-The completed 4090 histogram grid is shown in Table~\ref{tab:histogram-llp-pvc}.
+Table~\ref{tab:histogram-llp-pvc} reports the histogram results.
 KL and CE proportion matching are strong, but the one-vs-rest count likelihood/PVC objective consistently improves both hidden digit recovery and histogram count MAE.
 The advantage is clearest for larger bags: at $n=50$ and $1000$ training bags, PVC improves digit accuracy from $96.4\%$ to $98.5\%$ and reduces count MAE from $0.376$ to $0.137$.
 MSE proportion matching is not competitive for large bags.
 
 \begin{table}[t]
 \centering
-\caption{Completed MNIST histogram supervision results on the 4090 server.  Entries report count MAE / hidden digit accuracy over three seeds.  CE and KL give identical results up to rounding in this grid.}
+\caption{MNIST histogram supervision results.  Entries report count MAE / hidden digit accuracy over three seeds.  CE and KL give identical results up to rounding.}
 \label{tab:histogram-llp-pvc}
 \begin{tabular}{lcccc}
 \toprule
@@ -140,14 +168,14 @@ $50/5000$ & $.184/ .988$ & $1.684/ .116$ & $.080/ .992$ & $.659$ \\
 
 \subsection{CIFAR Experiments}
 
-CIFAR-10 with ResNet-18 is the direct comparison setting for LLP-PVC.
+CIFAR-10 with ResNet-18 is a protocol-sensitive comparison setting for LLP-PVC, not the main evidence for the finite-support generalization.
 Ma et al. report CIFAR-10 results with a ResNet-18 backbone, and their appendix specifies ImageNet-pretrained initialization.
 We therefore evaluate both randomly initialized and ImageNet-pretrained ResNet-18 backbones because the representation source has a large effect on LLP performance.
-The from-scratch run completes the same pipeline without external pretrained features, while the pretrained run matches the backbone initialization specified for LLP-PVC.
+The from-scratch setting evaluates the same pipeline without external pretrained features, while the pretrained setting matches the backbone initialization specified for LLP-PVC.
 
 \begin{table}[t]
 \centering
-\caption{CIFAR-10 histogram supervision with ResNet-18.  From-scratch results are complete.  Pretrained PVC rows follow the ImageNet initialization specified in the LLP-PVC appendix.  The $n=64$, train $250$ row is an in-progress fixed-instance-budget diagnostic.}
+\caption{CIFAR-10 histogram supervision with ResNet-18.  Pretrained PVC rows use ImageNet initialization.  The $n=64$, train $250$ setting matches $n=16$, train $1000$ in sampled image instances per epoch and shows that larger bags are not intrinsically better at fixed exposure.}
 \label{tab:cifar10}
 \begin{tabular}{lllccc}
 \toprule
@@ -165,30 +193,32 @@ $128$ & $1000$ & scratch PVC & $2.707$ & $0.0211$ & $0.488$ \\
 \midrule
 $16$ & $1000$ & pretrained PVC, final & $0.260$ & $0.0162$ & $0.902$ \\
 $64$ & $1000$ & pretrained PVC, final & $0.678$ & $0.0106$ & $0.914$ \\
-$64$ & $250$ & pretrained PVC, running & $\approx 1.10$ & $\approx 0.0171$ & $\approx 0.806$ \\
+$64$ & $250$ & pretrained PVC, final & $1.115$ & $0.0174$ & $0.803$ \\
+$64$ & $250$ & pretrained PVC, best hist. & $1.013$ & $0.0158$ & $0.806$ \\
 \midrule
-$16$ & -- & LLP-PVC reported & -- & -- & $0.845$ \\
-$64$ & -- & LLP-PVC reported & -- & -- & $0.789$ \\
-$128$ & -- & LLP-PVC reported & -- & -- & $0.760$ \\
+$16$ & -- & LLP-PVC reference & -- & -- & $0.845$ \\
+$64$ & -- & LLP-PVC reference & -- & -- & $0.789$ \\
+$128$ & -- & LLP-PVC reference & -- & -- & $0.760$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The completed from-scratch results are much weaker than LLP-PVC, showing that the CIFAR comparison is not meaningful unless the backbone initialization protocol is matched.
-With ImageNet-pretrained ResNet-18 and the PVC objective, the completed $n=16$ and $n=64$ runs reach about $90.2\%$ and $91.4\%$ final instance accuracy, respectively, above the reported LLP-PVC accuracies for those bag sizes.
+The from-scratch results are substantially below the LLP-PVC reference, showing that the CIFAR comparison is not meaningful unless the backbone initialization protocol is matched.
+With ImageNet-pretrained ResNet-18 and the PVC objective, the $n=16$ and $n=64$ settings reach about $90.2\%$ and $91.4\%$ final instance accuracy, respectively, above the LLP-PVC reference accuracies for those bag sizes.
 However, the $n=64$, train $1000$ setting exposes four times as many image instances per epoch as $n=16$, train $1000$.
-An in-progress fixed-instance-budget diagnostic, $n=64$ with $250$ train bags, currently reaches only about $80.6\%$ instance accuracy.
-Thus the completed CIFAR-10 results support the usefulness of pretrained PVC/count likelihood under the matched backbone protocol, but they do not yet justify a claim that larger bags are intrinsically easier or more scalable at fixed image-instance exposure.
-The $n=128$ pretrained jobs have not completed and should not be claimed.
+The fixed-instance-budget setting, $n=64$ with $250$ train bags, reaches only about $80.3\%$ final instance accuracy and $80.6\%$ when selecting by observed histogram MAE.
+Thus the CIFAR-10 results support the usefulness of pretrained PVC/count likelihood under a strong representation, but they also show that the apparent $n=64$ gain comes from greater total image exposure or aggregate observations rather than bag size alone.
+They do not justify a claim that larger bags are intrinsically easier or more scalable at fixed image-instance exposure.
 
-CIFAR-100 coarse-histogram pilots currently show nontrivial learning above chance but are not yet strong enough as headline results.
-The completed CIFAR-100 coarse pilot used 20 coarse classes, bag size $50$, train bags $1000$, and two seeds.
-PVC and KL reach about $30\%$ hidden coarse-class accuracy, clearly above the $5\%$ random baseline, but the result is not yet competitive enough for a main claim.
-We therefore use CIFAR-10 for direct LLP-PVC comparison and treat CIFAR-100 as a harder exploratory setting.
+The CIFAR-100 coarse experiment used 20 coarse classes, bag size $50$, train bags $1000$, and two seeds.
+PVC and KL reach about $30\%$ hidden coarse-class accuracy, above the $5\%$ random baseline, but this setting remains exploratory rather than a primary claim.
+We therefore use CIFAR-10 for direct LLP-PVC comparison and treat CIFAR-100 as an exploratory higher-class-count setting.
 
 \subsection{Runtime}
 
 Our FFT-tree backend computes batched multiclass one-vs-rest count PMFs on GPU and gives large practical speedups over CPU dynamic programming in large-bag benchmarks.
+This addresses a practical limitation of DP-based count losses: exact count probabilities need not be tied to a sequential CPU implementation.
+The benchmark isolates aggregate-PMF evaluation and should be read as backend evidence, not as an end-to-end training-speed claim or as evidence about representation quality.
 
 \begin{table}[t]
 \centering

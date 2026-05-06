@@ -1,23 +1,48 @@
 \documentclass{article}
 
+% NeurIPS 2026 submission shell. For official submission, place the
+% unmodified neurips_2026.sty file in this directory and compile without the
+% final or preprint options.
+%
+% If natbib options are needed, pass them before loading neurips_2026:
+% \PassOptionsToPackage{numbers, compress}{natbib}
+%
+% Track options, matching the official template:
+% \usepackage[main]{neurips_2026}
+% \usepackage[position]{neurips_2026}
+% \usepackage[eandd]{neurips_2026}
+% \usepackage[creativeai]{neurips_2026}
+% \usepackage[sglblindworkshop]{neurips_2026}
+% \usepackage[dblblindworkshop]{neurips_2026}
+% \usepackage[preprint]{neurips_2026}
+% \usepackage[main,final]{neurips_2026}
 \IfFileExists{neurips_2026.sty}{
   \usepackage{neurips_2026}
 }{
+  % Fallback only. This keeps the paper buildable before the
+  % official NeurIPS style file is added; it is not a submission substitute.
   \usepackage[margin=1in]{geometry}
   \usepackage[numbers]{natbib}
 }
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{hyperref}
+\usepackage{url}
 \usepackage{booktabs}
-\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsthm}
+\usepackage{nicefrac}
 \usepackage[protrusion=true,expansion=false]{microtype}
 \usepackage{xcolor}
-\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
 
 \newcommand{\method}{FS-Conv}
-\newcommand{\TODO}[1]{\textcolor{red}{[TODO: #1]}}
+\newtheorem{proposition}{Proposition}
 
 \title{Finite-Support Convolutional Likelihoods for Aggregate-Supervised Multiple-Instance Learning}
 
@@ -36,12 +61,14 @@ We propose a finite-support convolutional view of aggregate likelihoods for Coun
 Each instance emits a latent discrete contribution distribution, and the bag-level likelihood is obtained by convolving these atomic probability mass functions.
 This formulation recovers the standard Bernoulli count likelihood as a special case while extending directly to signed and ordinal aggregate labels.
 We further derive count-conditioned posterior marginals for instance recovery and implement the likelihood with GPU-parallel convolution, including an FFT-tree backend for large multiclass one-vs-rest count likelihoods.
-Experiments on MNIST-family bag benchmarks evaluate binary counts, digit-sum supervision, signed cancellation-heavy counts, posterior instance recovery, and multiclass LLP-style histogram supervision, with comparisons to dynamic-programming count loss, attention MIL, expected-sum regression, and proportion-matching baselines.
-Completed results show strong hidden-instance recovery on MNIST-family aggregate tasks and competitive CIFAR-10 PVC performance under a matched ImageNet-pretrained ResNet-18 protocol, while fixed-budget diagnostics caution against attributing all large-bag gains to bag size alone.
+Experiments evaluate binary counts, signed cancellation-heavy counts, ordinal sum labels on MNIST/SVHN/UltraMNIST-style benchmarks, posterior instance recovery, and multiclass LLP-style histogram supervision, with comparisons to dynamic-programming count loss, attention MIL, expected-sum regression, and proportion-matching baselines.
+Results show accurate hidden-instance recovery on finite-support aggregate tasks, especially for signed and ordinal aggregate labels, and competitive CIFAR-10 PVC performance under an ImageNet-pretrained ResNet-18 protocol.
+A fixed-instance-budget CIFAR-10 comparison shows that larger bags are not intrinsically better: the apparent $n=64$ gain disappears when the total sampled image exposure is matched.
 \end{abstract}
 
 \input{sections/01_introduction}
 \input{sections/02_related_work}
+\input{sections/03_problem_setup}
 \input{sections/03_method}
 \input{sections/04_experiments}
 \input{sections/05_discussion}
@@ -51,5 +78,10 @@ Completed results show strong hidden-instance recovery on MNIST-family aggregate
 
 \appendix
 \input{sections/appendix}
+
+\IfFileExists{checklist.tex}{
+  \newpage
+  \input{checklist}
+}{}
 
 \end{document}

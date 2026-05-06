@@ -1,0 +1,35 @@
+\begin{figure}[t]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  font=\small,
+  node distance=1.15cm,
+  box/.style={draw, rounded corners=2pt, align=center, minimum height=0.72cm, inner xsep=6pt, inner ysep=4pt},
+  atom/.style={draw, rounded corners=2pt, align=center, minimum height=0.58cm, inner xsep=5pt, inner ysep=3pt, fill=black!3},
+  arrow/.style={-{Latex[length=2.0mm]}, line width=0.4pt}
+]
+\node[box] (bag) {instances\\$x_1,\ldots,x_n$};
+\node[box, right=of bag] (net) {neural\\selector};
+\node[atom, right=of net, yshift=0.75cm] (d1) {$d_1$\\finite PMF};
+\node[atom, right=of net] (d2) {$d_2$\\finite PMF};
+\node[atom, right=of net, yshift=-0.75cm] (dn) {$d_n$\\finite PMF};
+\node[box, right=1.35cm of d2] (conv) {1D convolution\\or FFT tree};
+\node[box, right=of conv] (pmf) {aggregate PMF\\$p_\theta(Y\mid x_{1:n})$};
+\node[box, right=of pmf] (loss) {observed label\\likelihood};
+
+\draw[arrow] (bag) -- (net);
+\draw[arrow] (net.east) -- (d1.west);
+\draw[arrow] (net.east) -- (d2.west);
+\draw[arrow] (net.east) -- (dn.west);
+\draw[arrow] (d1.east) -- (conv.west);
+\draw[arrow] (d2.east) -- (conv.west);
+\draw[arrow] (dn.east) -- (conv.west);
+\draw[arrow] (conv) -- (pmf);
+\draw[arrow] (pmf) -- (loss);
+
+\node[align=center, below=0.28cm of d2] (support) {\footnotesize atoms may be Bernoulli, signed, ordinal, or one-vs-rest};
+\end{tikzpicture}
+}
+\caption{Finite-support aggregate likelihood.  Instance networks emit atomic PMFs over discrete contributions.  A deterministic convolutional layer gives the exact aggregate PMF, whose observed coefficient is used as the bag likelihood.}
+\label{fig:method-schematic}
+\end{figure}

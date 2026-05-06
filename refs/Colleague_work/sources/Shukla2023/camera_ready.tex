@@ -1,0 +1,1343 @@
+\documentclass{article}
+
+
+\PassOptionsToPackage{numbers, compress}{natbib}
+
+
+\usepackage[final]{neurips_2023}
+
+
+
+
+
+
+
+
+\usepackage[utf8]{inputenc} %
+\usepackage[T1]{fontenc}    %
+\usepackage[colorlinks=true,linkcolor=Purple,citecolor=Blue]{hyperref}      %
+\usepackage{url}            %
+\usepackage{booktabs}       %
+\usepackage{amsfonts}       %
+\usepackage{nicefrac}       %
+\usepackage{microtype}      %
+\usepackage[table, dvipsnames]{xcolor}         %
+
+
+\title{A Unified Approach to Count-Based Weakly-Supervised Learning}
+
+
+
+
+\author{%
+  Vinay Shukla \\
+  Department of Computer Science\\
+  University of California, Los Angeles\\
+  \texttt{vshukla@g.ucla.edu} \\
+  \And
+  Zhe Zeng$^*$ \\
+  Department of Computer Science\\
+  University of California, Los Angeles\\
+  \texttt{zhezeng@cs.ucla.edu} \\
+  \And
+  Kareem Ahmed$^*$ \\
+  Department of Computer Science\\
+  University of California, Los Angeles\\
+  \texttt{ahmedk@cs.ucla.edu} \\
+  \And
+  Guy Van den Broeck \\
+  Department of Computer Science\\
+  University of California, Los Angeles\\
+  \texttt{guyvdb@cs.ucla.edu} \\
+}
+
+\usepackage{natbib} %
+    \bibliographystyle{plainnat}
+    \renewcommand{\bibsection}{\subsubsection*{References}}
+\usepackage{mathtools} %
+\usepackage{booktabs} %
+\usepackage{tikz} %
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage[noend]{algpseudocode}
+
+\usepackage{xcolor}
+\usepackage{nicefrac}
+\usepackage{xspace}
+
+\usepackage{amsfonts, dsfont} %
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{xspace}
+\usepackage{stmaryrd}
+\usepackage{url}
+\usepackage{enumitem}
+\usepackage{wrapfig}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{graphicx,calc}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{adjustbox}      
+
+
+\newlength\myheight
+\newlength\mydepth
+\settototalheight\myheight{Xygp}
+\settodepth\mydepth{Xygp}
+\setlength\fboxsep{0pt}
+\newcommand*\inlinegraphics[1]{%
+  \settototalheight\myheight{Xygp}%
+  \settodepth\mydepth{Xygp}%
+  \raisebox{-\mydepth}{\includegraphics[height=\myheight]{#1}}%
+}
+
+
+\renewcommand\fbox{\fcolorbox{red}{white}}
+
+\include{macros}
+\newcommand{\ie}{i.e.,\ }
+
+\begin{document}
+
+
+\maketitle
+\def\thefootnote{*}\footnotetext{Equal contribution.}\def\thefootnote{\arabic{footnote}}
+
+\begin{abstract}
+High-quality labels are often very scarce, whereas unlabeled data with inferred weak labels occurs more naturally.
+In many cases, these weak labels dictate the frequency of each respective class over a set of instances.
+In this paper, we develop a unified approach to learning from such weakly-labeled data, which we call \emph{count-based weakly-supervised learning}.
+At the heart of our approach is the ability to compute the probability of exactly $k$ out of $n$ outputs being set to true.
+This computation is differentiable, exact, and efficient.
+Building upon the previous computation, we derive a \emph{count loss} penalizing the model for deviations in its distribution
+from an arithmetic constraint defined over label counts. 
+We evaluate our approach on three 
+common weakly-supervised learning paradigms and observe that our proposed approach achieves state-of-the-art or highly competitive results across all three of the paradigms.
+\end{abstract}
+
+
+
+
+
+
+
+
+\section{Introduction}\label{sec:intro}
+
+Weakly supervised learning~\citep{zhou2018brief} enables a model to learn from data with restricted, partial or inaccurate labels, often known as \emph{weakly-labeled data}.
+Weakly supervised learning fulfills a need arising in many real-world settings that are subject to privacy or budget constraints, such as privacy sensitive data~\citep{wojtusiak2011using},  medical image analysis~\citep{bortsova2018deep}, clinical practice~\citep{quellec2017multiple}, personalized advertisement~\citep{bekker2020learning} and knowledge base completion~\citep{galarraga2015fast,zupanc2018estimating}, to name a few.
+In some settings, \emph{instance-level labels} are unavailable.
+Instead, instances are grouped into \emph{bags} with corresponding \emph{bag-level labels} that are a function of the instance labels, e.g., the proportion of positive labels in a bag.
+A key insight that we bring forth is that such weak supervision can very often be construed as \emph{enforcing constraints on label counts of data}.
+
+More concretely, we consider three prominent weakly supervised learning paradigms. 
+The first paradigm is known as \emph{learning from label proportions}~\citep{quadrianto2008llp}.
+Here the weak supervision consists in the \emph{proportion} of 
+positive labels in a given bag, which can be interpreted
+as \emph{the count of positive instances} in such a bag.
+The second paradigm, whose supervision is strictly weaker
+than the former, is \emph{multiple instance learning}~\citep{MIL1997framework, dietterich1997musk}.
+Here the bag labels only indicate the \emph{existence} of
+at least one positive instance in a bag, which can
+be recast as to whether \emph{the count of positive 
+instances} is greater than zero.
+The third paradigm, \emph{learning from positive and unlabeled data}~\citep{PUoriginal, PUoriginal2}, grants access to the ground truth labels for a subset of \emph{only the positive instances}, providing only a class prior for what remains. We can recast the class prior as \emph{a distribution of the count of positive labels}.
+
+\begin{table*}[t!]
+    \resizebox{0.15\columnwidth}{!}{
+    \begin{subtable}[t]{.18\linewidth}
+      \centering
+        \begin{tabular}[t]{c|c}
+        \toprule
+        $\x$ & $\y$ \\
+        \midrule
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/zero_0.pdf} 
+        }
+        & 0 \\
+        \hline
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/zero_1.pdf} 
+        }
+        & 0 \\
+        \hline
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/ones_0.pdf} 
+        }
+        & 1 \\
+        \hline
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/ones_1.pdf} 
+        }
+        & 1 \\
+        \bottomrule
+        \end{tabular}
+        \caption{Classical}
+        \label{fig: Classical example}
+    \end{subtable}%
+    }
+    \hfill
+    \resizebox{0.23\columnwidth}{!}{
+    \begin{subtable}[t]{.28\linewidth}
+      \centering
+        \begin{tabular}[t]{c|c}
+        \toprule
+        $\{{\x}_{i}\}_{i=1}^k$ & $\weaky = \sum \y_i / k$ \\
+        \midrule
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/zero_1.pdf}
+        \inlinegraphics{fig/mnist/zero_2.pdf}
+        \inlinegraphics{fig/mnist/zero_3.pdf}
+        }
+        & 0 \\
+        \hline
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/zero_4.pdf}
+        \inlinegraphics{fig/mnist/ones_2.pdf}
+        \inlinegraphics{fig/mnist/zero_5.pdf} 
+        }
+        & 1/3 \\
+        \hline
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/ones_1.pdf}
+        \inlinegraphics{fig/mnist/zero_0.pdf} \\
+        \inlinegraphics{fig/mnist/ones_2.pdf}
+        \inlinegraphics{fig/mnist/zero_2.pdf}
+        \inlinegraphics{fig/mnist/ones_3.pdf}
+        }
+        & 3/5 \\
+        \bottomrule
+        \end{tabular}
+        \caption{LLP}
+        \label{fig: Label Proportion example}
+    \end{subtable}%
+    }
+    \hfill
+    \resizebox{0.23\columnwidth}{!}{
+    \begin{subtable}[t]{.28\linewidth}
+      \centering
+        \begin{tabular}[t]{c|c}
+        \toprule
+        $\{{\x}_{i}\}_{i=1}^k$ & $\weaky = \max\{\y_i\}$ \\
+        \midrule
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/zero_0.pdf}
+        \inlinegraphics{fig/mnist/zero_4.pdf}
+        \inlinegraphics{fig/mnist/zero_5.pdf}
+        } 
+        & 0 \\
+        \hline
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/ones_0.pdf}
+        \inlinegraphics{fig/mnist/zero_2.pdf}
+        \inlinegraphics{fig/mnist/ones_5.pdf}
+        }
+        & 1 \\
+        \hline
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/zero_1.pdf}
+        \inlinegraphics{fig/mnist/zero_2.pdf} \\
+        \inlinegraphics{fig/mnist/zero_3.pdf}
+        \inlinegraphics{fig/mnist/ones_3.pdf}
+        \inlinegraphics{fig/mnist/ones_5.pdf}
+        }
+        & 1 \\
+        \bottomrule
+        \end{tabular}
+        \caption{MIL}
+        \label{fig: MIL example}
+    \end{subtable}%
+    }
+    \hfill
+    \resizebox{0.15\columnwidth}{!}{
+    \begin{subtable}[t]{.18\linewidth}
+      \centering
+        \begin{tabular}[t]{c|c}
+        \toprule
+        $\x$ & $\weaky$ \\
+        \midrule
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/zero_5.pdf}
+        } 
+        & ? \\
+        \hline
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/ones_5.pdf}
+        } 
+        & 1 \\
+        \hline
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/zero_3.pdf}
+        } 
+        & ? \\
+        \hline
+        \huge
+        \makecell{
+        \inlinegraphics{fig/mnist/ones_4.pdf}
+        } 
+        & ? \\
+        \bottomrule
+        \end{tabular}
+
+        \caption{PU Learning}
+        \label{fig: PU example}
+    \end{subtable}%
+    }
+    \caption{
+    A comparison of the tasks considered in the three weakly supervised settings, LLP~(cf. Section~\ref{sec: LLP intro}), MIL~(cf. Section~\ref{sec: MIL intro}) and PU learning~(cf. Section~\ref{sec: PU intro}), against the classical fully supervised setting
+    for binary classification, using digits from the MNIST dataset.
+    }
+    \label{tb: example datasets}
+\end{table*}
+
+Leveraging the view of weak supervision as a constraint on label counts, 
+we utilize a simple, efficient and probabilistically sound approach to 
+weakly-supervised learning.
+More precisely, we train a neural network to make instance-level predictions 
+that conform to the desired label counts.
+To this end, we propose a \emph{differentiable count loss} that characterizes how close the network's distribution comes to the label counts; a loss which is surprisingly tractable.
+Compared to prior methods, this approach does not approximate probabilities but computes them \emph{exactly}.
+Our empirical evaluation demonstrates that our proposed count loss significantly 
+boosts the classification performance on all three aforementioned settings.
+
+
+
+
+\section{Problem Formulations}
+\label{sec: problem formulation}
+
+
+In this section, we formally introduce the aforementioned weakly supervised learning paradigms.
+For notation,
+let $\inputspace \in \R^{\inputdim}$ be the input feature space over $\inputdim$ features and $\outputspace = \{\neglabel, \poslabel\}$ be a binary label space. We write
+$\x \in \inputspace$ and $\y \in \outputspace$ for the input and output random variables respectively.
+Recall that in fully-supervised binary classification, it is assumed that each feature and label pair $(\x, \y) \in \inputspace \times \outputspace$ is sampled independently from a joint distribution $p(\x, \y)$.
+A classifier $\f$ is learned to minimize the risk
+$\risk(\f) = \E_{(\x, \y) \sim p} [\loss(\f(\x), \y)]$
+where $\loss: [0, 1] \times \outputspace \rightarrow \R_{\geq 0}$ is the cross entropy loss function.
+Typically, the true distribution $p(\x, \y)$ is implicit and cannot be observed.
+Therefore, a set of $n$ training samples, $\data = \{(\x_i, \y_i)\}_{i = 1}^n$, is used and the empirical risk,
+$\hat{\risk}(\f) = \frac{1}{n} \sum_{i = 1}^n \loss(\f(\x_i), \y_i)$,
+is minimized in practice.
+In the count-based weakly supervised learning settings, the supervision is given at a bag level instead of an instance level.
+We formally introduce these settings as below.
+
+\subsection{Learning from Label Proportions}
+\label{sec: LLP intro}
+\emph{Learning from label proportions~(LLP)} \citep{quadrianto2008llp} assumes that
+each instance in the training set is assigned to bags and only the proportion of positive instances in each bag is known.
+One example is in light of the coronavirus pandemic, where infection rates were typically reported based on geographical boundaries such as states and counties.
+Each boundary can be treated as a bag with the infection rate as the proportion annotation.
+
+The goal of LLP is to learn an instance-level classifier $\f: \inputspace \rightarrow [0, 1]$ even though it is trained on bag-level labeled data.
+Formally, the training dataset consists of $m$ bags, denoted by 
+$\data = \{(\bag_i, \weaky_i)\}_{i = 1}^m$ where each bag $\bag_i = \{{\x}_j\}_{j = 1}^k$ consist of $k$ instances and this $k$ could vary among different bags.
+The bag proportions are defined as $\weaky_i = \sum_{j = 1}^k \y_j / k$ with $\y_j$ being the instance label that cannot be accessed and only $\weaky_i$ is available during training.
+An example is shown in Figure~\ref{fig: Label Proportion example}.
+We do not assume that the bags are non-overlapping 
+while some existing work suffers from this limitation including \citet{NEURIPS2020_fcde1491}.
+\subsection{Multiple Instance Learning}
+\label{sec: MIL intro}
+\emph{Multiple instance learning~(MIL)}~\citep{MIL1997framework, dietterich1997musk} refers to the scenario where the training dataset consists of bags of instances, and 
+labels are provided at bag level.
+However, in MIL, the bag label is a single binary label indicating whether there is a positive instance in the bag or not as opposed to a bag proportion defined in LLP.
+A real-world application of MIL lies
+in the field of drug activity \cite{dietterich1997musk}. 
+We can observe the effects of a group of conformations but not for any specific molecule, motivating a MIL setting.
+Formally, in MIL, the training dataset consists of $m$ bags, denoted by $\data = \{ (\bag_i, \weaky_i)\}_{i = 1}^m$, with a bag consisting of $k$ instances, i.e., $\bag_i = \{\x_j\}_{j = 1}^k$. The size $k$ can vary among different bags.
+For each instance $\x_j$, there exists an instance-level label $\y_j$ which is not accessible. The bag-level label is defined as $\weaky_i = \max_{j}\{\y_j\}$.
+An example is shown in Figure~\ref{fig: MIL example}.
+
+The main goal of MIL is to learn a model that predicts a bag label
+while a more challenging goal is to learn an instance-level predictor that is able to discover positive instances in a bag.
+In this work, 
+we aim to tackle both by training an instance-level classifier whose predictions can be combined into a bag-level prediction as the last step.
+
+\begin{table*}[t]
+\caption{A summary of the labels and objective functions for all the settings considered in the paper.}
+\centering
+\renewcommand{\arraystretch}{1.5}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}[t]{llll}
+\toprule
+\textbf{\textsc{Task}} & \textbf{\textsc{Label}}& 
+\textbf{\textsc{Label Level}} & \textbf{\textsc{Objective}}
+\\
+\midrule
+Classical Fully Supervised & Binary $\y$ & Instance Level & $-\y \log p(\y) - (1 - \y) \log (1 - p(\y))$ \\
+Learning from Label Proportion & Continuous $\weaky = \sum_i \y_i / k$ & Bag Level & $- \log p(\sum \pred_i = k \weaky)$ \\
+Multiple Instance Learning & Binary $\weaky = \max \{ y_i \}$ &  Bag Level & 
+\makecell[l]{
+$-\weaky \log p(\sum \pred_i \geq 1) - (1 - \weaky) \log p(\sum_i \pred_i = 0)$\\
+}\\
+\makecell[l]{Learning from Positive \\and Unlabeled Data}
+& Binary $\weaky$ & Instance Level &  
+\makecell[l]{
+1) $\kl(\bin(k, \mixprop) \parallel p(\sum_i \pred_i))$ \\ 
+2) $- \log p(\sum \pred_i = k \mixprop)$
+} \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\label{tb: task comparison}
+\end{table*}
+
+\subsection{Learning from Positive and Unlabeled Data}
+\label{sec: PU intro}
+
+\emph{Learning from positive and unlabeled data} or \emph{PU learning}~\citep{PUoriginal, PUoriginal2}
+refers to the setting where the training dataset consists of only positive instances and unlabeled data, and the unlabeled data can contain both positive and negative instances. 
+A motivation of PU learning is persistence in the case of shifts to the negative-class distribution \citep{pmlr-v37-plessis15}, for example, a spam filter.
+An attacker may alter the properties of a spam email, making a traditional classifier require a new negative dataset \citep{pmlr-v37-plessis15}. We note that taking a new unlabeled sample would be more efficient, motivating PU learning. 
+Formally, in PU learning,
+the training dataset $\data = \data_{\positive} \cup \data_{\unlabel}$
+where $\data_{\positive} = \{(\x_i, \weaky_i = \poslabel)\}_{i = 1}^{n_{\positive}}$ is the set of positive instances 
+with $\x_i$ from $p(\x \mid \y = \poslabel)$ and $\weaky$ denoting whether the instance is labeled,
+and $\data_{\unlabel} = \{(\x_i, \weaky_i~=~\neglabel)\}_{i = 1}^{n_{\unlabel}}$ the unlabeled set
+with $\x_i$ from 
+\begin{equation}
+\label{eq: mixture}
+    p_{\unlabel}(\x) = \mixprop~p(\x \mid \y = \poslabel) + (1 - \mixprop)~p(\x \mid \y = \neglabel),
+\end{equation}
+where the mixture proportion $\mixprop := p(\y = \poslabel \mid \weaky = \neglabel)$ is the fraction of positive instances among the unlabeled population.
+Although the instance label $\y$ is not accessible, its information can be inferred from the binary selection label $\weaky$:
+if the selection label $\weaky = \poslabel$, it belongs to the positively labeled set, i.e., $p(\y = \poslabel \mid \weaky = \poslabel) = 1$;
+otherwise,
+the instance $\x$ can be either positive or negative. An example of such a dataset is shown in Figure~\ref{fig: PU example}.
+
+The goal of PU learning is to train an instance-level classifier.
+However, it is not straightforward to learn from PU data and it is necessary to make assumptions to enable learning with positive and unlabeled data~\citep{bekker2020learning}.
+In this work, we make 
+a commonly-used assumption for PU learning, \emph{selected completely at random~(SCAR)}, which lies at the basis of many PU learning methods.
+
+\begin{definition}[\textbf{SCAR}]
+\label{def: scar}
+Labeled instances are selected completely at random, independent from input features, from the positive distribution $p(\x \mid \y = \poslabel)$,
+that is, $p(\weaky = \poslabel \mid \x, \y = \poslabel) = p(\weaky = \poslabel \mid \y = \poslabel)$.
+\end{definition}
+
+
+
+
+
+\section{A Unified Approach: Count Loss }
+\label{sec: A Unified Approach}
+In this section, we derive objectives for the three weakly supervised settings, LLP, MIL, and PU learning, from first principles. 
+Our proposed objectives bridge between neural outputs, which can be observed as counts, and arithmetic constraints derived from the weakly supervised labels.
+The idea is to capture how close the classifier is to satisfying the arithmetic constraints on its outputs.
+They can be easily integrated with 
+deep learning models, and allow them to be trained end-to-end.
+\begin{figure}
+\begin{center}
+\begin{minipage}[t]{1.0\textwidth}
+\begin{algorithm}[H]
+    \caption{Count Probability $p(\sum_{i = 1}^k \pred_i = \labelsum)$}
+    \label{alg:cap}
+    \textbf{Input: } 
+    A set of $k$ log probabilities $\{ \logy_i \}_{i=1}^k$ with $\logy_i := \log p(\pred_i = 1)$, the number of instances $k$, and a label sum $\labelsum$ \\
+    \textbf{Output: } log probabilities $\log p(\sum_{i = 1}^k \pred_i = \labelsum)$
+    or a set of log probability $\{\log p(\sum_{i = 1}^k \pred_i = \labelsum)\}_{\labelsum=0}^k$
+    \begin{algorithmic}
+        \State \hspace{-1em}\Comment{$\dparray[i, m] = \log p(\sum_{j=1}^i \y_j = m)$ $\forall i$, $m$}
+        \State Initialize an array $\dparray$ to be $-\mathsf{Inf}$ everywhere
+        \State $\dparray[0, 0] = 0$ \Comment{$p(\sum_{j=1}^0 \y_j = 0) = 1$}
+        \State Compute $\logy_i^\prime \gets \logmexp(\logy_i)$
+        \hspace{-1em}\Comment{$\log p(\y_i = 0)$}
+        \For {$i = 1$ \textbf{to} $k$} 
+        \For {$m = 0$ \textbf{to} $\labelsum$}
+            \State $a_+ = \dparray[i - 1, m - 1] + \logy_i$
+            \State $a_- = \dparray[i - 1, m] + \logy_i^\prime$
+            \State $\dparray[i, m] = \logsumexp(a_+, a_-)$
+        \EndFor
+        \EndFor
+        \Return $\dparray[k, \labelsum]$ or $\dparray[k, :]$
+    \end{algorithmic}
+\end{algorithm}
+\end{minipage}
+\end{center}
+\end{figure}
+For the three objectives, we show that they share the same computational building block:
+given $k$ instances $\{\x_i\}_{i = 1}^k$ and an instance-level classifier $\f$ that predicts $p(\pred_i \mid \x_i)$ with $\pred$ denoting the prediction variable,
+the problem of inferring the probability of the constraint on counts $\sum_{i = 1}^k \pred_i = \labelsum$ is to compute the count probability defined below:
+\begin{equation*}
+p(\sum_{i = 1}^k \pred_i = \labelsum \mid \{\x_i\}_{i = 1}^k)
+:= \sum_{\hat{\by} \in \outputspace^k} \id{\sum_{i = 1}^k \pred_i~=~\labelsum} \prod_{i = 1}^k p(\pred_i \mid \x_i)
+\end{equation*}
+where $\id{\cdot}$ denotes the indicator function and $\hat{\by}$ denotes the vector $(\pred_1, \cdots, \pred_k)$.
+For succinctness, we omit the dependency on the input and simply write the count probability as $p(\sum_{i = 1}^k \pred_i = \labelsum)$.
+Next, we show how the objectives derived from first principles can be solved by using the count probability as an oracle.
+We summarize all proposed objectives 
+in Table~\ref{tb: task comparison}.
+Later, we will show how this seemingly intractable count probability can be efficiently computed by our proposed algorithm.
+
+\textbf{LLP setting.}
+Given a bag $\bag = \{\x_i\}_{i = 1}^k$ of size $k$ and its weakly supervised label $\weaky$,
+by definition, it can be inferred that the number of positive instances (count) in the bag is $k\weaky$.
+Our objective is to minimize the negative log probability $- \log p(\sum_i \pred_i = k \weaky)$.
+Notice that when each bag consists of only one instance, that is, when the bag-level supervisions are reduced to instance-level ones, this objective is exactly cross-entropy loss.
+We further show that our method is risk-consistent, that is, the optimal classifier under our proposed loss provides predictions consistent with the underlying risk as in the supervised learning setting. Details of the risk analysis can be found in Appendix~\ref{sec:proofs}.
+
+
+
+
+
+\textbf{MIL setting.}
+Given a bag $\bag = \{\x_i\}_{i = 1}^k$ of size $k$ and a single binary label $\weaky$ as its weakly supervised label,
+we propose a cross-entropy loss as below
+\begin{equation*}
+    \loss(\bag, \weaky) = -\weaky \log p(\sum \pred_i \geq 1) - (1 - \weaky) \log p(\sum \pred_i = 0).
+\end{equation*}
+Notice that in the above loss, the probability term $p(\sum \pred_i = 0)$ is accessible to the oracle for computing count probability, and the other probability term $p(\sum \pred_i \geq 1)$ can simply be obtained from $1 - p(\sum \pred_i = 0)$, i.e., the same call to the oracle since all prediction variables $\pred_i$ are binary. 
+
+
+\textbf{PU Learning setting.}
+Recall that for the unlabeled data $\data_{\unlabel}$ in the training dataset,
+an unlabeled instance $\x_i$ is drawn from a mixture distribution as shown in Equation~\ref{eq: mixture} parameterized by a mixture proportion $\mixprop = p(\y = \poslabel \mid \weaky = \neglabel)$.
+Under the SCAR assumption, even though only a class prior is given, we show that the mixture proportion can be estimated from the dataset.
+\begin{proposition}
+\label{prop: mixture proportion}
+With SCAR assumption and a class prior $\alpha~:=~p(\y = \poslabel)$, the mixture proportion $\mixprop~:=~p(\y = \poslabel \mid \weaky = \neglabel)$ can be estimated from dataset $\data$.
+\end{proposition}
+\begin{proof}
+First, the label frequency $p(\weaky = \poslabel \mid \y = \poslabel)$ denoted by $c$ can be obtained by
+\begin{equation*}
+    c = \frac{p(\weaky = \poslabel, \y = \poslabel)}{p(\y = \poslabel)} = \frac{p(\weaky = \poslabel)}{p(\y = \poslabel)} \textit{~~(by the definition of PU learning)}.
+\end{equation*}
+that is, $c = p(\weaky = \poslabel) / \alpha$. 
+Notice that $p(\weaky = \poslabel)$ can be estimated from the dataset $\data$ by counting the proportion of the labeled instances.
+Thus, we can estimate the mixture proportion as below,
+\begin{equation*}
+    \mixprop 
+    = \frac{p(\weaky = \neglabel \mid \y = \poslabel)p(\y = \poslabel)}{p(\weaky = \neglabel)} 
+    = \frac{(1 -  p(\weaky = \poslabel \mid \y = \poslabel))p(\y = \poslabel)}{1 - p(\weaky = \poslabel)} 
+    = \frac{(1 - c)\alpha}{1 - \alpha c}.
+\end{equation*}
+\end{proof}
+
+
+
+The probabilistic semantic of the mixture proportion is that if we randomly draw an instance $\x_i$ from the unlabeled population, 
+the probability that the true label $\y_i$ is positive would be $\mixprop$.
+Further, if we randomly draw $k$ instances, 
+the distribution of the summation of the true labels $\sum_{i = 1}^k \y_i$ conforms to a binomial distribution $\bin(k, \mixprop)$ parameterized by the mixture proportion $\mixprop$, i.e.,
+\begin{equation}
+    p(\sum_{i = 1}^k \y_i = \labelsum)
+    = \binom{k}{\labelsum} \mixprop^{\labelsum} (1 - \mixprop)^{k - \labelsum}.
+\end{equation}
+Based on this observation, we propose an objective to minimize the KL divergence between the distribution of predicted label sum and the binomial distribution parameterized by the mixture proportion for a random subset drawn from the unlabeled population, that is,
+\begin{equation*}
+\begin{split}
+    &\kl\left(\bin(k, \mixprop)~\parallel~p(\sum_{i = 1}^k \pred_i) \right) = \sum_{\labelsum = 0}^{k}~\bin(\labelsum; k, \mixprop)~\log \frac{\bin(\labelsum; k, \mixprop)}{p(\sum_{i = 1}^k \pred_i = \labelsum)}
+\end{split}
+\end{equation*}
+where $\bin(s; k, \mixprop)$ denotes the probability mass function of the binomial distribution $\bin(k, \mixprop)$.
+Again, the KL divergence can be obtained by $k + 1$ calls to the oracle for computing count probability $p(\sum_{i = 1}^k \pred_i = \labelsum)$.
+The KL divergence is further combined with a cross entropy defined over labeled data $\data_{\positive}$ as in the classical binary classification training as the overall objective.
+
+As an alternative, we propose an objective for the unlabeled data that requires fewer calls to the oracle: instead of matching the distribution of the predicted label sum with the binomial distribution, this objective matches only the expectations of the two distributions, that is, to maximize $p(\sum_{i = 1}^k \pred_i = k\mixprop)$ where $k\mixprop$ is the expectation of the binomial distribution $\bin(k, \mixprop)$. We present empirical evaluations of both proposed objectives in the experimental section.
+
+
+
+\section{Tractable Computation of Count Probability}
+
+
+
+\begin{figure}[t]
+ \begin{minipage}{\textwidth}
+    \centering
+    \includegraphics[width=.7\textwidth]{fig/dp.pdf}
+    \caption{An example of how to compute the count probability in a dynamic programming manner.
+    Assume that an instance-level classifier predicts three instances to have $p(\y_1 = 1) = 0.1$, $p(\y_2 = 1) = 0.2$, and $p(\y_3 = 1) = 0.3$ respectively. 
+    The algorithm starts from the top-left cell and propagates the results down right.
+    A cell has its probability $p(\sum_{j=0}^i \y_j = s)$
+    computed by inputs from $p(\sum_{j=0}^{i-1} \y_j = s)$ weighted by $p(\y_i = 0)$, and $p(\sum_{j=0}^{i-1} \y_j = s - 1)$ weighted by $p(\y_i = 1)$ respectively, as indicated by the arrows.}
+    \label{fig: alg example}
+\end{minipage}
+\end{figure}
+
+
+
+
+
+
+
+
+In the previous section, we show how the count probability $p(\sum_{i = 1}^k \pred_i = \labelsum)$ serves as a computational building block for the objectives derived from first principles for the three weakly supervised learning settings.
+With a closer look at the count probability, we can see that given a set of instances, the classifier predicts an instance-level probability for each and it requires further manipulation to obtain count information;
+actually, the number of joint labelings for the set can be exponential in the number of instances.
+Intractable as it seems, we show that it is indeed possible to derive a tractable computation for the count probability based on a result from~\citet{simple2023}.
+
+\begin{proposition}
+\label{eq: tractable constraint probability}
+The count probability $p(\sum_{i = 1}^k \pred_i = \labelsum)$ of sampling $k$ prediction variables that sums to $\labelsum$ from an unconstrained distribution $p(\by) = \prod_{i = 1}^k p(\pred_i)$ can be computed exactly in time $\bigO(k\labelsum)$.
+Moreover, 
+the set $\{ p(\sum_{i = 1}^k \pred_i = \labelsum) \}_{s = 0}^{k}$ can also be computed in time $\bigO(k^2)$.
+\end{proposition}
+
+The above proposition can be proved in a constructive way where we show that the count probability $p(\sum_{i = 1}^k \pred_i = \labelsum)$ can be computed in a dynamic programming manner.
+We provide an illustrative example of this computation in Figure~\ref{fig: alg example}.
+In practice, we implement this computation in log space for numeric stability which we summarized as Algorithm~\ref{alg:cap}, where function $\logmexp$ provides a numerically stable way to compute $\logmexp(x) = \log(1 - \exp(x))$ and function $\logsumexp$ a numerically stable way to compute $\logsumexp(x, y) = \log(\exp(x) + \exp(y))$.
+Notice that since we show it is tractable to compute the set $\{ p(\sum_{i = 1}^k \pred_i = \labelsum) \}_{s = 0}^{k}$,
+for any two given label sum $\labelsum_1$ and $\labelsum_2$,
+a count probability $p(\labelsum_1 \leq \sum_{i} \pred_i \leq \labelsum_2)$ where the count lies in an interval, can also be exactly and tractably computed.
+This implies that our tractable computation of count probabilities can potentially be leveraged by other count-based applications besides the three weakly supervised learning settings in the last section.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Related Work}
+\textbf{Weakly Supervised Learning.\ } Besides settings explored in our work there are many other weakly-supervised settings. One of which is semi-supervised learning, a close relative to PU Learning with the difference being that labeled samples can be both positive and negative \citep{zhu2022introduction, zhu2005semi}. Another is label noise learning, which occurs when our instances are mislabeled. Two common variations involve whether noise is independent or dependent on the instance \citep{frenay2013classification, song2022learning}. A third setting is partial label learning, where each instance is provided a set of labels of which exactly one is true \citep{cour2011learning}. An extension of this is partial multi-label learning, where among a set of labels, a subset is true~\citep{xie2018partial}.
+
+\textbf{Unified Approaches.\ } There exists some literature in regards to ``general" approaches for weakly supervised learning. One example being the method proposed in \citet{hullermeier2014learning}, which provides a procedure that minimizes the empirical risk on ``fuzzy'' sets of data. The paper also establishes guarantees for model identification and instance-level recognition. Co-Training and Self-Training are also examples of similar techniques that are applicable to a wide variety of weakly supervised settings \cite{cotraining1998, unsupervisedsup1995}. Self-training involves progressively incorporating more unlabeled data via our model’s prediction (with pseudo-label) and then training a model on more data as an iterative algorithm \cite{karamanolakis2021self}. Co-Training leverages two models that have different “views” of the data and iteratively augment each other's training set with samples they deem as “well-classified”. They are traditionally applied to semi-supervised learning but can extend to multiple instance learning settings \cite{cotraining2011lu, xu2013survey, liu2023multiple}.
+
+\textbf{LLP.\ }
+\citet{quadrianto2008llp} first introduced an exponential family based approach that used an estimation of mean for each class. Others seek to minimize ``empirical proportion risk'' or EPR as in \citet{yu2014learning}, which is centered around creating an instance-level classifier that is able to reproduce the label proportions of each bag. 
+As mentioned previously, more recent methods use bag posterior approximation and neural-based approaches~\citep{ardehaly2017co, tsai2020learning}. One such method is Proportion Loss~(PL) \citep{tsai2020learning}, which we contrast to our approach. This is computed by binary cross entropy between the averaged instance-level probabilities and ground-truth bag proportion.
+
+
+
+\textbf{MIL.}
+MIL finds its earlier approaches with SVMs, which have been used quite prolifically and still remain one of the most common baselines. We start with MI-SVM/mi-SVM~\citep{Andrews2002SupportVM} which are examples of transductive SVMs \citep{carbonneau2018multiple} that seek a stable instance classification through repeated retraining iterations. MI-SVM is an example of an instance space method \citep{carbonneau2018multiple}, which identifies methods that classify instances as a preliminary step in the problem. This is in contrast to bag-space or embedded-space methods that omit the instance classification step. Furthermore, \citet{wang2018revisiting} remains one of the hallmarks of the use of neural networks for Multi-Instance Learning. \citet{ilse2018attention}, utilize a similar approach but with attention-based mechanisms.
+
+\textbf{PU learning.}
+\citet{bekker2020learning} groups PU Learning paradigms into three main classes: two step, biased, and class prior incorporation. Biased learning techniques train a classifier on the entire dataset with the understanding that negative samples are subject to noise \citep{bekker2020learning}. We will focus on a subset of biased learning techniques~(Risk Estimators) as they are considered state-of-the-art and relevant to us as baselines. The Unbiased Risk Estimator~(uPU) provides an alternative to the inefficiencies in manually biasing unlabeled data~\citep{plessis2014unbiased, pmlr-v37-plessis15}. Later, Non-negative Risk Estimator~(nnPU) \cite{kiryo2017positive} accounted for weaknesses in the unbiased risk estimator such as overfitting. 
+
+\textbf{Count Loss.\ } To our knowledge, viewing the computation of the ``bag posterior'' as \emph{probabilistic} is new. However, the prior approaches do this implicitly. Many approaches have tried to approximate the ``bag posterior'' by averaging the instance-level probabilities in a bag \citep{ardehaly2017co, tsai2020learning}. In MIL settings, among instance-level approaches, the MIL-pooling is an implicit ``bag posterior'' computation. These include mean, max, and log-sum-exp pooling to approximate the likelihood that a bag has at least one positive instance \cite{wang2018revisiting}. But again, these are all approximations of what our computation does \emph{exactly}. In PU Learning, to our best knowledge, the view of unlabeled data as a bag annotated with the mixture proportion is new.
+
+\textbf{Neuro-Symbolic Losses.\ } In this paper, we have dealt with a specific form of distributional constraint.
+Conversely, there has been a plethora of work exploring the integration of \emph{hard} symbolic constraints
+into the learning of neural networks.
+This can take the form of enforcing a hard constraint~\citep{AhmedNeurIPS22}, whereby the network's
+predictions are guaranteed to satisfy the pre-specified constraints. Or it can take the form of a soft constraint~\citep{xu2018semantic, manhaeve2018, AhmedArxiv21b, Ahmed2022neuro, AhmedAAAI22, AhmedAISTATS23} whereby the network is trained with an additional loss term that penalizes the network for placing any probability mass on predictions that violate the constraint.
+While in this work we focus on discrete linear inequality constraints defined over binary variables, there is existing work focusing on hybrid linear inequality constraints defined over both discrete and continuous variables and their tractability~\citep{belle2015probabilistic,ZengTPM21,zeng2020probabilistic}. The development of inference algorithms for such constraints and their applications such as Bayesian deep learning remain an active topic~\citep{zeng2019efficient,kolb2019pywmi,zeng2020scaling, zeng2023collapsed}.
+
+\begin{table*}[t]
+    \caption{LLP results across different bag sizes. We report the mean and standard deviation of the test AUC over $5$ seeds for each setting. The highest metric for each setting is shown in \textbf{boldface}.
+    }
+    
+    \centering
+    \title{Label Proportion Results with $L1$.}\label{tab:data}
+    \renewcommand{\arraystretch}{1.1}
+    \resizebox{\textwidth}{!}{%
+    \footnotesize
+    \small
+    \begin{tabular}{lllllll}
+      \toprule %
+      \bfseries Dataset & \bfseries Dist & \bfseries Method & 8 & 32 & 128 & 512 \\
+      \midrule %
+      Adult & $[0, \frac{1}{2}]$ & PL & $0.8889 \pm 0.0024$ & $0.8782 \pm 0.0036$ & $\textbf{0.8743} \pm \textbf{0.0039}$ & $0.8678 \pm 0.0085$\\
+      Adult & $[0, \frac{1}{2}]$ & LMMCM & $0.8728 \pm 0.0019$&$0.8693\pm0.0047$&$0.8669\pm0.0041$&$0.8674\pm0.0040$\\
+      Adult & $[0, \frac{1}{2}]$ & \oursprincipled & $\textbf{0.8984} \pm \textbf{0.0013}$ & $\textbf{0.8848} \pm \textbf{0.0041}$ & $\textbf{0.8743} \pm \textbf{0.0052}$ & $\textbf{0.8703} \pm \textbf{0.0070}$\\
+      \midrule %
+      Adult & $[\frac{1}{2}, 1]$ & PL & $0.8781 \pm 0.0038$ & $0.8731 \pm 0.0035$ & $\textbf{0.8699} \pm \textbf{0.0057}$ & $0.8556 \pm 0.0180$\\
+      Adult & $[\frac{1}{2}, 1]$ & LMMCM & $0.8584 \pm 0.0164$&$0.8644\pm0.0052$&$0.8601\pm0.0045$&$0.8500\pm 0.0186$\\
+      Adult & $[\frac{1}{2}, 1]$ & \oursprincipled & $\textbf{0.8854} \pm \textbf{0.0022}$ & $\textbf{0.8738} \pm \textbf{0.0039}$ & $0.8675 \pm 0.0043$ & $\textbf{0.8607} \pm \textbf{0.0056}$\\
+      \midrule
+      Adult & $[0, 1]$ & PL & $0.8884 \pm 0.0030$ & $0.8884 \pm 0.0008$ & $\textbf{0.8879} \pm \textbf{0.0025}$ & $\textbf{0.8828} \pm \textbf{0.0051}$\\
+      Adult & $[0, 1]$ & LMMCM & $0.8831\pm 0.0026$&$0.8819\pm0.0006$&$0.8821\pm0.0017$&$0.8786\pm0.0052$\\
+      Adult & $[0, 1]$ & \oursprincipled & $\textbf{0.8985} \pm \textbf{0.0010}$ & $\textbf{0.8891} \pm \textbf{0.0013}$ & $0.8871 \pm 0.0021$ & $0.8790 \pm 0.0056$\\
+      \midrule %
+      Magic & $[0, \frac{1}{2}]$ & PL & $0.8900 \pm 0.0095$ & $0.8510 \pm 0.0032$ & $0.8405 \pm 0.0110$ & $0.8332 \pm 0.0149$\\
+      Magic & $[0, \frac{1}{2}]$ & LMMCM & $0.8918 \pm 0.0077$&$0.8799\pm0.0113$&$0.8753\pm0.0157$& $0.8734\pm 0.0092$\\
+      Magic & $[0, \frac{1}{2}]$ & \oursprincipled & $\textbf{0.9088} \pm \textbf{0.0056}$ & $\textbf{0.8830} \pm \textbf{0.0097}$ & $\textbf{0.8926} \pm \textbf{0.0049}$ & $\textbf{0.8864} \pm \textbf{0.0107}$\\
+      \midrule %
+      Magic & $[\frac{1}{2}, 1]$ & PL & $0.9066 \pm 0.0016$ & $0.8818 \pm 0.0108$ & $0.8769 \pm 0.0101$ & $0.8429 \pm 0.0443$\\
+      Magic & $[\frac{1}{2}, 1]$ & LMMCM & $0.8911 \pm 0.0083$&$0.8790\pm0.0091$&$0.8684\pm0.0046$&$0.8567\pm 0.0292$\\
+      Magic & $[\frac{1}{2}, 1]$ & \oursprincipled & $\textbf{0.9105} \pm \textbf{0.0020}$ & $\textbf{0.8980} \pm \textbf{0.0059}$ & $\textbf{0.8851} \pm \textbf{0.0255}$ & $\textbf{0.8816} \pm \textbf{0.0083}$\\
+      \midrule %
+      Magic & $[0, 1]$ & PL & $0.9039 \pm 0.0029$ & $0.8870 \pm 0.0037$ & $0.9002 \pm 0.0092$ & $0.8807 \pm 0.0200$\\
+      Magic & $[0, 1]$ & LMMCM & $0.9070 \pm 0.0026$&$0.9048 \pm 0.0058$&$0.9113 \pm 0.0058$&$0.8934 \pm 0.0097$\\
+      Magic & $[0, 1]$ & \oursprincipled & $\textbf{0.9173} \pm \textbf{0.0018}$ & $\textbf{0.9102} \pm \textbf{0.0057}$ & $\textbf{0.9146} \pm \textbf{0.0051}$ & $\textbf{0.9088} \pm \textbf{0.0039}$\\
+      \bottomrule %
+    \end{tabular}}
+\label{tab: LLP main}
+\end{table*}
+
+
+
+\section{Experiments}
+\label{sec: experiments}
+
+In this section, we present a thorough empirical evaluation of our proposed count loss on the three weakly supervised learning problems, \emph{LLP}, \emph{MIL}, and \emph{PU learning}.\footnote{Code and experiments are available at \url{https://github.com/UCLA-StarAI/CountLoss}}
+We refer the readers to the appendix for additional experimental details.
+
+\subsection{Learning from Label Proportions}
+
+We experiment on two datasets: 
+1) \emph{Adult} with $8192$ training samples where the task is to predict whether a person makes over $50k$ a year or not given personal information as input;
+2) \emph{Magic Gamma Ray Telescope} with $6144$ training samples where the task is to predict whether the electromagnetic shower is caused by primary gammas or not given information from the atmospheric Cherenkov gamma telescope \citep{Dua:2019}.\footnote{Publicly available at \url{archive.ics.uci.edu/ml}}
+
+We follow \citet{NEURIPS2020_fcde1491} 
+where two settings are considered: one with label proportions uniformly on $[0, \frac{1}{2}]$ and the other uniformly on $[\frac{1}{2}, 1]$.
+Additionally, we experiment on a third setting with label proportions distributing uniformly on $[0, 1]$ which is not considered in \citet{NEURIPS2020_fcde1491} but is the most natural setting since the label proportion is not biased toward either $0$ or $1$.
+We experiment on four bag sizes $n \in \{8, 32, 128, 512\}$. 
+
+Count loss~(CL) denotes our proposed approach using the loss objective defined in Table~\ref{tb: task comparison} for LLP. 
+We compare our approach with a mutual contamination framework for LLP (LMMCM)~\citep{NEURIPS2020_fcde1491}
+and against Proportion Loss~(PL)~\citep{tsai2020learning}.
+
+\begin{table*}[t]
+    \caption{MIL experiment on the MNIST dataset. Each block represents a different distribution from which we draw bag sizes---First Block: $\mathcal{N}(10, 2)$, Second Block: $\mathcal{N}(50, 10)$, Third Block: $\mathcal{N}(100, 20)$. We run each experiment for $3$ runs and report mean test AUC with standard error. The highest metric for each setting is shown in \textbf{boldface}.
+    }
+    \centering
+    \small
+    \begin{adjustbox}{max width=1.0\textwidth}
+    \begin{tabular}{lllllllll}
+      \toprule %
+      \bfseries Training Bags & \bfseries $50$ & \bfseries $100$ & \bfseries $150$ &\bfseries $200$ &\bfseries $300$ &\bfseries $400$ &\bfseries $500$  \\
+      \midrule %
+      Gated Attention & $0.775 \pm 0.034$ & $0.894 \pm 0.012$ & $0.935 \pm 0.005$ & $0.939 \pm 0.006$ & $\textbf{0.963} \pm \textbf{0.002}$ & $0.959 \pm 0.002$ & $\textbf{0.966} \pm \textbf{0.003}$\\
+      Attention & $0.807 \pm 0.026$ & $\textbf{0.913} \pm \textbf{0.006}$ & $\textbf{0.940} \pm \textbf{0.004}$ & $0.942 \pm 0.007$ & $0.957 \pm 0.002$ & $0.961 \pm 0.005$ & $0.965 \pm 0.004$\\
+      \oursprincipled& $\textbf{0.818 }\pm \textbf{0.024}$ & $0.906 \pm 0.009$ & $0.929 \pm 0.005$ & $\textbf{0.946} \pm \textbf{0.001}$ & $0.952 \pm 0.004$ & $\textbf{0.962} \pm \textbf{0.002}$ & $0.963 \pm 0.002$\\
+      \midrule %
+      Gated Attention & $\textbf{0.943} \pm \textbf{0.005}$ & $0.949 \pm 0.009$ & $\textbf{0.970} \pm \textbf{0.005}$ & $\textbf{0.977} \pm \textbf{0.001}$ & $0.983 \pm 0.002$ & $0.986 \pm 0.004$ & $\textbf{0.987} \pm \textbf{0.002}$\\
+      Attention & $0.936 \pm 0.010$ & $\textbf{0.962} \pm \textbf{0.006}$ & $\textbf{0.970} \pm \textbf{0.001}$ & $\textbf{0.977} \pm \textbf{0.002}$ & $0.981 \pm 0.002$ & $\textbf{0.987} \pm \textbf{0.001}$ & $\textbf{0.987} \pm \textbf{0.002}$\\
+      \oursprincipled & $0.939 \pm 0.010$ & $0.960 \pm 0.002$ & $0.964 \pm 0.007$ &$0.972 \pm 0.002$ & $\textbf{0.982} \pm \textbf{0.003}$ & $0.982 \pm 0.001$ & $\textbf{0.987} \pm \textbf{0.002}$\\
+      \midrule %
+      Gated Attention & $0.975 \pm 0.003$ & $0.981 \pm 0.004$ & $0.992 \pm 0.002$ & $0.987 \pm 0.004$ & $\textbf{0.996} \pm \textbf{0.001}$ & $\textbf{0.998} \pm \textbf{0.001}$ & $0.990 \pm 0.004$\\
+      Attention & $\textbf{0.984} \pm \textbf{0.001}$ & $0.982 \pm 0.001$ & $\textbf{0.996} \pm \textbf{0.000}$ & $0.987 \pm 0.007$ & $0.992 \pm 0.004$ & $0.994 \pm 0.002$ & $0.998 \pm 0.000$\\
+      \oursprincipled & $0.981 \pm 0.007$ & $\textbf{0.989} \pm \textbf{0.000}$ & $\textbf{0.996} \pm \textbf{0.002}$ & $\textbf{0.995} \pm \textbf{0.001}$ & $\textbf{0.996} \pm \textbf{0.002}$ & $0.993 \pm 0.003$ & $\textbf{0.999} \pm \textbf{0.001}$\\
+      \bottomrule %
+    \end{tabular}
+    \end{adjustbox}
+\label{tab:MIL results}
+\end{table*}
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{table*}[t]
+    \caption{MIL: We report mean test accuracy, AUC, F$1$, precision, and recall averaged over $5$ runs with std.\ error on the Colon Cancer dataset. The highest value for each metric is shown in \textbf{boldface}.
+    }
+    \centering
+    \begin{adjustbox}{max width=1.0\textwidth}
+    \small
+    \begin{tabular}{lllllll}
+      \toprule %
+      \bfseries Method & \bfseries Accuracy & \bfseries AUC & \bfseries F$1$  & \bfseries Precision  &\bfseries Recall \\
+      \midrule %
+      Gated Attention& $0.909 \pm 0.014$ & $0.908 \pm 0.013$ & $0.886 \pm 0.021$ & $0.916 \pm 0.020$ & $0.879 \pm 0.020$\\
+      Attention& $0.893 \pm 0.015$ & $0.890 \pm 0.008$ & $0.876 \pm 0.017$ & $0.908 \pm 0.016$ & $0.879 \pm 0.018$\\
+      \midrule
+      \oursprincipled & $\textbf{0.915} \pm \textbf{0.008}$ & $\textbf{0.912} \pm \textbf{0.010}$ & $\textbf{0.903} \pm \textbf{0.010}$ & $\textbf{0.936} \pm \textbf{0.014}$ & $\textbf{0.898} \pm \textbf{0.007}$\\
+      \bottomrule %
+    \end{tabular}
+    \end{adjustbox}
+\label{tab:MIL2}
+\end{table*}
+
+
+\textbf{Results and Discussions} We show our results in Table \ref{tab: LLP main}. Our method showcases superior results against the baselines on both datasets and variations in bag sizes. Especially in cases with lower bag sizes, \ie $8, 32$, CL greatly outperforms all other methodologies.
+Among our baselines are methods that approximate the bag posterior~(PL), which we show to be less effective than optimizing the exact bag posterior with CL. 
+
+\begin{figure}
+  \centering
+  \raggedleft
+  \includegraphics[width=0.47\textwidth]{fig/Low_Bag_Graphs_MIL/10_MNIST4.pdf}
+  \hfill
+  \includegraphics[width=0.50\textwidth]{fig/Low_Bag_Graphs_MIL/5_MNIST4.pdf}
+  \caption{MIL MNIST dataset experiments with decreased numbers of training bags and lower bag size. Left: bag sizes sampled from $\mathcal{N}(10, 2)$; Right: bag sizes sampled from $\mathcal{N}(5, 1)$. We plot the mean test AUC~(aggregated over $3$ trials) with standard errors for $4$ bag sizes.
+  Best viewed in color. \vinay{Not sure what the change is here.}   
+  }
+  \label{fig: MIL lowered bags}
+    \vspace{-1em}
+\end{figure}
+
+\subsection{Multiple Instance Learning}
+
+We first experiment on the MNIST dataset~\citep{lecun1998mnist}
+and follow the MIL experimental setting in \citet{ilse2018attention}:
+the training and test set bags are randomly sampled from the MNIST training and test set respectively; 
+each bag can have
+images of digits from $0$ to $9$,
+and bags with the digit $9$ are labeled positive.
+Moreover, the dataset is constructed in a balanced way such that there is
+an equal amount of positively and negatively labeled bags as in~\citet{ilse2018attention}.
+The task is to train a classifier that is able to predict bag labels; the more challenging task is to \emph{discover key instances}, that is, to train a classifier that identifies images of digit $9$. Following~\citet{ilse2018attention},
+we consider three settings that vary in the bag generation process:
+in each setting, bags have their sizes generated from a normal distribution being $\mathcal{N}(10, 2), \mathcal{N}(50, 10), \mathcal{N}(100, 20)$ respectively.
+The number of bags in training set $n$ is in $\{50, 100, 150, 200, 300, 400, 500\}$. Thus, we have $3 \times 7 = 21$ settings in total.
+Additionally,
+we introduce experimental analysis on \emph{how the performance of the learning methods would degrade as the number of bags and total samples in training set decreases},
+by modulating the number of training bags $n$ to be $\{10, 20, 30, 40\}$ and selecting bag sizes from $\mathcal{N}(5, 1)$ and $\mathcal{N}(10, 2)$.
+\begin{wrapfigure}{r}{0.58\textwidth}
+\centering
+\begin{adjustbox}{max width=0.58\columnwidth}
+\begin{minipage}[t]{\columnwidth}
+\centering
+\begin{minipage}{0.09\columnwidth}
+\centering
+\includegraphics[width=\columnwidth]{fig/MIL_Mnist/0.pdf} \\
+\large $< 10^{-6}$
+\end{minipage}
+\hfill
+\fbox{
+\begin{minipage}{0.09\columnwidth}
+\centering
+\includegraphics[width=\columnwidth]{fig/MIL_Mnist/1.pdf} \\
+\large $0.9997$
+\end{minipage}
+}
+\hfill
+\begin{minipage}{0.09\columnwidth}
+\centering
+\includegraphics[width=\columnwidth]{fig/MIL_Mnist/2.pdf} \\
+\large $< 10^{-6}$
+\end{minipage}
+\hfill
+\begin{minipage}{0.09\columnwidth}
+\centering
+\includegraphics[width=\columnwidth]{fig/MIL_Mnist/3.pdf} \\
+\large $< 10^{-6}$
+\end{minipage}
+\hfill
+\begin{minipage}{0.10\columnwidth}
+\centering
+\includegraphics[width=\columnwidth]{fig/MIL_Mnist/4.pdf} \\
+\large $6\times10^{-6}$
+\end{minipage}
+\hfill
+\begin{minipage}{0.09\columnwidth}
+\centering
+\includegraphics[width=\columnwidth]{fig/MIL_Mnist/5.pdf} \\
+\large $< 10^{-6}$
+\end{minipage}
+\hfill
+\begin{minipage}{0.09\columnwidth}
+\centering
+\includegraphics[width=\columnwidth]{fig/MIL_Mnist/6.pdf} \\
+\large $< 10^{-6}$
+\end{minipage}
+\\[10pt]
+\begin{minipage}{0.09\columnwidth}
+\centering
+\includegraphics[width=\columnwidth]{fig/MIL_Mnist/7.pdf} \\
+\large $< 10^{-6}$
+\end{minipage}
+\hfill
+\begin{minipage}{0.09\columnwidth}
+\centering
+\includegraphics[width=\columnwidth]{fig/MIL_Mnist/8.pdf} \\
+\large $< 10^{-6}$
+\end{minipage}
+\hfill
+\begin{minipage}{0.09\columnwidth}
+\centering
+\includegraphics[width=\columnwidth]{fig/MIL_Mnist/9.pdf} \\
+\large $< 10^{-6}$
+\end{minipage}
+\hfill
+\begin{minipage}{0.09\columnwidth}
+\centering
+\includegraphics[width=\columnwidth]{fig/MIL_Mnist/10.pdf} \\
+\large $< 10^{-6}$
+\end{minipage}
+\hfill
+\setlength{\fboxrule}{1.5pt}
+\setlength{\fboxsep}{0.5pt}
+\fbox{
+\begin{minipage}{0.09\columnwidth}
+\centering
+\includegraphics[width=\columnwidth]{fig/MIL_Mnist/12.pdf} \\
+\large $1.0000$
+\end{minipage}
+}
+\hfill
+\begin{minipage}{0.09\columnwidth}
+\centering
+\includegraphics[width=\columnwidth]{fig/MIL_Mnist/11.pdf} \\
+\large $< 10^{-6}$
+\end{minipage}
+\end{minipage}
+\end{adjustbox}
+\caption{A test bag from our MIL experiments, where we set only the digit $9$ as a positive instance. 
+Highlighted in red are digits identified to be positive with corresponding probability beneath.
+}
+\label{fig: MIL mnist}
+\vspace{-1.5em}
+\end{wrapfigure}
+
+We also experiment on the Colon Cancer dataset \citep{2016colon} to simulate a setting where bag instances are not independent. The dataset consists of $100$ total hematoxylin-eosin~(H\&E) stained images, each of which contains images of cell nuclei that are classified as one of: epithelial, inflammatory, fibroblast, and miscellaneous. Each image represents a bag and instances are $27 \times 27$ patches extracted from the original image. A positively labeled bag or image is one that contains the epithelial nuclei.
+For both datasets, we include the Attention and Gated Attention mechanism~\citep{ilse2018attention} as baselines. We also use the MIL objective defined in Table \ref{tb: task comparison}.
+
+
+\textbf{Results and Discussions} 
+For the MNIST experiments, CL is able to outperform all other baselines or exhibit highly comparable performance for bag-level predictions as shown in Table~\ref{tab:MIL results}. 
+A more interesting setting is to compare how robust the learning methods are if the number of training bags decreases.
+\citet{wang2018revisiting} claim that instance-level classifiers tend to lose against embedding-based methods. However, we show in our experiment that this is not true in all cases as seen in Figure~\ref{fig: MIL lowered bags}.
+While Attention and Gated Attention are based on embedding,
+they suffer from a more severe drop in predictive performance than CL when the number of training bags drops from $40$ to $10$;
+our method shows great robustness and consistently outperforms all baselines. The rationale we provide is that with a lower number of training instances, we need more supervision over the limited samples we have. Our constraint provides this additional supervision, which accounts for the difference in performance.
+
+We provide an additional investigation~in Figure~\ref{fig: MIL mnist} to show that our approach learns effectively and delivers accurate instance-level predictions under bag-level supervision. In Figure~\ref{fig: MIL mnist}, we can see that even though the classifier is trained on feedback about whether a bag contains the digit $9$ or not, it accurately discovers all images of digit $9$. To reinforce this, Table \ref{tab:MIL results instance} and Table \ref{tab:MIL results instance 2}, in Appendix \ref{appendix: MIL instance}, show that our approach outperforms existing instance-space methods on instance-level classification.
+
+Our experimental results on the Colon Cancer dataset are shown in Table~\ref{tab:MIL2}. We show that both our proposed objectives are able to consistently outperform baseline methods on all metrics. 
+Interestingly, we do not expect CL to perform well when instances in a bag are dependent; however, the results indicate that our count loss is robust to these settings.
+
+\begin{table*}[t]
+    \caption{PU Learning: We report accuracy and standard deviation on a test set of unlabeled data, which is aggregated over $3$ runs. The results from CVIR, nnPU, and uPU are aggregated over $10$ epochs, as in \citet{garg2021mixture}, while we choose the single best epoch based on validation for our approaches. The highest metric for each setting is shown in \textbf{boldface}.
+    }
+    \centering
+    \begin{adjustbox}{max width=1.0\textwidth}
+    \begin{tabular}{llllllll}
+      \toprule %
+      \bfseries Dataset & \bfseries Network & \bfseries \oursexpected & \bfseries \oursprincipled  & \bfseries CVIR  &\bfseries nnPU &\bfseries nPU  \\
+      \midrule %
+      Binarized MNIST & MLP & $95.9 \pm 0.15$ & $\textbf{96.4} \pm \textbf{0.01}$ & $96.3 \pm 0.07$ & $96.1 \pm 0.14$ & $95.2 \pm 0.19$\\
+      MNIST17 & MLP & $98.7 \pm 0.17$ & $\textbf{99.0} \pm \textbf{0.19}$ & $98.7 \pm 0.09$ & $98.4 \pm 0.20$ & $98.4 \pm 0.09$\\
+      Binarized CIFAR & ResNet & $79.2 \pm 0.27$ & $80.1 \pm 0.34$ & $\textbf{82.3} \pm \textbf{0.18}$ & $77.2 \pm 1.03$ & $76.7 \pm 0.74$\\
+      CIFAR Cat vs. Dog & ResNet & $\textbf{76.5} \pm \textbf{1.86}$& $74.8 \pm 1.64$ & $73.3 \pm 0.94$ &  $71.8 \pm 0.33$ & $68.8 \pm 0.53$\\
+      \bottomrule %
+    \end{tabular}
+    \end{adjustbox}
+\label{tab:PU}
+\end{table*}
+
+
+\begin{wrapfigure}{r}{0.5\textwidth}
+\vspace{-0.5em}
+  \centerline{
+  \begin{minipage}{0.5\textwidth}
+  \centerline{
+  \includegraphics[width=0.9\textwidth, trim= 30 0 0 0]
+  {fig/PU_Learning/Dist_plot_v3.pdf}
+  }
+  \caption{MNIST17 setting for PU Learning: We compute the average discrete distribution for CL and CVIR, over $5$ test bags, each of which contain $100$ instances. A ground truth binomial distribution of counts is also shown.
+  }
+    \label{fig:PU Dist}
+
+  \end{minipage}
+  }
+  \vspace{-1.5em}
+\end{wrapfigure}
+
+
+
+
+
+\vspace{0.8em}
+\subsection{Learning from Positive and Unlabeled Data}
+We experiment on dataset MNIST and CIFAR-10 \citep{2009CIFAR}, following the four simulated settings from \citet{garg2021mixture}:
+1) Binarized MNIST: the training set consist of images of digits $0-9$ and images with digits in range $[0, 4]$ are positive instances while others as negative;
+2) MNIST17: the training set consist of images of digits $1$ and $7$ and images with digit $1$ are defined as positive while $7$ as negative;
+3) Binarized CIFAR: the training set consists of images from ten classes and images from the first five classes is defined as positive instances while others as negative;
+4) CIFAR Cat vs. Dog: the training set consist of images of cats and dogs and images of cats are defined as positive while dogs as negative.
+The mixture proportion is $0.5$ in all experiments. 
+The performance is evaluated using the accuracy on a test set of unlabeled data. 
+
+
+As shown in Table~\ref{tb: task comparison}, we propose two objectives for PU learning. Our first objective is denoted by CL whereas the second approach is denoted by CL-expect.
+We compare against the Conditional Value Ignoring Risk approach~(CVIR)~\cite{garg2021mixture},
+nnPU~\cite{kiryo2017positive}, and uPU~\cite{pmlr-v37-plessis15}. 
+
+
+\textbf{Results and Discussions} Accuracy results are presented in Table \ref{tab:PU} where we can see that
+our proposed methods perform better than baselines on $3$ out of the $4$ simulated PU learning settings. 
+CL-expect builds off a similar ``exactly-k'' count approach, which we have shown to work well in the label proportion setting. 
+The more interesting results are from CL
+where we fully leverage the information from a distribution as supervision instead of simply using the expectation.
+We think of this as applying a loss on each count weighted by their probabilities from the binomial distribution. 
+We provide further evidence that our proposed count loss effectively guides the classifier towards predicting a binomial distribution
+as shown in Figure \ref{fig:PU Dist}: 
+we plot the count distributions predicted by CL and CVIR as well as the ground-truth binomial distribution.
+We can see that CL is able to generate the expected distribution, proving the efficacy of our approach.
+
+
+\section{Conclusions}
+In this paper, we present a unified approach to several weakly-supervised tasks, i.e., LLP, MIL, PU. We construct our approach based on the idea of using weak labels to constrain count-based probabilities computed from model outputs. A future direction for our work can be to extend to multi-class classification as well as explore the applicability to other weakly-supervised settings, e.g. label noise learning, semi-supervised learning, and partial label learning \cite{cour2011partial, natarajan2011, zhu2005semi}. 
+
+\section*{Acknowledgments}
+We would like to thank Yuhang Fan for helpful discussions.
+This work was funded in part by the DARPA PTG Program under award HR00112220005, the DARPA ANSR program under award FA8750-23-2-0004, 
+NSF grants \#IIS-1943641, \#IIS-1956441, \#CCF-1837129, and a gift from RelationalAI. GVdB discloses a financial interest in RelationalAI. ZZ is supported by an Amazon Doctoral Student Fellowship. 
+
+
+
+
+\bibliography{references}
+\clearpage
+\appendix
+\section{Proofs}
+\label{sec:proofs}
+\begin{lemma}
+\label{thm: lemma}
+Let $\risk_{\llp}$ be our risk estimator defined over $p(\x, \weaky)$ as
+$\risk_{\llp}(\f) = \frac{1}{k(k + 1)} \E_{p(\x^k, \weaky)}[\loss(\f(\x), \by)]$.
+Following the assumptions in Section~3.1 from \citet{kobayashi2022risk},
+our proposed method is risk-consistent.
+\end{lemma}
+\begin{proof}
+In~\citet{kobayashi2022risk},
+it is shown that the risk $\risk$ in classical multi-class classification can be reduced to a risk $\risk_{\mathit{rc}}$ over $p(\x^k, \weaky^k)$ as shown in Equation~1 in \citet{kobayashi2022risk} under certain assumptions.
+
+Consider binary classification and follow our notations, we rewrite the Equation~1 in \citet{kobayashi2022risk} as below,
+\begin{equation*}
+\begin{split}
+    \risk_{\mathit{rc}}
+    &(\f) = 
+    \frac{1}{k(k + 1)} \E_{p(\x^k, \weaky)} \\
+    &\sum_{\by \in \outputspace^k} 
+    \frac{\prod_{j = 1}^k p(\y_j \mid \x_j)}{\sum\limits_{\by^\prime \in \outputspace^k, \sum_j \y_j^\prime = \weaky} \prod_{j=1}^k p(\y_j^\prime \mid \x_j)}
+    ~\loss(\f(\x^k), \by)
+\end{split}
+\end{equation*}
+We notice that the weight term attached to the loss can be further rewritten as a constrained probability as follows,
+\begin{equation*}
+    \frac{\prod_{j = 1}^k p(\y_j \mid \x_j)}{\sum\limits_{\by^\prime \in \outputspace^k, \sum_j \y_j^\prime = \weaky} \prod_{j=1}^k p(\y_j^\prime \mid \x_j)} 
+    = p(\by \mid \sum_{j = 1}^k \y_j = \weaky, \x^k)
+\end{equation*}
+
+This allows us to further rewrite the risk $\risk_{\mathit{rc}}$ with likelihood loss being 
+$\loss(\f(\x^k), \by) = - p(\sum_{j = 1}^k \y_j = k\weaky \mid \x^k)$:
+\begin{align*}
+    &\risk_{\mathit{rc}}
+    (\f)
+    = \frac{1}{k(k + 1)} \E_{p(\x^k, \weaky)} \\
+    &\left[- \sum_{\by \in \outputspace^k} 
+    p(\by \mid \sum_{j = 1}^k \y_j = k\weaky, \x^k)
+    p(\sum_{j = 1}^k \y_j = k\weaky \mid \x^k) \right] \\
+    &= \frac{1}{k(k + 1)} \E_{p(\x^k, \weaky)}
+    \left[- \sum_{\by \in \outputspace^k} 
+    p(\by, \sum_{j = 1}^k \y_j = k\weaky \mid \x^k) \right] \\
+    &= \frac{1}{k(k + 1)} \E_{p(\x^k, \weaky)}
+    \left[- p(\sum_{j = 1}^k \y_j = k\weaky \mid \x^k)\right] \\
+    &= \frac{1}{k(k + 1)} \E_{p(\x^k, \weaky)} [\loss(\f(\x^k), \by)]
+    = \risk_{\llp}(\f)
+\end{align*}
+The last few lines follow from the definition of conditional probabilities.
+This shows that the risk $\risk_{rc}(\f) = \risk_{\llp}(\f)$, meaning that the reduction from risk $\risk_{rc}(\f)$ to the classical risk $\risk(\f)$ in \citet{kobayashi2022risk} is applicable to our risk estimator $\risk_{\llp}$,
+which proves that our learning method is risk-consistent.
+\end{proof}
+
+
+\begin{proposition}
+\emph{
+Assume that the loss function $\loss(\f(\x), \y)$ is $\rho$-Lipschitz with respect to $\f(\x)$ for any $\y \in \outputspace$ bounded by some constant.
+Let $\f_{\llp}$ be the hypothesis that minimizes the empirical risk, and $\f^*_{\llp}$ is the hypothesis that minimizes the true risk,
+then $\f_{\llp}$ converges to $\f^*_{\llp}$ as $m \rightarrow \infty$.
+}
+\end{proposition}
+\begin{proof}
+This claim immediately follows Lemma~\ref{thm: lemma},
+where we shows that $\risk_{\mathit{rc}}(\f) = \risk_{\llp}(\f)$.
+Therefore, it holds that $\risk_{\llp}(\hat{\f}) - \risk_{\llp}(\f^*) = \risk_{\mathit(sc)}(\hat{\f}) - \risk_{\mathit(sc)}(\f^*)$,
+where the latter term, an always positive term, is shown in Theorem~3.1 in \citet{kobayashi2022risk} that it converges to $0$ at rate $\sqrt{m}$.
+\end{proof}
+
+
+
+
+
+
+\textbf{Proposition~\ref{eq: tractable constraint probability}}
+\emph{
+The count probability $p(\sum_{i = 1}^k \pred_i = \labelsum)$ of sampling $k$ prediction variables with summation being $\labelsum$ from an unconstrained distribution $p(\by) = \prod_{i = 1}^k p(\pred_i)$ can be computed exactly in time $\bigO(k\labelsum)$.
+Moreover, 
+the set $\{ p(\sum_{i = 1}^k \pred_i = \labelsum) \}_{s = 0}^k$ can also be computed in time $\bigO(k^2)$.
+}
+
+\begin{proof}
+The claim that $p(\sum_{i = 1}^k \pred_i = \labelsum)$ can be computed exactly in time $\bigO(k\labelsum)$ follows immediately from Proposition~1 in \citet{simple2023}:
+in \citet{simple2023}, the unconstrained distribution is a factorized distribution obtained from $k$ outputs from a single neural network model while in our case, the unconstrained distribution $p(\by)$ is obtained from applying a classifier that gives a single output $p(\y_i)$ on $k$ inputs;
+the constructive proof of Proposition~1 in \citet{simple2023} still applies in our case.
+Moreover, the computation of $p(\sum_{i = 1}^k \pred_i = k)$ is done in a dynamic programming manner in the sense that for any $\labelsum < k$, $p(\sum_{i = 1}^k \pred_i = \labelsum)$ is an intermediate result for computing $p(\sum_{i = 1}^k \pred_i = k)$.
+By caching the intermediate result, the set $\{ p(\sum_{i = 1}^k \pred_i = \labelsum) \}_{s = 0}^k$ can be obtained by the time $p(\sum_{i = 1}^k \pred_i = k)$ is computed, which finishes our proof.
+\end{proof}
+
+
+
+\section{Instance MIL Experimental Results}
+\label{appendix: MIL instance}
+In this section, we provide results for instance level feedback in the MIL setting. The baselines that we used in our experiments, Gated-Attention and Attention are both examples of embedding based approaches and do not make instance-level predictions. We compare against one baseline approach, which is based on Instance-Max from \citet{ilse2018attention}. This uses the maximum instance probability as an approximation for the "positiveness" of a bag. We then train it with a binary cross entropy. Note that max pooling is stated in the literature as the best performing option and makes the “most sense” in the MIL setting \cite{ilse2018attention, wang2018revisiting}.
+\begin{table*}[h]
+    \caption{MIL experiment on MNIST dataset on instance-level classification. Each block represents a different distribution from which we draw bag sizes---First Block: $\mathcal{N}(10, 2)$, Second Block: $\mathcal{N}(50, 10)$, Third Block: $\mathcal{N}(100, 20)$. We run each experiment for $3$ runs and report mean test accuracy with standard error. We bold the highest value and both if the standard-errors overlap.
+    }
+    \centering
+    \Large
+    \begin{adjustbox}{max width=1.0\textwidth}
+    \begin{tabular}{cccccccc}
+      \toprule %
+      \bfseries Training Bags & \bfseries $50$ & \bfseries $100$ & \bfseries $150$ &\bfseries $200$ &\bfseries $300$ &\bfseries $400$ &\bfseries $500$  \\
+      \midrule %
+      Instance-Max & $0.8714 \pm 0.0015$ & $0.9577 \pm 0.0096$ & $0.9494 \pm 0.0232$ & $\textbf{0.9845} \pm \textbf{0.0009}$ & $0.9885 \pm 0.0004$ & $\textbf{0.9903} \pm \textbf{0.0008}$ & $0.9908 \pm 0.0004$\\
+      \oursprincipled& $\textbf{0.9551}\pm \textbf{0.0055}$ & $\textbf{0.9780} \pm \textbf{0.0015}$ & $\textbf{0.9826} \pm \textbf{0.0014}$ & $\textbf{0.9864} \pm \textbf{0.0005}$ & $\textbf{0.9906} \pm \textbf{0.0001}$ & $\textbf{0.9905} \pm \textbf{0.0007}$ & $\textbf{0.9916} \pm \textbf{0.0003}$\\
+      \midrule %
+      Instance-Max & $0.9398 \pm 0.0010$ & $0.9415 \pm 0.0008$ & $0.9513 \pm 0.0113$ & $0.9686 \pm 0.0123$ & $\textbf{0.9849} \pm \textbf{0.0010}$ & $0.9848 \pm 0.0008$ & $\textbf{0.9867} \pm \textbf{0.0008}$\\
+      \oursprincipled & $\textbf{0.9732} \pm \textbf{0.0009}$ & $\textbf{0.9776} \pm \textbf{0.0009}$ & $\textbf{0.9799} \pm \textbf{0.0010}$ &$\textbf{0.9816} \pm \textbf{0.0005}$ & $\textbf{0.9839} \pm \textbf{0.0013}$ & $\textbf{0.9864} \pm \textbf{0.0006}$ & $\textbf{0.9865} \pm \textbf{0.0014}$\\
+      \midrule %
+      Instance-Max & $0.9446 \pm 0.0007$ & $0.9462 \pm 0.0005$ & $0.9583 \pm 0.0076$ & $0.9700 \pm 0.0035$ & $0.9750 \pm 0.0017$ & $0.9776 \pm 0.0008$ & $0.9695 \pm 0.0097$\\
+      \oursprincipled & $\textbf{0.9695} \pm \textbf{0.0010}$ & $\textbf{0.9717} \pm \textbf{0.0011}$ & $\textbf{0.9759} \pm \textbf{0.0013}$ & $\textbf{0.9764} \pm \textbf{0.0006}$ & $\textbf{0.9780} \pm \textbf{0.0001}$ & $\textbf{0.9805} \pm \textbf{0.0008}$ & $\textbf{0.9798} \pm \textbf{0.0003}$\\
+      \bottomrule %
+    \end{tabular}
+    \end{adjustbox}
+\label{tab:MIL results instance}
+\end{table*}
+\begin{table*}[h]
+    \caption{MIL experiment on MNIST dataset on instance-level classification. Each block represents a different distribution from which we draw bag sizes---First Block: $\mathcal{N}(10, 2)$, Second Block: $\mathcal{N}(50, 10)$, Third Block: $\mathcal{N}(100, 20)$. We run each experiment for $3$ runs and report mean test AUC with standard error. We bold the highest value and both if the standard-errors overlap. 
+    }
+    \centering
+    \Large
+    \begin{adjustbox}{max width=1.0\textwidth}
+    \begin{tabular}{cccccccc}
+      \toprule %
+      \bfseries Training Bags & \bfseries $50$ & \bfseries $100$ & \bfseries $150$ &\bfseries $200$ &\bfseries $300$ &\bfseries $400$ &\bfseries $500$  \\
+      \midrule %
+      Instance-Max & $0.4904 \pm 0.0054$ & $0.8171 \pm 0.0465$ & $0.7740 \pm 0.1072$ & $0.9288 \pm 0.0064$ & $0.9460 \pm 0.0022$ & $\textbf{0.9562} \pm \textbf{0.0037}$ & $0.9603 \pm 0.0016$\\
+      \oursprincipled& $\textbf{0.8341} \pm \textbf{0.0135}$ & $\textbf{0.9040} \pm \textbf{0.0146}$ & $\textbf{0.9291} \pm \textbf{0.0070}$ & $\textbf{0.9394} \pm \textbf{0.0005}$ & $\textbf{0.9571} \pm \textbf{0.0021}$ & $\textbf{0.9592} \pm \textbf{0.0029}$ & $\textbf{0.9647} \pm \textbf{0.0012}$\\
+      \midrule %
+      Instance-Max & $0.4956 \pm 0.0007$ & $0.4965 \pm 0.0003$ & $0.5960 \pm 0.0821$ & $\textbf{0.7297} \pm \textbf{0.0959}$ & $\textbf{0.8566} \pm \textbf{0.0088}$ & $0.8554 \pm 0.0080$ & $\textbf{0.8733} \pm \textbf{0.0048}$\\
+      \oursprincipled & $\textbf{0.7518} \pm \textbf{0.0090}$ & $\textbf{0.7900} \pm \textbf{0.0081}$ & $\textbf{0.8125} \pm \textbf{0.0106}$ &$\textbf{0.8261} \pm \textbf{0.0064}$ & $\textbf{0.8473} \pm \textbf{0.0064}$ & $\textbf{0.8717} \pm \textbf{0.0063}$ & $\textbf{0.8709} \pm \textbf{0.0120}$\\
+      \midrule %
+      Instance-Max & $0.4974 \pm 0.0002$ & $0.5007 \pm 0.0016$ & $0.6170 \pm 0.0571$ & $0.7099 \pm 0.0311$ & $0.7546 \pm 0.0164$ & $0.7792 \pm 0.0080$ & $0.7102 \pm 0.0867$\\
+      \oursprincipled & $\textbf{0.7008} \pm \textbf{0.0077}$ & $\textbf{0.7214} \pm \textbf{0.0102}$ & $\textbf{0.7617} \pm \textbf{0.0130}$ & $\textbf{0.7673} \pm \textbf{0.0059}$ & $\textbf{0.7832} \pm \textbf{0.0011}$ & $\textbf{0.8085} \pm \textbf{0.0084}$ & $\textbf{0.8007} \pm \textbf{0.0032}$\\
+      \bottomrule %
+    \end{tabular}
+    \end{adjustbox}
+\label{tab:MIL results instance 2}
+\end{table*}
+
+Our results show that for bags of size less than or equal to $150$, our method greatly improves upon the baseline and is better for bag sizes greater than or equal to $200$. We notice that across both methods, performance goes down as bag size increases; we expect this because we have less supervision on positive bags (at least $1$ label is less meaningful for bigger bags). However, our approach is able to recover this gap compared to the baseline methodology. In the case of less overall training bags, less than $150$ training bags, we find that Instance-max really suffers on AUC while our objective guides the model to learning something more meaningful—showcasing the robustness of our methodology.
+\section{Experimental Details}
+In this section, we will provide relevant training details as it relates to each of our settings including hyperparameters and dataset details.
+\begin{table*}[h]
+    \centering
+     \caption{Illustration of Adult and Magic datasets showing the number of training bags for each bag size. Note that we test on the same number of instances in all variations of bag size for both experiments: $16280$ for Adult and $3804$ for Magic. The breakdown of training bags is the same across all distributions of label proportion as well, i.e., $[0, \frac{1}{2}]$, $[\frac{1}{2}, 1]$, $[0, 1]$.  }
+    \begin{tabular}{ccc}
+        \toprule
+        Bag Size & Training Bags Adult & Training Bags Magic \\
+         \midrule
+         8 & 1024 & 768\\
+         32 & 256 & 192\\
+         128 & 64 & 48\\
+         512 & 16 & 12\\
+        \bottomrule
+    \end{tabular}
+   
+    \label{tab:adult magic dataset}
+\end{table*}
+
+\subsection{Label Proportion}
+\subsubsection{Adult Dataset}
+\paragraph{Hyperparameters.}We use a learning rate of $0.00001$ with the Adam Optimizer and $\beta_1 = 0.9, \beta_2 = 0.999$. The weight decay value is set to $0.001$. We also notice that adding in $L1$ regularization of $0.001$ improved the performance of our method. We train for $10000$ epochs and use a set number of warm epochs for our experiments. All parameters were obtained by using a holdout of $12.5\%$ of training data for validation on the $[0, 1]$ uniform setting. The network shown in Table \ref{tab:Adult Net} was also obtained grid search on this same validation set.
+\begin{table*}[h]
+    \centering
+    \caption{Network used for Adult dataset in LLP Experiments.}
+    \begin{tabular}{c|c}
+        \toprule
+         Layer & Type\\
+         \midrule
+         1 & fc - 2048 + ReLU\\
+         2 & fc - 64 + ReLU\\
+         3 & fc - 1 + logsigmoid\\
+        \bottomrule
+    \end{tabular}\\
+    \label{tab:Adult Net}
+\end{table*}
+
+\textbf{Training Procedure.} For CL, we use the parameters and network described in the previous paragraph and early stopping criterion based on validation loss from a held out validation set ($12.5\%$ of training data). For PL, we use the parameters and network except that we do not use $L1$ as we found this improves performance. We also use an early stopping criterion based on validation loss from a held out validation set ($12.5\%$ of training data).
+
+\paragraph{Computing Resources.} Trained on Intel(R) Xeon(R) CPU E5-2640 v4 @ 2.40GHzU and AMD EPYC 7313P 16-Core Processor CPU.
+
+\subsubsection{Magic Dataset}
+
+\paragraph{Hyperparameters.}
+We use a learning rate of $0.0001$ with the Adam Optimizer and $\beta_1 = 0.9, \beta_2 = 0.999$. The weight decay value is set to $0.001$. We also notice that adding in $L1$ regularization of $0.001$ improved the performance of our method. We train for $10000$ epochs and use a set number of warm epochs for our experiments. All parameters were obtained by using a holdout of $12.5\%$ of training data for validation on the $[0, 1]$ uniform setting. The network shown in Table \ref{tab:Magic Net} was also obtained grid search on this same validation set.
+\begin{table*}[h]
+    \centering
+    \caption{Network used for Magic dataset in LLP Experiments.}
+    \begin{tabular}{c|c}
+        \toprule
+         Layer & Type\\
+         \midrule
+         1 & fc - 2048 + ReLU\\
+         2 & fc - 1 + logsigmoid\\
+        \bottomrule
+    \end{tabular}
+    \label{tab:Magic Net}
+\end{table*}
+\paragraph{Training Procedure.} For CL, we use the parameters and network described in the previous paragraph and early stopping criterion based on validation loss from a held out validation set ($12.5\%$ of training data). For PL, we use the parameters and network except that we do not use $L1$ regularization as we found this improves performance. We also use an early stopping criterion based on validation loss from a held out validation set ($12.5\%$ of training data). In Table \ref{tab: LLP main}, there are two instances where we reran our method with no validation set, i.e. Magic $[0, \frac{1}{2}]$ and Magic $[\frac{1}{2}, 1]$ because early stopping proved to be unstable with a small amount of validation samples. In these experiments, we only use $87.5\%$ of training data and ran for a fixed number of epochs: $2000$. This is because with only one validation bag, we can find ourselves with some instability in the training procedure. Note that PL did not benefit from rerunning with this method. 
+
+\paragraph{Computing Resources.} Trained on Intel(R) Xeon(R) CPU E5-2640 v4 @ 2.40GHzU and AMD EPYC 7313P 16-Core Processor CPU.
+
+\subsection{Multi-Instance Learning}
+\subsubsection{MNIST-Bags}
+\paragraph{Dataset Details.} We experiment on various modulations of training bag size and number of training bags. In the main experiment, we draw bag size from: $\{\mathcal{N}(10, 2), \mathcal{N}(50, 10), \mathcal{N}(100, 20)\}$ and modulate number of training bags from $\{50, 100, 150, 200, 300, 400, 500\}$. In total, this makes $21$ different settings. In our follow up experiment where we limit the number of training bags and overall bag size, we draw bag size from: $\{\mathcal{N}(5, 1), \mathcal{N}(10, 2)\}$. For each experiment, we sample $1000$ test bags with size coorelating to the normal distribution associated.
+
+\paragraph{Hyperparameters.} All of our hyperparameters derive from \citet{ilse2018attention}. This includes using the Adam optimizer with $\beta_1 = 0.9, \beta_2 = 0.999$, a learning rate of $0.0005$, weight decay of $0.0001$, and max epochs of $200$. For the main experiment, we use a validation holdout of $20\%$ to find a class weight for balancing the loss on positive bags versus negative bags. (We omit this step for our limited data experiments.)
+\begin{table*}[h]
+    \centering
+    \caption{Network used for all MNIST experiments in MIL settings. Derived from the same network shown in \citet{ilse2018attention}.}
+    \begin{tabular}{c|c}
+        \toprule
+         Layer & Type\\
+         \midrule
+         1 & conv(5, 1, 0) - 20 + ReLU\\
+         2 & maxpool(2, 2)\\
+         3 & conv(5, 1, 0) - 50 + ReLU\\
+         4 & maxpool(2, 2)\\
+         5 & fc-500 + ReLU\\
+         6 & fc-1 + logsigmoid\\
+        \bottomrule
+    \end{tabular}
+
+\end{table*}
+
+\paragraph{Training Procedure.} For CL, we train on all the training data for the maximum number of iterations: $200$. We also use all of the hyperparameters described in the last paragraph and \citet{ilse2018attention}. Because we were unable to reproduce the values in \citet{ilse2018attention} for the Attention and Gated Attention mechanisms, we reran their experiments with our own implementation. To try and reproduce their results, we follow their optimization procedure. Specifically, we use a holdout of training data~($20 \%$) and validation loss + error for early stopping. We found that doing so provided the best values for Attention and Gated Attention.
+
+\paragraph{Instance Pooling.}To pool together instance level classification at the final stage, there are several operations that have been considered in the literature. Some include using the max and mean operator \cite{wang2018revisiting}. We propose a new method based on our constraint. We compute the relevant probabilities defined in \ref{sec: A Unified Approach} for the MIL setting. More specifically, we compute the probability that a bag has at least one positive instance. We then round the probability of at least one positive instance to obtain our bag level classification.
+
+\paragraph{Computing Resources.} Trained on AMD EPYC 7313P 16-Core Processor CPU.
+
+\subsubsection{Colon Cancer Dataset}
+\paragraph{Dataset Details.} The dataset consists of $100$ H\&E images of which we use $99$ of them. There are a total of $51$ positive bags and $48$ negative bags. We use a series of data augmentations including flipping, cropping, and rotation\footnote{Refer to https:\slash \slash github.com\slash utayao\slash Atten\_Deep\_MIL for the preprocessed data generation code}. Note that these data augmentations do not align with those in the original paper by \citet{ilse2018attention}, so we reran their baseline methods.
+
+\paragraph{Hyperparameters.} We derive our set of hyperparameters from \citet{ilse2018attention}. We use the Adam optimizer for all experiments with $\beta_1 = 0.9, \beta_2 = 0.999$. This includes weight decay of $0.0005$, learning rate of $0.0001$, and a maximum of $100$ epochs.
+
+\begin{table*}[h]
+    \centering
+    \caption{MIL: Network used for CL in colon cancer dataset. Derived from the same network shown in \citet{ilse2018attention}.}
+    \begin{tabular}{c|c}
+        \toprule
+         Layer & Type\\
+         \midrule
+         1 & conv(4, 1, 0) - 36 + ReLU\\
+         2 & maxpool(2, 2)\\
+         3 & conv(3, 1, 0) - 48 + ReLU\\
+         4 & maxpool(2, 2)\\
+         5 & fc-512 + ReLU\\
+         6 & dropout\\
+         7 & fc - 512 + ReLU\\
+         8 & dropout\\
+         9 & fc-2 + logsigmoid\\
+        \bottomrule
+    \end{tabular}
+
+\end{table*}
+
+
+\paragraph{Training Procedure.} We perform $10$-fold cross-validation and average the mean value of each metric over $5$ seeds. For CL, we do not use early stopping and train on all data for the maximum number of epochs using the hyperparameters mentioned in the previous paragraph. For our baselines, Attention and Gated-Attention, we use the same hyperparameters as mentioned above. However, we follow the optimization procedure detailed in \citet{ilse2018attention} to give try and reproduce the results given in the paper. This involves using a held out validation set for early stopping with validation loss + error as the stopping criteria. For this experiment, this validation set is assumed to be the size of $1$ fold or one-ninth of the training data. (We find that including early stopping helps increase performance for both baselines.)
+
+\paragraph{Computing Resources.} Trained on NVIDIA RTX A$6000$ GPU.
+
+
+
+
+\subsection{PU Learning}
+\subsubsection{MNIST Dataset}
+\paragraph{Dataset Details.} Our settings derive from \citet{garg2021mixture}. We construct two main datasets from the original MNIST dataset. This includes the Binarized MNIST and MNIST-$17$ as detailed in Table \ref{tab:PU dataset}. In the Binarized MNIST setting, we assign digits $[0 - 4]$ as positive and $[5 - 9]$ as negative. In the MNIST-$17$ setting, we assign digit $1$ as positive and $7$ as negative. The test set for both settings are chosen from a set of unlabeled data.
+
+\begin{table*}[h]
+    \centering
+    \caption{Network used for MNIST data in PU Learning experiments. Resembles the network in \citet{garg2021mixture} except we replace the last layer with a single output and logsigmoid instead of softmax.}
+    \begin{tabular}{c|c}
+        \toprule
+         Layer & Type\\
+         \midrule
+         1 & fc - 5000 + ReLU\\
+         2 & fc - 5000 +  ReLU\\
+         3 & fc - 50 + ReLU \\
+         4 & fc-1 + logsigmoid\\
+         \bottomrule
+    \end{tabular}
+    \label{tab:PU MLP1}
+\end{table*}
+
+\paragraph{Hyperparameters.} We fix weight decay to be $0.0005$ and Adam optimizer for all experiments with $\beta_1 = 0.9, \beta_2 = 0.999$. We use a learning rate of $0.0001$ and train for a maximum of $2000$ epochs in all experiments for both CL and CL-expect. We use a validation set with size equal to $10\%$ of training data in order to weigh the loss on positive data versus loss on unlabeled data.
+
+
+
+\paragraph{Training Procedure.}For MNIST dataset experiments, we use a fully connected multi-layer perceptron~(MLP) defined in Table \ref{tab:PU MLP1}. We train CL and CL-expect with the hyperparameters defined in the previous paragraph. Furthermore, we use a held out validation set, equivalent to $10\%$ of training data, for early stopping. While as results in \citet{garg2021mixture} are aggregated over $10$ epochs, we choose to pick a single epoch based on our early stopping as this makes the most sense for our optimization technique.
+
+\paragraph{Computing Resources.} Trained on a singular NVIDIA RTX $2080$-Ti GPU.
+
+\begin{table*}[h]
+    \centering
+    \caption{Table taken almost directly from \citet{garg2021mixture}. Table shows the break down of the various simulated PU datasets that we train on.}
+    \begin{tabular}{ccccccc}
+        \toprule
+         Dataset & Simulated PU Dataset & P vs N & \multicolumn{2}{c}{Training} & Test\\
+         & & & Positive & Unlabeled & Unlabeled\\ 
+         \midrule
+         \multirow{2}{*}{CIFAR} & Binarized CIFAR & $[0 - 4]$ vs. $[5 - 9]$ & $12500$ & $12500$ & $2500$\\
+         & CIFAR Cat vs. Dog & $3$ vs. $5$ & $3000$ & $3000$ & $500$\\
+         \multirow{2}{*}{MNIST} & Binarized MNIST & $[0 - 4]$ vs. $[5 - 9]$ & $15000$ & $15000$ & $2500$\\
+         & MNIST-$17$ & $1$ vs. $7$ & $3000$ & $3000$ & $500$\\
+         \bottomrule
+    \end{tabular}
+    \label{tab:PU dataset}
+\end{table*}
+
+\subsubsection{CIFAR Dataset.} 
+\paragraph{Dataset Details.} Our settings derive from \citet{garg2021mixture}. We construct two main datasets from the original CIFAR dataset. This includes the Binarized CIFAR and CIFAR Cat vs. Dog as detailed in Table \ref{tab:PU dataset}. In the Binarized CIFAR setting, we assign classes $[0 - 4]$ as positive and classes $[5 - 9]$ as negative. In the CIFAR Cat vs. Dog setting, we assign Cats~(class $3$) as positive and Dogs~(class $5$) as negative. The test set for both settings are chosen from a set of unlabeled data.
+
+\paragraph{Hyperparameters.} We fix weight decay to be $0.0005$ and Adam optimizer for all experiments with $\beta_1 = 0.9, \beta_2 = 0.999$. We use a learning rate of $0.0001$ for all experiments except for CL-expect in the CIFAR Cat vs. Dog setting where we use $0.001$. We use a validation set with size equal to $10\%$ of training data in order to weigh the loss on positive data versus loss on unlabeled data.
+
+\paragraph{Training Procedure.} We use a ResNet-$18$ architecture for all CIFAR experiments. We train CL and CL-expect with the hyperparameters defined in the previous paragraph. Furthermore, we use a held out validation set, equivalent to $10\%$ of training data, for early stopping. While as results in \citet{garg2021mixture} are aggregated over $10$ epochs, we choose to pick a single epoch as this makes the most sense for our optimization technique. 
+
+\paragraph{Computing Resources.} Trained on a singular NVIDIA $2080$-Ti GPU.
+
+\subsubsection{Early Stopping}
+The early stopping procedure that we used in our experiments was a bit unique. Using our holdout of validation data, we do early stopping using the proximity to the class prior and validation loss to break ties. We can imagine that if we perfectly identify all positive and unlabeled samples and then calculate accuracy against the actually provided labels, we would get an accuracy equivalent to the class prior. This is because all the positive samples in the unlabeled set would be labeled incorrect. 
+
+\section{Limitations} 
+In MIL, one assumption that our approach makes is that the label distribution of instances within a bag are independent. This is a common assumption in the literature as stated in \citet{carbonneau2018multiple}. However, in most practical scenarios, this assumption does not hold. Through empirical validation we show that while this is true, our method can still outperform state of the art benchmarks on the Colon Cancer dataest \cite{2016colon}, which violates the independence assumption~(Table \ref{tab:MIL2}). 
+In PU Learning, our approaches—CL and CL-expect—assume that the batch of data is sufficiently large such that the distribution is roughly binomial. Note that CL-expect relies on the expected value of the binomial distribution while as CL relies on the entire distribution. If the batch of data was too small, this assumption would certainly degrade as batch-to-batch variance would make our loss unsuitable.  
+
+\section{Broader Impact}
+We provide a unified framework to count-based weakly supervised learning.
+One benefit enjoyed by our approach is that it does not necessitate the 
+presence of instance labels, and is therefore privacy preserving.
+In many of our settings, we show that we can still train a strong instance
+level classifier even with these weak bag-level annotations.
+Another important use case that we have not fully explored in this paper is 
+debiasing classifiers through using our proportion loss as a regularization term.
+If we know the expected class priors, we can penalize any bias in the classifiers predictions.
+Care should be taken however since, just as our approach can be used to de-bias 
+classifiers, it can also be used by a malicious actor to bias them.
+\end{document}

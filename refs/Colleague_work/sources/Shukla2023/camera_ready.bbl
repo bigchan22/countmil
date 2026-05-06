@@ -1,0 +1,414 @@
+\begin{thebibliography}{59}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Ahmed et~al.(2021)Ahmed, Wang, Chang, and Van~den
+  Broeck]{AhmedArxiv21b}
+Kareem Ahmed, Eric Wang, Kai-Wei Chang, and Guy Van~den Broeck.
+\newblock Leveraging unlabeled data for entity-relation extraction through
+  probabilistic constraint satisfaction, mar 2021.
+
+\bibitem[Ahmed et~al.(2022{\natexlab{a}})Ahmed, Li, Ton, Guo, Chang,
+  Kordjamshidi, Srikumar, Van~den Broeck, and Singh]{AhmedAAAI22}
+Kareem Ahmed, Tao Li, Thy Ton, Quan Guo, Kai-Wei Chang, Parisa Kordjamshidi,
+  Vivek Srikumar, Guy Van~den Broeck, and Sameer Singh.
+\newblock Pylon: A pytorch framework for learning with constraints.
+\newblock In \emph{Proceedings of the 36th AAAI Conference on Artificial
+  Intelligence (Demo Track)}, feb 2022{\natexlab{a}}.
+
+\bibitem[Ahmed et~al.(2022{\natexlab{b}})Ahmed, Teso, Chang, Van~den Broeck,
+  and Vergari]{AhmedNeurIPS22}
+Kareem Ahmed, Stefano Teso, Kai-Wei Chang, Guy Van~den Broeck, and Antonio
+  Vergari.
+\newblock Semantic probabilistic layers for neuro-symbolic learning.
+\newblock In \emph{Advances in Neural Information Processing Systems 35
+  (NeurIPS)}, dec 2022{\natexlab{b}}.
+
+\bibitem[Ahmed et~al.(2022{\natexlab{c}})Ahmed, Wang, Chang, and den
+  Broeck]{Ahmed2022neuro}
+Kareem Ahmed, Eric Wang, Kai-Wei Chang, and Guy~Van den Broeck.
+\newblock Neuro-symbolic entropy regularization.
+\newblock In \emph{The 38th Conference on Uncertainty in Artificial
+  Intelligence}, 2022{\natexlab{c}}.
+
+\bibitem[Ahmed et~al.(2023{\natexlab{a}})Ahmed, Chang, and Van~den
+  Broeck]{AhmedAISTATS23}
+Kareem Ahmed, Kai-Wei Chang, and Guy Van~den Broeck.
+\newblock Semantic strengthening of neuro-symbolic learning.
+\newblock In \emph{Proceedings of the 26th International Conference on
+  Artificial Intelligence and Statistics (AISTATS)}, apr 2023{\natexlab{a}}.
+
+\bibitem[Ahmed et~al.(2023{\natexlab{b}})Ahmed, Zeng, Niepert, and Van~den
+  Broeck]{simple2023}
+Kareem Ahmed, Zhe Zeng, Mathias Niepert, and Guy Van~den Broeck.
+\newblock Simple: A gradient estimator for k-subset sampling.
+\newblock In \emph{Proceedings of the International Conference on Learning
+  Representations (ICLR)}, may 2023{\natexlab{b}}.
+
+\bibitem[Andrews et~al.(2002)Andrews, Tsochantaridis, and
+  Hofmann]{Andrews2002SupportVM}
+Stuart Andrews, Ioannis Tsochantaridis, and Thomas Hofmann.
+\newblock Support vector machines for multiple-instance learning.
+\newblock In \emph{NIPS}, 2002.
+
+\bibitem[Ardehaly and Culotta(2017)]{ardehaly2017co}
+Ehsan~Mohammady Ardehaly and Aron Culotta.
+\newblock Co-training for demographic classification using deep learning from
+  label proportions.
+\newblock In \emph{2017 IEEE International Conference on Data Mining Workshops
+  (ICDMW)}, pages 1017--1024. IEEE, 2017.
+
+\bibitem[Bekker and Davis(2020)]{bekker2020learning}
+Jessa Bekker and Jesse Davis.
+\newblock Learning from positive and unlabeled data: A survey.
+\newblock \emph{Machine Learning}, 109:\penalty0 719--760, 2020.
+
+\bibitem[Belle et~al.(2015)Belle, Passerini, and Van~den
+  Broeck]{belle2015probabilistic}
+Vaishak Belle, Andrea Passerini, and Guy Van~den Broeck.
+\newblock Probabilistic inference in hybrid domains by weighted model
+  integration.
+\newblock In \emph{Proceedings of IJCAI}, pages 2770--2776, 2015.
+
+\bibitem[Blum and Mitchell(1998)]{cotraining1998}
+Avrim Blum and Tom Mitchell.
+\newblock Combining labeled and unlabeled data with co-training.
+\newblock In \emph{Proceedings of the Eleventh Annual Conference on
+  Computational Learning Theory}, COLT' 98, page 92–100, New York, NY, USA,
+  1998. Association for Computing Machinery.
+\newblock ISBN 1581130570.
+\newblock \doi{10.1145/279943.279962}.
+\newblock URL \url{https://doi.org/10.1145/279943.279962}.
+
+\bibitem[Bortsova et~al.(2018)Bortsova, Dubost, {\O}rting, Katramados, Hogeweg,
+  Thomsen, Wille, and de~Bruijne]{bortsova2018deep}
+Gerda Bortsova, Florian Dubost, Silas {\O}rting, Ioannis Katramados, Laurens
+  Hogeweg, Laura Thomsen, Mathilde Wille, and Marleen de~Bruijne.
+\newblock Deep learning from label proportions for emphysema quantification.
+\newblock In \emph{Medical Image Computing and Computer Assisted
+  Intervention--MICCAI 2018: 21st International Conference, Granada, Spain,
+  September 16-20, 2018, Proceedings, Part II 11}, pages 768--776. Springer,
+  2018.
+
+\bibitem[Carbonneau et~al.(2018)Carbonneau, Cheplygina, Granger, and
+  Gagnon]{carbonneau2018multiple}
+Marc-Andr{\'e} Carbonneau, Veronika Cheplygina, Eric Granger, and Ghyslain
+  Gagnon.
+\newblock Multiple instance learning: A survey of problem characteristics and
+  applications.
+\newblock \emph{Pattern Recognition}, 2018.
+
+\bibitem[Cour et~al.(2011{\natexlab{a}})Cour, Sapp, and
+  Taskar]{cour2011learning}
+Timothee Cour, Ben Sapp, and Ben Taskar.
+\newblock Learning from partial labels.
+\newblock \emph{The Journal of Machine Learning Research}, 12:\penalty0
+  1501--1536, 2011{\natexlab{a}}.
+
+\bibitem[Cour et~al.(2011{\natexlab{b}})Cour, Sapp, and
+  Taskar]{cour2011partial}
+Timothee Cour, Ben Sapp, and Ben Taskar.
+\newblock Learning from partial labels.
+\newblock \emph{J. Mach. Learn. Res.}, 12\penalty0 (null):\penalty0
+  1501–1536, jul 2011{\natexlab{b}}.
+\newblock ISSN 1532-4435.
+
+\bibitem[De~Comité et~al.(1999)De~Comité, Denis, Gilleron, and
+  Letouzey]{PUoriginal}
+Francesco De~Comité, François Denis, Rémi Gilleron, and Fabien Letouzey.
+\newblock Positive and unlabeled examples help learning.
+\newblock pages 219--230, 12 1999.
+\newblock ISBN 978-3-540-66748-3.
+\newblock \doi{10.1007/3-540-46769-6_18}.
+
+\bibitem[Dietterich et~al.(2001)Dietterich, Lathrop, and
+  Lozano-Pérez]{dietterich1997musk}
+Thomas Dietterich, Richard Lathrop, and Tomás Lozano-Pérez.
+\newblock Solving the multiple instance problem with axis-parallel rectangles.
+\newblock \emph{Artificial Intelligence}, 89:\penalty0 31--71, 03 2001.
+\newblock \doi{10.1016/S0004-3702(96)00034-3}.
+
+\bibitem[du~Plessis et~al.(2014)du~Plessis, Niu, and
+  Sugiyama]{plessis2014unbiased}
+Marthinus~C du~Plessis, Gang Niu, and Masashi Sugiyama.
+\newblock Analysis of learning from positive and unlabeled data.
+\newblock In Z.~Ghahramani, M.~Welling, C.~Cortes, N.~Lawrence, and K.Q.
+  Weinberger, editors, \emph{Advances in Neural Information Processing
+  Systems}, volume~27. Curran Associates, Inc., 2014.
+
+\bibitem[Dua and Graff(2017)]{Dua:2019}
+Dheeru Dua and Casey Graff.
+\newblock {UCI} machine learning repository, 2017.
+\newblock URL \url{http://archive.ics.uci.edu/ml}.
+
+\bibitem[Fr{\'e}nay and Verleysen(2013)]{frenay2013classification}
+Beno{\^\i}t Fr{\'e}nay and Michel Verleysen.
+\newblock Classification in the presence of label noise: a survey.
+\newblock \emph{IEEE transactions on neural networks and learning systems},
+  25\penalty0 (5):\penalty0 845--869, 2013.
+
+\bibitem[Gal{\'a}rraga et~al.(2015)Gal{\'a}rraga, Teflioudi, Hose, and
+  Suchanek]{galarraga2015fast}
+Luis Gal{\'a}rraga, Christina Teflioudi, Katja Hose, and Fabian~M Suchanek.
+\newblock Fast rule mining in ontological knowledge bases with amie++.
+\newblock \emph{The VLDB Journal}, 24\penalty0 (6):\penalty0 707--730, 2015.
+
+\bibitem[Garg et~al.(2021)Garg, Wu, Smola, Balakrishnan, and
+  Lipton]{garg2021mixture}
+Saurabh Garg, Yifan Wu, Alexander~J Smola, Sivaraman Balakrishnan, and Zachary
+  Lipton.
+\newblock Mixture proportion estimation and pu learning: a modern approach.
+\newblock \emph{Advances in Neural Information Processing Systems},
+  34:\penalty0 8532--8544, 2021.
+
+\bibitem[H{\"u}llermeier(2014)]{hullermeier2014learning}
+Eyke H{\"u}llermeier.
+\newblock Learning from imprecise and fuzzy observations: Data disambiguation
+  through generalized loss minimization.
+\newblock \emph{International Journal of Approximate Reasoning}, 55\penalty0
+  (7):\penalty0 1519--1534, 2014.
+
+\bibitem[Ilse et~al.(2018)Ilse, Tomczak, and Welling]{ilse2018attention}
+Maximilian Ilse, Jakub Tomczak, and Max Welling.
+\newblock Attention-based deep multiple instance learning.
+\newblock In \emph{International conference on machine learning}, pages
+  2127--2136. PMLR, 2018.
+
+\bibitem[Karamanolakis et~al.(2021)Karamanolakis, Mukherjee, Zheng, and
+  Awadallah]{karamanolakis2021self}
+Giannis Karamanolakis, Subhabrata Mukherjee, Guoqing Zheng, and Ahmed~Hassan
+  Awadallah.
+\newblock Self-training with weak supervision.
+\newblock \emph{arXiv preprint arXiv:2104.05514}, 2021.
+
+\bibitem[Kiryo et~al.(2017)Kiryo, Niu, Du~Plessis, and
+  Sugiyama]{kiryo2017positive}
+Ryuichi Kiryo, Gang Niu, Marthinus~C Du~Plessis, and Masashi Sugiyama.
+\newblock Positive-unlabeled learning with non-negative risk estimator.
+\newblock \emph{Advances in neural information processing systems}, 30, 2017.
+
+\bibitem[Kobayashi et~al.(2022)Kobayashi, Mukuta, and
+  Harada]{kobayashi2022risk}
+Ryoma Kobayashi, Yusuke Mukuta, and Tatsuya Harada.
+\newblock Learning from label proportions with instance-wise consistency.
+\newblock \emph{arXiv preprint arXiv:2203.12836}, 2022.
+
+\bibitem[Kolb et~al.(2019)Kolb, Morettin, Zuidberg Dos~Martires, Sommavilla,
+  Passerini, Sebastiani, and De~Raedt]{kolb2019pywmi}
+Samuel Kolb, Paolo Morettin, Pedro Zuidberg Dos~Martires, Francesco Sommavilla,
+  Andrea Passerini, Roberto Sebastiani, and Luc De~Raedt.
+\newblock The pywmi framework and toolbox for probabilistic inference using
+  weighted model integration.
+\newblock In \emph{Proceedings of the Twenty-Eighth International Joint
+  Conference on Artificial Intelligence, {IJCAI}}, pages 6530--6532, 7 2019.
+\newblock \doi{10.24963/ijcai.2019/946}.
+
+\bibitem[Krizhevsky and Hinton(2009)]{2009CIFAR}
+Alex Krizhevsky and Geoffrey Hinton.
+\newblock Learning multiple layers of features from tiny images.
+\newblock Technical Report~0, University of Toronto, Toronto, Ontario, 2009.
+
+\bibitem[LeCun(1998)]{lecun1998mnist}
+Yann LeCun.
+\newblock The mnist database of handwritten digits.
+\newblock 1998.
+
+\bibitem[Letouzey et~al.(2000)Letouzey, Denis, and Gilleron]{PUoriginal2}
+Fabien Letouzey, Fran{\c c}ois Denis, and R{\'e}mi Gilleron.
+\newblock {Learning From Positive and Unlabeled examples}.
+\newblock In \emph{{Proceedings of the 11th International Conference on
+  Algorithmic Learning Theory, ALT'00}}, pages 71--85, Sydney, Australia, 2000.
+  {Springer Verlag}.
+
+\bibitem[Liu et~al.(2023)Liu, Zhu, Shen, Liu, Razavian, Geras, and
+  Fernandez-Granda]{liu2023multiple}
+Kangning Liu, Weicheng Zhu, Yiqiu Shen, Sheng Liu, Narges Razavian, Krzysztof~J
+  Geras, and Carlos Fernandez-Granda.
+\newblock Multiple instance learning via iterative self-paced supervised
+  contrastive learning.
+\newblock In \emph{Proceedings of the IEEE/CVF Conference on Computer Vision
+  and Pattern Recognition}, pages 3355--3365, 2023.
+
+\bibitem[Lu et~al.(2011)Lu, Zhou, Wang, and Xiang]{cotraining2011lu}
+Huchuan Lu, Qiuhong Zhou, Dong Wang, and Ruan Xiang.
+\newblock A co-training framework for visual tracking with multiple instance
+  learning.
+\newblock In \emph{2011 IEEE International Conference on Automatic Face \&
+  Gesture Recognition (FG)}, pages 539--544, 2011.
+\newblock \doi{10.1109/FG.2011.5771455}.
+
+\bibitem[Manhaeve et~al.(2018)Manhaeve, Dumancic, Kimmig, Demeester, and
+  De~Raedt]{manhaeve2018}
+Robin Manhaeve, Sebastijan Dumancic, Angelika Kimmig, Thomas Demeester, and Luc
+  De~Raedt.
+\newblock Deepproblog: Neural probabilistic logic programming.
+\newblock In \emph{NeurIPS}, 2018.
+
+\bibitem[Maron and Lozano-P\'{e}rez(1997)]{MIL1997framework}
+Oded Maron and Tom\'{a}s Lozano-P\'{e}rez.
+\newblock A framework for multiple-instance learning.
+\newblock In M.~Jordan, M.~Kearns, and S.~Solla, editors, \emph{Advances in
+  Neural Information Processing Systems}, volume~10. MIT Press, 1997.
+
+\bibitem[Natarajan et~al.(2013)Natarajan, Dhillon, Ravikumar, and
+  Tewari]{natarajan2011}
+Nagarajan Natarajan, Inderjit~S Dhillon, Pradeep~K Ravikumar, and Ambuj Tewari.
+\newblock Learning with noisy labels.
+\newblock In C.J. Burges, L.~Bottou, M.~Welling, Z.~Ghahramani, and K.Q.
+  Weinberger, editors, \emph{Advances in Neural Information Processing
+  Systems}, volume~26. Curran Associates, Inc., 2013.
+
+\bibitem[Plessis et~al.(2015)Plessis, Niu, and Sugiyama]{pmlr-v37-plessis15}
+Marthinus~Du Plessis, Gang Niu, and Masashi Sugiyama.
+\newblock Convex formulation for learning from positive and unlabeled data.
+\newblock In \emph{Proceedings of the 32nd International Conference on Machine
+  Learning}, volume~37, 2015.
+
+\bibitem[Quadrianto et~al.(2008)Quadrianto, Smola, Caetano, and
+  Le]{quadrianto2008llp}
+Novi Quadrianto, Alex Smola, Tibério Caetano, and Quoc Le.
+\newblock Estimating labels from label proportions.
+\newblock 2008.
+
+\bibitem[Quellec et~al.()Quellec, Cazuguel, Cochener, and
+  Lamard]{quellec2017multiple}
+Gwenol{\'e} Quellec, Guy Cazuguel, B{\'e}atrice Cochener, and Mathieu Lamard.
+\newblock Multiple-instance learning for medical image and video analysis.
+\newblock \emph{IEEE reviews in biomedical engineering}.
+
+\bibitem[Scott and Zhang(2020)]{NEURIPS2020_fcde1491}
+Clayton Scott and Jianxin Zhang.
+\newblock Learning from label proportions: A mutual contamination framework.
+\newblock In H.~Larochelle, M.~Ranzato, R.~Hadsell, M.F. Balcan, and H.~Lin,
+  editors, \emph{Advances in Neural Information Processing Systems}, volume~33,
+  pages 22256--22267. Curran Associates, Inc., 2020.
+
+\bibitem[Sirinukunwattana et~al.(2016)Sirinukunwattana, Raza, Tsang, Snead,
+  Cree, and Rajpoot]{2016colon}
+Korsuk Sirinukunwattana, Shan e~Ahmed Raza, Yee Tsang, David Snead, Ian Cree,
+  and Nasir Rajpoot.
+\newblock Locality sensitive deep learning for detection and classification of
+  nuclei in routine colon cancer histology images.
+\newblock \emph{IEEE Transactions on Medical Imaging}, 35:\penalty0 1--1, 02
+  2016.
+\newblock \doi{10.1109/TMI.2016.2525803}.
+
+\bibitem[Song et~al.(2022)Song, Kim, Park, Shin, and Lee]{song2022learning}
+Hwanjun Song, Minseok Kim, Dongmin Park, Yooju Shin, and Jae-Gil Lee.
+\newblock Learning from noisy labels with deep neural networks: A survey.
+\newblock \emph{IEEE Transactions on Neural Networks and Learning Systems},
+  2022.
+
+\bibitem[Tsai and Lin(2020)]{tsai2020learning}
+Kuen-Han Tsai and Hsuan-Tien Lin.
+\newblock Learning from label proportions with consistency regularization.
+\newblock In \emph{Asian Conference on Machine Learning}, pages 513--528. PMLR,
+  2020.
+
+\bibitem[Wang et~al.(2018)Wang, Yan, Tang, Bai, and Liu]{wang2018revisiting}
+Xinggang Wang, Yongluan Yan, Peng Tang, Xiang Bai, and Wenyu Liu.
+\newblock Revisiting multiple instance neural networks.
+\newblock \emph{Pattern Recognition}, 74:\penalty0 15--24, 2018.
+
+\bibitem[Wojtusiak et~al.(2011)Wojtusiak, Irvin, Birerdinc, and
+  Baranova]{wojtusiak2011using}
+Janusz Wojtusiak, Katherine Irvin, Aybike Birerdinc, and Ancha~V Baranova.
+\newblock Using published medical results and non-homogenous data in rule
+  learning.
+\newblock In \emph{2011 10th International Conference on Machine Learning and
+  Applications and Workshops}, volume~2, pages 84--89. IEEE, 2011.
+
+\bibitem[Xie and Huang(2018)]{xie2018partial}
+Ming-Kun Xie and Sheng-Jun Huang.
+\newblock Partial multi-label learning.
+\newblock In \emph{Proceedings of the AAAI conference on artificial
+  intelligence}, volume~32, 2018.
+
+\bibitem[Xu et~al.(2013)Xu, Tao, and Xu]{xu2013survey}
+Chang Xu, Dacheng Tao, and Chao Xu.
+\newblock A survey on multi-view learning.
+\newblock \emph{arXiv preprint arXiv:1304.5634}, 2013.
+
+\bibitem[Xu et~al.(2018)Xu, Zhang, Friedman, Liang, and Van~den
+  Broeck]{xu2018semantic}
+Jingyi Xu, Zilu Zhang, Tal Friedman, Yitao Liang, and Guy Van~den Broeck.
+\newblock A semantic loss function for deep learning with symbolic knowledge.
+\newblock In \emph{International conference on machine learning}, pages
+  5502--5511. PMLR, 2018.
+
+\bibitem[Yarowsky(1995)]{unsupervisedsup1995}
+David Yarowsky.
+\newblock Unsupervised word sense disambiguation rivaling supervised methods.
+\newblock In \emph{Proceedings of the 33rd Annual Meeting on Association for
+  Computational Linguistics}, ACL '95, page 189–196, USA, 1995. Association
+  for Computational Linguistics.
+\newblock \doi{10.3115/981658.981684}.
+\newblock URL \url{https://doi.org/10.3115/981658.981684}.
+
+\bibitem[Yu et~al.(2014)Yu, Choromanski, Kumar, Jebara, and
+  Chang]{yu2014learning}
+Felix~X Yu, Krzysztof Choromanski, Sanjiv Kumar, Tony Jebara, and Shih-Fu
+  Chang.
+\newblock On learning from label proportions.
+\newblock \emph{arXiv preprint arXiv:1402.5902}, 2014.
+
+\bibitem[Zeng and Broeck(2023)]{zeng2023collapsed}
+Zhe Zeng and Guy Van~den Broeck.
+\newblock Collapsed inference for bayesian deep learning.
+\newblock \emph{arXiv preprint arXiv:2306.09686}, 2023.
+
+\bibitem[Zeng and Van~den Broeck(2019)]{zeng2019efficient}
+Zhe Zeng and Guy Van~den Broeck.
+\newblock Efficient search-based weighted model integration.
+\newblock \emph{Proceedings of UAI}, 2019.
+
+\bibitem[Zeng et~al.(2020{\natexlab{a}})Zeng, Morettin, Yan, Vergari, and
+  Broeck]{zeng2020scaling}
+Zhe Zeng, Paolo Morettin, Fanqi Yan, Antonio Vergari, and Guy Van~den Broeck.
+\newblock Scaling up hybrid probabilistic inference with logical and arithmetic
+  constraints via message passing.
+\newblock In \emph{Proceedings of the International Conference of Machine
+  Learning (ICML)}, 2020{\natexlab{a}}.
+
+\bibitem[Zeng et~al.(2020{\natexlab{b}})Zeng, Morettin, Yan, Vergari, and
+  Van~den Broeck]{zeng2020probabilistic}
+Zhe Zeng, Paolo Morettin, Fanqi Yan, Antonio Vergari, and Guy Van~den Broeck.
+\newblock Probabilistic inference with algebraic constraints: Theoretical
+  limits and practical approximations.
+\newblock \emph{Advances in Neural Information Processing Systems},
+  33:\penalty0 11564--11575, 2020{\natexlab{b}}.
+
+\bibitem[Zeng et~al.(2021)Zeng, Morettin, Yan, Vergari, and Van~den
+  Broeck]{ZengTPM21}
+Zhe Zeng, Paolo Morettin, Fanqi Yan, Antonio Vergari, and Guy Van~den Broeck.
+\newblock Is parameter learning via weighted model integration tractable?
+\newblock In \emph{Proceedings of the UAI Workshop on Tractable Probabilistic
+  Modeling (TPM)}, jul 2021.
+
+\bibitem[Zhou(2018)]{zhou2018brief}
+Zhi-Hua Zhou.
+\newblock A brief introduction to weakly supervised learning.
+\newblock \emph{National science review}, 5\penalty0 (1):\penalty0 44--53,
+  2018.
+
+\bibitem[Zhu and Goldberg(2022)]{zhu2022introduction}
+Xiaojin Zhu and Andrew~B Goldberg.
+\newblock \emph{Introduction to semi-supervised learning}.
+\newblock Springer Nature, 2022.
+
+\bibitem[Zhu(2005)]{zhu2005semi}
+Xiaojin~Jerry Zhu.
+\newblock Semi-supervised learning literature survey.
+\newblock 2005.
+
+\bibitem[Zupanc and Davis(2018)]{zupanc2018estimating}
+Kaja Zupanc and Jesse Davis.
+\newblock Estimating rule quality for knowledge base completion with the
+  relationship between coverage assumption.
+\newblock In \emph{Proceedings of the 2018 World Wide Web Conference}, pages
+  1073--1081, 2018.
+
+\end{thebibliography}

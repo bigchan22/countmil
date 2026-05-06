@@ -1,0 +1,97 @@
+\section{Problem Setup}
+\label{sec:problem-setup}
+
+We study weakly supervised bags of instances.
+A training example is a bag $B=(x_1,\ldots,x_n)$ together with an observed bag label $y$.
+The instance-level variables that explain $y$ are hidden during training and are used only for evaluation.
+The label $y$ may be a binary count, a signed count, an ordinal sum, or a class histogram.
+The common structure is that each instance contributes a finite-support discrete value and the bag label is a sum of these contributions.
+
+The unifying object is the \emph{atomic support}.
+For a one-dimensional task, choose a finite set
+\begin{equation}
+  \mathcal{A}=\{v_0,\ldots,v_{S-1}\}\subset\mathbb{Z},
+\end{equation}
+where $S=|\mathcal{A}|$ is the atomic support size.
+A backbone model produces scores for each instance, and a contribution map turns those scores into an atomic PMF over $\mathcal{A}$.
+Changing $\mathcal{A}$ changes the weak-label problem while leaving the bag-prediction algorithm unchanged:
+$S=2$ gives Bernoulli counts, $S=10$ gives digit sums over $\{0,\ldots,9\}$, and $S=3$ gives signed atoms over $\{-1,0,+1\}$.
+For bag size $n$ and contiguous support $\{0,\ldots,S-1\}$, the aggregate PMF has length
+\begin{equation}
+  T = n(S-1)+1.
+  \label{eq:aggregate-support-width}
+\end{equation}
+Signed supports use the same principle with an offset, and variable-multiplicity atoms use instance-dependent support sizes.
+
+Let $C_i$ denote the latent contribution of instance $x_i$.
+The contribution may also depend on observed side information $a_i$, such as a known sign in signed-count experiments.
+We assume
+\begin{equation}
+  C_i \in \mathcal{S}_i \subset \mathbb{Z}^d,
+  \qquad
+  |\mathcal{S}_i| < \infty,
+\end{equation}
+and the observed aggregate is
+\begin{equation}
+  Y = \sum_{i=1}^n C_i.
+  \label{eq:aggregate-sum}
+\end{equation}
+For most experiments $d=1$.
+For histograms, $d$ can be the number of classes, although our scalable PVC implementation uses one-dimensional one-vs-rest counts.
+The learner observes $(x_{1:n},a_{1:n},y)$ when side information is present, but not the individual $C_i$ values.
+
+\begin{proposition}[Finite-support convolution law]
+\label{prop:finite-support-convolution}
+Let $C_1,\ldots,C_n$ be conditionally independent discrete random variables given a bag $x_{1:n}$ and any observed side information $a_{1:n}$.
+Assume each $C_i$ has finite support $\mathcal{S}_i \subset \mathbb{Z}^d$ and probability mass function
+\begin{equation}
+  d_i(c) =
+  \Pr_\theta(C_i=c \mid x_i,a_i),
+  \qquad c\in\mathbb{Z}^d,
+\end{equation}
+where $d_i(c)=0$ for $c\notin\mathcal{S}_i$.
+Define $Y=\sum_{i=1}^n C_i$.
+Then $Y$ has finite support contained in the Minkowski sum
+\begin{equation}
+  \mathcal{S}_1+\cdots+\mathcal{S}_n
+  =
+  \{c_1+\cdots+c_n : c_i\in\mathcal{S}_i\},
+\end{equation}
+and its probability mass function is the discrete convolution
+\begin{equation}
+  \Pr_\theta(Y=y \mid x_{1:n},a_{1:n})
+  =
+  (d_1 * \cdots * d_n)(y)
+  =
+  \sum_{\substack{c_1\in\mathcal{S}_1,\ldots,c_n\in\mathcal{S}_n\\
+                  c_1+\cdots+c_n=y}}
+  \prod_{i=1}^n d_i(c_i).
+  \label{eq:finite-support-convolution-law}
+\end{equation}
+\end{proposition}
+
+The proposition is a standard probability identity, but making it explicit clarifies the modeling choice.
+Once the atomic contribution distributions $d_i$ are predicted by a neural network, the bag-label distribution is determined exactly by convolution.
+Different weak-label tasks differ mainly in the support $\mathcal{S}_i$ and in which side information is observed.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Weak-label tasks as finite-support contribution models.  The atomic support size $S$ determines the local PMF shape; convolution then gives the aggregate PMF used for the bag label.}
+\label{tab:problem-task-kernels}
+\begin{tabular}{lllll}
+\toprule
+Task & Atomic size $S$ & Contribution support & Bag label & Aggregate width \\
+\midrule
+Binary count & $2$ & $\{0,1\}$ & number of positives & $n+1$ \\
+Ordinal sum & $K$ & $\{0,\ldots,K-1\}$ & scalar sum & $n(K-1)+1$ \\
+Signed count & $3$ & $\{-1,0,+1\}$ & signed sum & $2n+1$ \\
+Multiplicity & $m_i+1$ & $\{0,\ldots,m_i\}$ & total multiplicity & $\sum_i m_i+1$ \\
+OVR/PVC histogram & $2$ per class & $\{0,1\}$ & count of class $c$ & $n+1$ per class \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Binary Count-MIL is therefore the simplest case of Eq.~\eqref{eq:aggregate-sum}; it is not new by itself.
+The broader formulation is useful because signed cancellation, ordinal sums, multiplicity counts, and one-vs-rest histograms can be handled by changing the finite-support atom while keeping the same convolutional bag-prediction principle.
+Bags in our experiments are sampled on the fly with replacement from the corresponding train or test split, so an image may appear in multiple bags, but train and test bags are drawn from disjoint dataset splits.

@@ -382,16 +382,24 @@ Run:
 - Batch size: `8`
 - Test bags: `1000`
 
-Status at 2026-05-06 06:02 UTC:
+Completed status at 2026-05-06:
 
-| Setting | Progress | Current inst. acc. | Current hist MAE | Best-by-hist epoch | Best-by-hist inst. acc. | Best-by-hist hist MAE |
-|---|---:|---:|---:|---:|---:|---:|
-| n64 train250 seed 0 | epoch 211/500 | 0.8064 | 1.1003 | 41 | 0.8091 | 0.9993 |
-| n64 train250 seed 1 | epoch 212/500 | 0.8056 | 1.0912 | 39 | 0.8035 | 1.0267 |
+| Setting | Selection | Seed 0 inst. acc. | Seed 1 inst. acc. | Mean inst. acc. | Mean hist MAE |
+|---|---|---:|---:|---:|---:|
+| n64 train250 | final epoch | 0.8033 | 0.8035 | 0.8034 | 1.115 |
+| n64 train250 | best by hist MAE | 0.8091 | 0.8035 | 0.8063 | 1.013 |
 
-Mean current accuracy is about `0.806`; mean best hidden-instance accuracy so far is about `0.810`.
-This is far below the completed `n16/train1000` final accuracy of about `0.902`, despite matched sampled image instances per epoch.
-The diagnostic suggests the `n64/train1000` gain is likely driven by larger total instance exposure rather than bag size alone.
+Comparison at matched or unmatched sampled image exposure:
+
+| Setting | Total train instances/epoch | Mean final inst. acc. |
+|---|---:|---:|
+| n16 train1000 | 16,000 | 0.9024 |
+| n64 train250 | 16,000 | 0.8034 |
+| n64 train1000 | 64,000 | 0.9145 |
+
+This completed diagnostic is far below the completed `n16/train1000` final accuracy despite matched sampled image instances per epoch.
+It also separates the two effects that were confounded in the earlier comparison: large bags can work well when they expose more total images/aggregate observations, but larger bag size alone is not better under fixed total instance exposure.
+The diagnostic therefore argues against claiming intrinsic large-bag superiority.
 
 ## Current Recommended Paper Claims
 
@@ -402,4 +410,4 @@ The diagnostic suggests the `n64/train1000` gain is likely driven by larger tota
 - Say exact scalar-sum likelihood is more data-efficient than expected-value matching in low-data settings.
 - Say histogram LLP labels are rich and ordinary CE/KL baselines are strong.
 - Say PVC/count likelihood improves over CE/KL proportion matching in completed MNIST histogram experiments, especially for larger bags.
-- Treat CIFAR-10 pretrained ResNet-18 as strong for completed `n=16` and `n=64`, but avoid overclaiming scalability until fixed-budget diagnostics and `n=128` finish.
+- Treat CIFAR-10 pretrained ResNet-18 as strong for completed `n=16/train1000` and `n=64/train1000`, but the completed `n=64/train250` fixed-instance-budget diagnostic argues against claiming larger bags are intrinsically better. Avoid scalability claims until `n=128` and matched-budget baselines finish.

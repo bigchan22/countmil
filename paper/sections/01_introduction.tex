@@ -1,21 +1,51 @@
 \section{Introduction}
 
-Multiple-instance learning (MIL) studies settings where labels are observed at the bag level while instance labels remain latent.
-In classical binary MIL, a positive bag indicates that at least one instance is positive.
-Many weak-supervision settings provide more informative aggregate labels: a count of positive instances, a class histogram, a signed count with cancellation, or an ordinal sum.
-The central problem is to learn an instance-level predictor from these aggregate observations without observing instance labels during training.
+Multiple-instance learning (MIL) studies settings where supervision is observed for a bag while the labels of individual instances remain latent.
+Classical binary MIL uses a positive bag label to indicate that at least one instance is positive.
+Many weak-supervision settings provide more structured aggregate labels: the number of positive instances, a class histogram, a signed count with cancellation, or a scalar ordinal sum.
+The central problem is to learn an instance-level predictor from such aggregate observations without using instance labels during training.
 
 This paper studies aggregate-supervised MIL through finite-support likelihoods.
-Each instance $x_i$ is mapped to a probability mass function over a finite set of integer contributions.
-The observed bag label is an aggregate integer value, so the bag likelihood is the coefficient of the corresponding aggregate value in the convolution of the instance-level atomic PMFs.
-For Bernoulli contributions this recovers the standard count likelihood used in prior count-loss work; the same view directly covers signed counts and ordinal sums.
+Each instance $x_i$ is mapped to a probability mass function over a finite set of integer-valued contributions.
+The observed bag label is an aggregate value, so the bag likelihood is the coefficient of that value in the convolution of the instance-level atomic PMFs.
+For Bernoulli contributions this recovers the standard count probability used in prior count-loss work.
+The same construction also gives exact likelihoods for signed counts, ordinal digit sums, and one-vs-rest class-count objectives.
+We refer to this as atomic PMF generality: the atomic support size and contribution values define the weak-label problem, while the convolutional aggregator is unchanged.
+The interface is deliberately narrow: a backbone model only needs to output instance-level logits or probabilities, after which the aggregate layer converts them into finite-support atomic PMFs and computes the bag likelihood.
+Thus the method is not tied to a particular architecture; changing the weak label changes the contribution map and convolution support, not the backbone.
+
+\input{figures/method_schematic}
+
+The distinction between recovered prior objectives and new uses of the finite-support view is central to our positioning.
+Table~\ref{tab:known-new} summarizes this boundary.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Positioning of the finite-support convolutional view.  Binary Bernoulli counts and one-vs-rest class counts connect directly to prior count-loss and LLP-PVC objectives; the main contribution is the unified likelihood layer and its use for aggregate labels beyond ordinary counts and proportions.}
+\label{tab:known-new}
+\begin{tabular}{p{0.24\linewidth}p{0.34\linewidth}p{0.32\linewidth}}
+\toprule
+Aggregate label & Relation to prior work & Role \\
+\midrule
+Binary count & Recovers Shukla-style Bernoulli count probability & Baseline connection and validation case \\
+Class histogram & Closely related to LLP-PVC one-vs-rest count likelihood & Comparison setting and shared backend \\
+Signed count & Not an ordinary proportion label; cancellation creates many-to-one constraints & Main novelty case \\
+Ordinal sum & Scalar sum over finite ordinal supports; mean matching discards likelihood shape & Main novelty case \\
+Posterior marginals & Exact inference conditioned on the observed count & Instance recovery and diagnostic tool \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 Our contributions are:
 \begin{itemize}
-  \item We formulate Count-MIL as finite-support convolution of instance contribution distributions, recovering Bernoulli count loss as a special case and extending it to signed and ordinal aggregate labels.
-  \item We derive and implement count-conditioned posterior marginals for instance recovery in binary Count-MIL.
-  \item We provide practical GPU implementations, including grouped signed convolution and an FFT-tree backend for large multiclass one-vs-rest count likelihoods.
-  \item We evaluate binary counts, digit sums, signed cancellation-heavy aggregates, FashionMNIST robustness, and multiclass LLP-style histogram supervision.
+  \item We formulate aggregate-supervised Count-MIL as finite-support convolution of instance contribution distributions, explicitly recovering Bernoulli count loss as a special case rather than claiming it as new.
+  \item We show that the same backbone-agnostic likelihood layer extends to signed cancellation aggregates, ordinal digit-sum labels, and one-vs-rest histogram/PVC-style class counts by changing only the finite-support contribution map.
+  \item We derive count-conditioned posterior marginals for instance recovery and uncertainty diagnostics under binary count supervision.
+  \item We implement practical convolutional backends, including grouped signed convolution and a GPU FFT-tree backend that parallelizes large multiclass one-vs-rest PMFs beyond CPU dynamic programming.
+  \item We evaluate hidden-instance recovery across binary, signed, digit-sum, SVHN/UltraMNIST sum, histogram, and CIFAR-10 histogram settings, with cautious comparison to LLP/PVC baselines.
 \end{itemize}
 
-\TODO{Tighten contribution list after final results are selected.}
+Empirically, the clearest evidence comes from aggregate types where expectation or proportion matching is structurally lossy: digit sums and signed cancellation-heavy counts.
+CIFAR-10 serves as a protocol-sensitive external comparison.
+The experiments do not support superiority to fully supervised training, nor do they show that larger bags are intrinsically easier at fixed image-instance exposure.

@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+results/*/N*_*/
+*.DS_Store
+.DS_Store
+~/.cache/pca/
+results/mnist_sum/N*_*/
+results/svhn_sum/N*_*/
+results/ultramnist/N*_*/
+results/mnist_signed/N*_*/

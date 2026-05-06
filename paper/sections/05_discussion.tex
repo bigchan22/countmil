@@ -1,15 +1,21 @@
 \section{Discussion}
 
 The experiments support a hierarchy of aggregate supervision.
+The clearest gains occur when the observed aggregate is not well represented by only an expectation or a class proportion.
 Scalar expected-value matching is weak in low-data digit-sum settings, whereas exact aggregate likelihood can recover accurate instance predictors from the same scalar labels.
-With more training bags and small bags, expected-value baselines can become competitive, so the strongest claim is data efficiency and likelihood fidelity rather than universal dominance.
+With more training bags and small bags, expected-value baselines can become competitive, so the supported claim is data efficiency and likelihood fidelity rather than universal dominance.
+The SVHN-sum and UltraMNIST sum benchmarks strengthen the more basic atomic-support claim: the same aggregator remains useful when the support is fixed at $S=10$ but the image domain and backbone change.
+Together with binary and signed benchmarks, these results support the view that the method is a generic finite-support sum-label layer rather than a collection of task-specific losses.
 Histogram labels are substantially richer, and standard LLP/PVC-style baselines can already be strong.
 On MNIST histogram supervision, however, exact one-vs-rest count likelihood improves over CE/KL proportion matching, especially for larger bags, which suggests that likelihood fidelity still matters even when the aggregate label is rich.
-This distinction is important for positioning: our goal is not to replace every LLP method, but to provide a unified likelihood framework for aggregate labels beyond ordinary class proportions.
+This distinction is important for positioning: our goal is not to replace every LLP method, but to provide a unified likelihood framework for finite-support aggregate labels beyond ordinary binary counts and class proportions.
+The same formulation is also modular with respect to the instance model.
+Backbone choice determines the quality of the atomic PMFs, while the aggregate likelihood is determined by the weak label: binary counts, signed counts, ordinal sums, and one-vs-rest histograms all use the same convolutional bag-prediction interface.
+This modularity is useful computationally as well as conceptually, because the exact aggregate PMF can be evaluated by CPU DP, direct convolution, grouped convolution, or GPU FFT-tree multiplication without changing the statistical objective.
 
 Several limitations remain.
 Large bags can expose calibration issues even when instance ranking is accurate.
 Cancellation-heavy signed aggregates are genuinely ambiguous and require more data.
 CIFAR-scale experiments require matching the backbone initialization and training protocol used by recent LLP work.
-Our pretrained ResNet-18 PVC runs are strong for $n=16$ and $n=64$, but the fixed-instance-budget diagnostic suggests that part of the apparent large-bag gain comes from seeing more image instances per epoch.
-The current evidence therefore supports a cautious claim about effective use of aggregate-labeled image volume, not a stronger claim about intrinsic large-bag superiority or superiority to fully supervised learning at matched annotation budget.
+Pretrained ResNet-18 PVC is effective for $n=16$ and $n=64$, but the fixed-instance-budget comparison shows that the apparent large-bag gain disappears when total sampled image exposure is matched.
+These results therefore support a cautious claim about effective use of aggregate-labeled image volume under a strong representation, not a stronger claim about intrinsic large-bag superiority or superiority to fully supervised learning at matched annotation budget.
