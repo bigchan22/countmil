@@ -4,6 +4,7 @@
 Multiple-instance learning (MIL) studies settings where supervision is observed for a bag while the labels of individual instances remain latent.
 Classical binary MIL uses a positive bag label to indicate that at least one instance is positive.
 Many weak-supervision settings provide more structured aggregate labels: the number of positive instances, a class histogram, a signed count, or a scalar integer-valued sum.
+Such aggregates also arise in theoretical studies in mathematics and physics, where the underlying instance contributions carry combinatorial or algebraic meaning (Appendix~\ref{app:qtlr-origin}).
 The central problem is to learn an instance-level predictor from such aggregate observations without using instance labels during training.
 
 This paper studies aggregate-supervised MIL through a finite-support convolutional aggregator.
