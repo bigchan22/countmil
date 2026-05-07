@@ -47,3 +47,9 @@ The MNIST histogram experiments use batch size 192 for large-bag configurations.
 CIFAR-10 experiments use ResNet-18 backbones.
 The pretrained one-vs-rest count settings use ImageNet-pretrained ResNet-18 with random crop and horizontal flip augmentation, SGD with momentum 0.9, weight decay $10^{-4}$, learning rate $5\times 10^{-4}$, and a cosine learning-rate schedule for 500 epochs.
 The pretrained CIFAR-10 analysis is limited to the evaluated $n=16$ and $n=64$ one-vs-rest count settings.
+
+\paragraph{Compute resources.}
+All reported experiments are run on a single \texttt{TBD} GPU.
+MNIST-family runs (LeNet, 50 epochs) take approximately \texttt{TBD} per configuration;
+CIFAR-10 pretrained ResNet-18 runs (500 epochs, cosine schedule) take approximately \texttt{TBD} per configuration.
+Total compute used for the reported results is approximately \texttt{TBD}.
