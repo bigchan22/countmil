@@ -1,7 +1,7 @@
-\section{Convolutional Bag Prediction}
+\section{Convolutional bag prediction}
 \label{sec:convolutional-bag-prediction}
 
-\subsection{Aggregate Likelihood}
+\subsection{Aggregate likelihood}
 
 Following Definition~\ref{def:finite-support-aggregator}, the instance network and contribution map emit the atomic PMFs $d_i$.
 For one-dimensional contributions, this is a categorical distribution over a finite integer support:
@@ -35,7 +35,7 @@ Second, for any finite support, the likelihood uses the entire induced aggregate
 Thus two instance predictors with the same expected sum can receive different likelihoods if they assign different probability mass to the observed aggregate.
 This is the distinction exploited by the digit-sum and signed-count experiments.
 
-\subsection{Training Objective}
+\subsection{Training objective}
 
 For each minibatch, the instance model and task-specific contribution map first produce atomic PMFs for every instance in every bag.
 The aggregate layer then deterministically maps these atoms to an exact PMF over the observed bag label.
@@ -81,7 +81,7 @@ This is different from expected-value regression baselines, which regress the sc
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Special Cases}
+\subsection{Special cases}
 
 Table~\ref{tab:method-kernels} summarizes the task-specific kernels; the aggregator itself is unchanged.
 
@@ -120,7 +120,7 @@ OVR histogram & $h_c=\sum_i z_{ic}$ & $[1-p_{ic},\;p_{ic}]$ for each class $c$ &
 }
 \end{table}
 
-\subsection{Computational Backends}
+\subsection{Computational backends}
 
 All of the above objectives are one-dimensional convolutions over integer aggregate support.
 If $m^{(i)}$ denotes the aggregate PMF after processing the first $i$ atoms, then

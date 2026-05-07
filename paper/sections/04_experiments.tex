@@ -1,7 +1,7 @@
 \section{Experiments}
 \label{sec:experiments}
 
-\subsection{Experimental Setup}
+\subsection{Experimental setup}
 
 We evaluate finite-support aggregation under five aggregate-label themes:
 \begin{enumerate}
@@ -28,7 +28,7 @@ Rows labelled MSE denote MSE training objectives; MAE and accuracy columns are e
 Columns labelled instance accuracy use held-out instance labels only for evaluation, never for training.
 Instance accuracy is never used for model selection unless explicitly stated.
 
-\subsection{Ordinal Sum Labels}
+\subsection{Ordinal sum labels}
 
 Digit-sum supervision is an integer-valued aggregate label: the learner observes a single scalar while each hidden instance label has ten possible values.
 Here $z_i$ is the original MNIST digit value in $\{0,\ldots,9\}$ and the bag label is $Y_{\rm sum}=\sum_i z_i$.
@@ -67,7 +67,7 @@ SVHN and UltraMNIST support the same conclusion beyond MNIST: pretraining makes 
 On SVHN with $5000$ bags, the pretrained exact-likelihood model reaches $95.46\%$ hidden digit accuracy and $65.00\%$ exact sum accuracy, while the pretrained MSE baseline reaches $82.58\%$ hidden digit accuracy and $22.58\%$ exact sum accuracy.
 UltraMNIST gives a controlled patch-based benchmark with high hidden digit recovery.
 
-\subsection{Signed Aggregates with Cancellation}
+\subsection{Signed aggregates with cancellation}
 
 Signed counts test an aggregate that is not reducible to ordinary class proportions.
 We again use the digit-$9$ target indicator, but each instance carries a known random sign; target-digit images contribute $+1$ or $-1$, while all other digits contribute $0$.
@@ -106,7 +106,7 @@ FashionMNIST shows the same pattern beyond MNIST: MSE is close in instance recov
 The CIFAR-10 pretrained probes further show that signed finite-support aggregation can recover target-class detectors in a harder natural-image setting, reaching instance AUCs of $98.23\%$ for $n=16$ and $99.19\%$ for $n=64$.
 This setting is a direct example of why finite-support aggregation is not only a reformulation of ordinary nonnegative counts: cancellation changes the inverse problem even when the hidden instance variable remains Bernoulli.
 
-\subsection{Recovery of Bernoulli Count Loss}
+\subsection{Recovery of Bernoulli count loss}
 
 Binary Count-MIL validates the connection to prior count-loss work.
 For MNIST-Bags, we make MNIST binary by choosing digit $9$ as the positive class and treating digits $0$--$8$ as negative.
@@ -129,7 +129,7 @@ MNIST & $50/5000$ & exact count & $0.460$ & $0.991$ \\
 \end{tabular}
 \end{table}
 
-\subsection{Class Histograms and LLP Connections}
+\subsection{Class histograms and LLP connections}
 
 Histogram supervision is included mainly to connect the proposed finite-support view to recent LLP-PVC work.
 For MNIST histograms, the hidden category is the original digit class and the observed label is the vector of digit counts in the bag.
@@ -182,7 +182,7 @@ However, the $n=64$, train $1000$ setting exposes four times as many image insta
 The fixed-instance-budget setting, $n=64$ with $250$ train bags, reaches only about $80.3\%$ final instance accuracy and $80.6\%$ when selecting by observed histogram MAE.
 Thus the CIFAR-10 results should be read as evidence that count likelihood can use aggregate-labeled image volume effectively under a strong representation, not as evidence that larger bags are intrinsically superior.
 
-\subsection{Backend Runtime}
+\subsection{Backend runtime}
 
 Our FFT-tree backend computes batched multiclass one-vs-rest count PMFs on GPU and gives large practical speedups over CPU dynamic programming in large-bag benchmarks.
 This addresses a practical limitation of DP-based count losses: exact count probabilities need not be tied to a sequential CPU implementation.
