@@ -53,3 +53,68 @@ All reported experiments are run on a single \texttt{TBD} GPU.
 MNIST-family runs (LeNet, 50 epochs) take approximately \texttt{TBD} per configuration;
 CIFAR-10 pretrained ResNet-18 runs (500 epochs, cosine schedule) take approximately \texttt{TBD} per configuration.
 Total compute used for the reported results is approximately \texttt{TBD}.
+
+\section{Mathematical origin: signed counting in \texorpdfstring{$(q,t)$}{(q,t)}-Littlewood--Richardson coefficients}
+\label{app:qtlr-origin}
+
+The signed-count instance of our framework was originally motivated by a problem in algebraic combinatorics: a conjectural factorization of the $(q,t)$-Littlewood--Richardson coefficients arising in the theory of Macdonald polynomials~\cite{Macdonald1995}.
+This object is central across several areas of mathematics---symmetric function theory, representation theory, Schubert calculus on Grassmannians, and partition combinatorics---and it also surfaces in mathematical physics through connections to the Calogero--Sutherland model and related integrable systems~\cite{LittlewoodRichardson1934,KnutsonTao1999,Vakil2006}.
+We sketch how this problem reduces to signed counting in our framework; complete mathematical exposition and the corresponding empirical study fall outside the scope of this paper.
+
+\paragraph{Setup.}
+A partition $\lambda=(\lambda_1,\dots,\lambda_k)$ is identified with its Young diagram, a finite collection of unit cells.
+For a cell $u$ in $\lambda$, the \emph{arm length} $a_\lambda(u)$ is the number of cells strictly to the right of $u$ in the same row, and the \emph{leg length} $\ell_\lambda(u)$ is the number of cells strictly below $u$ in the same column.
+Figure~\ref{fig:qtlr-partition} illustrates these quantities on the partition $(4,3,1)$.
+The atomic building block of the theory is the rational function
+\begin{equation}
+b(a,\ell) \;:=\; \frac{1-q^{a}\,t^{\ell+1}}{1-q^{a+1}\,t^{\ell}},
+\qquad
+b_\lambda(u;q,t) \;:=\; b\bigl(a_\lambda(u),\,\ell_\lambda(u)\bigr).
+\end{equation}
+
+\begin{figure}[t]
+  \centering
+  \[
+  \begin{ytableau}
+     {~} & {u} & {a} & {a} \\
+     {~} & {\ell} & {~} \\
+     {~}
+  \end{ytableau}
+  \]
+  \caption{Young diagram of the partition $(4,3,1)$.
+  For the cell $u=(1,2)$, the arm length $a_\lambda(u)=2$ counts the cells marked $a$ to the right of $u$ in the same row, and the leg length $\ell_\lambda(u)=1$ counts the cell marked $\ell$ below $u$ in the same column.}
+  \label{fig:qtlr-partition}
+\end{figure}
+
+\paragraph{The conjectural factorization.}
+The Littlewood--Richardson coefficient $c^\nu_{\lambda,\mu}\in\mathbb{Z}_{\ge 0}$~\cite{LittlewoodRichardson1934} admits a $(q,t)$-refinement $f^\nu_{\lambda,\mu}(q,t)$, a rational function in $q,t$ with $f^\nu_{\lambda,\mu}(0,0)=c^\nu_{\lambda,\mu}$.
+A long-standing conjecture of Stanley~\cite{Stanley1989} predicts that whenever $c^\nu_{\lambda,\mu}=1$, there exist subsets
+$X^\nu_{\lambda,\mu}\subseteq\lambda$, $Y^\nu_{\lambda,\mu}\subseteq\mu$, and $Z^\nu_{\lambda,\mu}\subseteq\nu$ such that
+\begin{equation}
+\label{eq:stanley-factorization}
+f^\nu_{\lambda,\mu}(q,t)
+\;=\;
+\frac{\prod_{u\in Z^\nu_{\lambda,\mu}} b_\nu(u;q,t)}
+     {\prod_{u\in X^\nu_{\lambda,\mu}} b_\lambda(u;q,t)\,\cdot\,\prod_{u\in Y^\nu_{\lambda,\mu}} b_\mu(u;q,t)}.
+\end{equation}
+The conjecture remains open in general; the case where $\mu$ is a single-row partition is known explicitly as the \emph{Pieri rule}~\cite[p.~340]{Macdonald1995}.
+
+\paragraph{Reduction to signed finite-support aggregation.}
+Because $b_\lambda(u;q,t)$ depends on the cell $u$ only through its arm--leg pair $(a_\lambda(u),\ell_\lambda(u))$, the factorization in Eq.~\eqref{eq:stanley-factorization} can be regrouped by arm--leg type into the form
+\begin{equation}
+\label{eq:lr-as-signed-count}
+f^\nu_{\lambda,\mu}(q,t)
+\;=\;
+\prod_{(a,\ell)\in\mathbb{Z}_{\ge 0}^{2}} b(a,\ell)^{\beta_{\lambda,\mu,\nu,a,\ell}},
+\qquad
+\beta_{\lambda,\mu,\nu,a,\ell}
+\;=\;
+\sum_{u\in\mathcal{B}_{\lambda,\mu,\nu,a,\ell}} s_u\,z_u,
+\end{equation}
+where $\mathcal{B}_{\lambda,\mu,\nu,a,\ell}$ is the bag of all cells in $\lambda\sqcup\mu\sqcup\nu$ sharing arm--leg type $(a,\ell)$, the sign is $s_u=+1$ for $u\in\nu$ and $s_u=-1$ for $u\in\lambda\sqcup\mu$, and $z_u\in\{0,1\}$ is a latent selection indicator.
+The exponents $\beta_{\lambda,\mu,\nu,a,\ell}$ are read off from the rational expression of $f^\nu_{\lambda,\mu}(q,t)$, while the underlying selections $\{z_u\}$ are unobserved.
+Eq.~\eqref{eq:lr-as-signed-count} is exactly the signed finite-support aggregate-likelihood setting of Section~\ref{sec:problem-setup}: each triple $(\lambda,\mu,\nu)$ produces a family of bags indexed by $(a,\ell)$, each with a signed integer label, and the same convolutional bag-prediction layer applies without modification.
+
+\paragraph{Empirical note.}
+In preliminary experiments using the framework of this paper, we observed over $98\%$ bag-level exponent accuracy on out-of-distribution Pieri- and Stanley-type triples, indicating that exact signed-count likelihood can recover latent cell selections consistent with the conjectural factorization.
+The detailed mathematical formulation, problem-specific architectural choices, and combinatorial diagnostics are outside the scope of the present paper and are left to a separate report.
