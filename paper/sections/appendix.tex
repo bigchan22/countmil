@@ -1,26 +1,3 @@
-\section{Additional Derivations}
-\label{app:additional-derivations}
-
-For binary count labels, let $p_i=p_\theta(z_i=1\mid x_i)$ and let the observed count be $y$.
-Define the prefix distribution $F_i(k)=p_\theta(\sum_{j=1}^i z_j=k\mid x_{1:i})$ and suffix distribution $B_i(k)=p_\theta(\sum_{j=i}^n z_j=k\mid x_{i:n})$.
-They are initialized by $F_0(0)=1$ and $B_{n+1}(0)=1$ and updated by the Bernoulli count recurrence
-\begin{align}
-F_i(k) &= (1-p_i)F_{i-1}(k)+p_iF_{i-1}(k-1),\\
-B_i(k) &= (1-p_i)B_{i+1}(k)+p_iB_{i+1}(k-1).
-\end{align}
-Conditioning on the observed count gives
-\begin{equation}
-  p_\theta(z_i=1\mid \sum_j z_j=y,x_{1:n})
-  =
-  \frac{
-    p_i\sum_k F_{i-1}(k)B_{i+1}(y-1-k)
-  }{
-    \sum_k F_{i-1}(k)\left[(1-p_i)B_{i+1}(y-k)+p_iB_{i+1}(y-1-k)\right]
-  }.
-\end{equation}
-The denominator is the bag likelihood $p_\theta(Y=y\mid x_{1:n})$ written with instance $i$ separated out.
-In the unsigned binary case, the resulting posterior marginals sum to the observed count up to numerical precision.
-
 \section{Implementation Details}
 \label{app:implementation-details}
 
@@ -29,16 +6,44 @@ Instance labels are used only for evaluation metrics such as hidden-instance AUC
 MNIST-family experiments use LeNet-style instance classifiers, Adam with learning rate $5\times 10^{-4}$, weight decay $10^{-4}$, and 50 epochs.
 The main MNIST-family configurations use seeds $0,1,2$, test on 1000 sampled bags, and evaluate mean bag sizes 10 and 50 with standard deviations 2 and 10.
 
+\paragraph{Backend implementation.}
+Sequential finite-support convolution accumulates shifted copies of the current aggregate PMF and is used for the moderate-size binary, signed, and integer-valued sum experiments.
+Dynamic programming is used as a Shukla-style Bernoulli count baseline and computes the same binary count coefficients as the convolutional formulation.
+For grouped signed binary aggregates, each active group starts as a point mass at zero on support $[-K_{\max},K_{\max}]$.
+For one signed instance, the grouped GPU backend applies a length-three channelwise kernel and padding one.
+Because PyTorch's \texttt{conv1d} operator is cross-correlation rather than mathematical convolution, the implementation stores the kernel in the order
+\begin{equation}
+  [p_i\mathbf{1}\{s_i=+1\},\;1-p_i,\;p_i\mathbf{1}\{s_i=-1\}],
+\end{equation}
+so the left kernel entry shifts probability mass toward larger aggregate values and the right entry shifts mass toward smaller values.
+This is only an implementation orientation; in mathematical support order $[-1,0,+1]$ the signed kernels are the atoms described in Section~\ref{sec:convolutional-bag-prediction}.
+
+For digit-sum, the atom width is the number of finite digit values, for example ten for MNIST digits.
+For histogram experiments, we avoid a full $C$-dimensional joint histogram over classes and instead compute $C$ one-vs-rest one-dimensional count likelihoods in parallel.
+This keeps the aggregate support one-dimensional for each class and makes large bags practical on GPU.
+The FFT-tree backend is useful for this setting because the same pairwise polynomial products are batched over classes and bags.
+Padding or masked positions are represented by deterministic zero-contribution atoms, such as $[1,0]$ for Bernoulli counts, $[0,1,0]$ for signed support $[-1,0,+1]$, and $[1,0,\ldots,0]$ for integer-valued sums.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Exact aggregate backends.  $n$ is bag size, $S$ is atomic support size, $T=n(S-1)+1$ is aggregate PMF width, and $C$ is number of one-vs-rest classes.}
+\label{tab:backends}
+\begin{tabular}{p{0.18\linewidth}p{0.24\linewidth}p{0.20\linewidth}p{0.25\linewidth}}
+\toprule
+Backend & Setting & Work per bag & Use \\
+\midrule
+DP & Bernoulli count & $O(nT)$ & Shukla-style count baseline \\
+Sequential convolution & finite support & $O(nST)$ & main moderate-bag experiments \\
+Grouped convolution & signed Bernoulli & $O(nT)$, batched groups & signed GPU implementation \\
+FFT-tree & finite support / OVR & $O(CT\log T\log n)$ & runtime, OVR histograms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Histogram and CIFAR settings.}
 Histogram count-likelihood experiments treat each class count as a one-vs-rest Bernoulli count likelihood.
 The MNIST histogram experiments use batch size 192 for large-bag configurations.
 CIFAR-10 experiments use ResNet-18 backbones.
-The from-scratch CIFAR settings use randomly initialized ResNet-18.
 The pretrained one-vs-rest count settings use ImageNet-pretrained ResNet-18 with random crop and horizontal flip augmentation, SGD with momentum 0.9, weight decay $10^{-4}$, learning rate $5\times 10^{-4}$, and a cosine learning-rate schedule for 500 epochs.
 The pretrained CIFAR-10 analysis is limited to the evaluated $n=16$ and $n=64$ one-vs-rest count settings.
-
-\section{Additional Tables}
-\label{app:additional-tables}
-
-We also evaluated posterior-training variants for binary MNIST-Bags, including hard and tempered posterior objectives.
-These variants did not reliably improve the negative-log-likelihood result, so the main method treats posterior marginals as an inference and diagnostic tool rather than as the central training objective.
-The main text reports aggregate means, and seed counts are shown for comparisons evaluated with fewer than three seeds.

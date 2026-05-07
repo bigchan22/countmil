@@ -1,14 +1,15 @@
 \section{Discussion}
 
 The experiments support a hierarchy of aggregate supervision.
-The clearest gains occur when the observed aggregate is not well represented by only an expectation or a class proportion.
+The largest gains occur when the observed aggregate is not well represented by only an expectation or a class proportion.
 Scalar expected-value matching is weak in low-data digit-sum settings, whereas exact aggregate likelihood can recover accurate instance predictors from the same scalar labels.
 With more training bags and small bags, expected-value baselines can become competitive, so the observed advantage is data efficiency and likelihood fidelity rather than universal dominance.
-The SVHN and UltraMNIST rows strengthen the digit-sum evidence: the same integer-valued sum likelihood remains useful when the support is fixed at $S=10$ but the image domain and backbone change.
-Together with binary and signed benchmarks, these results support the view that \method{} is a generic finite-support sum-label layer rather than a collection of task-specific losses.
+The SVHN and UltraMNIST results strengthen the digit-sum evidence: the same integer-valued sum likelihood remains useful when the support is fixed at $S=10$ but the image domain and backbone change.
+The signed FashionMNIST and CIFAR-10 probes make the same point for cancellation aggregates: the method is not tied to MNIST digits or to nonnegative counts.
+Together with binary, ordinal, signed, and histogram benchmarks, these results support the view that \method{} is a finite-support aggregate-likelihood layer rather than a collection of task-specific losses.
 
 Histogram labels are substantially richer, and standard LLP/proportion-matching baselines can already be strong.
-On MNIST histogram supervision, exact one-vs-rest count likelihood improves over CE/KL proportion matching, especially for larger bags, suggesting that likelihood fidelity can still matter when the aggregate label is rich.
+On MNIST histogram supervision, the main comparison shows that exact one-vs-rest count likelihood improves over CE/KL and MSE proportion matching, especially for larger bags, suggesting that likelihood fidelity can still matter when the aggregate label is rich.
 This distinction defines the scope of the method: it provides a unified likelihood framework for finite-support aggregate labels beyond ordinary binary counts and class proportions, while standard LLP objectives remain strong when the observed label is already a rich class histogram.
 
 The same formulation is modular with respect to the instance model.
@@ -20,4 +21,5 @@ Large bags can expose calibration issues even when instance ranking is accurate.
 Signed aggregates can be ambiguous because different latent assignments may yield the same observed sum.
 CIFAR-scale experiments require matching the backbone initialization and training protocol used by recent LLP work.
 Pretrained ResNet-18 one-vs-rest count likelihood is effective for $n=16$ and $n=64$, but the fixed-instance-budget comparison shows that the large-bag gain disappears when total sampled image exposure is matched.
+The CIFAR signed-count result is currently a single-seed probe, so it supports feasibility on natural images but should not be read as a final benchmark claim.
 These results show effective use of aggregate-labeled image volume under a strong representation, but they do not indicate intrinsic large-bag superiority or superiority to fully supervised learning at matched annotation budget.

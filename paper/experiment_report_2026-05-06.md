@@ -171,17 +171,18 @@ Training:
 - Objective: exact finite-support sum likelihood over atoms `{0,...,9}`.
 - Train bags: `5000`.
 - Epochs: `40`.
-- Seeds: `0,1`.
+- Completed seeds: `0,1`.
+- Seed `2` status as of the latest server update: still running at epoch `4/40`, with interim instance acc. `0.9384`, sum acc. `0.5217`, and expected-sum MAE `1.967`.
 - Compared settings: from-scratch backbone versus ImageNet-pretrained backbone.
 
 Results, mean over two seeds:
 
-| SVHN setting | Instance acc. | Sum acc. | Expected-sum MAE | NLL |
-|---|---:|---:|---:|---:|
-| from scratch, final | 0.2292 | 0.0525 | 5.812 | 7.504 |
-| pretrained, best by NLL | 0.9508 | 0.6117 | 1.670 | 1.339 |
-| pretrained, final | 0.9550 | 0.6525 | 1.344 | 1.685 |
-| pretrained, tail-5 | 0.9522 | 0.6315 | 1.467 | 1.780 |
+| SVHN setting | Instance acc. | Sum acc. | Expected-sum MAE | NLL | Agg. ECE |
+|---|---:|---:|---:|---:|---:|
+| from scratch, final | 0.2292 | 0.0525 | 5.812 | 7.504 | - |
+| pretrained, best by NLL | 0.9508 | 0.6117 | 1.670 | 1.339 | - |
+| pretrained, final | 0.9550 | 0.6525 | 1.344 | 1.685 | 0.187 |
+| pretrained, tail-5 | 0.9522 | 0.6315 | 1.467 | 1.780 | - |
 
 Interpretation: pretraining changes SVHN digit-sum from weak to strong.  This supports the view that the exact finite-support sum likelihood is viable on natural digit images when the instance representation is strong, and that the earlier from-scratch SVHN result was representation-limited.
 
@@ -215,6 +216,43 @@ Results:
 | 50/5000 | cancellation | 0.993 | 1.118 | 0.591 |
 
 Interpretation: signed aggregates are a useful novelty case. Cancellation-heavy large bags are genuinely ambiguous, but instance ranking remains strong with enough data.
+
+## Signed Count Expected-Value Baseline
+
+Purpose: test whether matching only the expected signed count is sufficient.
+
+Source:
+
+- Remote result file: `results/server4090_signed_mse_baseline/aggregate.csv`.
+- Status reported: 24/24 jobs complete; no error/OOM patterns.
+
+Training:
+
+- Dataset: MNIST signed count bags.
+- Label: `Y=sum_i s_i z_i`, with known signs `s_i in {-1,+1}`.
+- Prediction: `y_hat=sum_i s_i p_i`.
+- Objective: `MSE(y_hat, signed_count)`.
+- Epochs: `50`.
+- Batch size: `192`.
+- Train bags: `1000` or `5000`.
+- Bag sizes: mean `10` std `2`; mean `50` std `10`.
+- Sign modes: random and cancellation-heavy.
+- Seeds: `0,1,2`.
+
+Results, mean over 3 seeds:
+
+| Bag/train | Mode | Exp. signed MSE | Signed MAE | Rounded signed-count acc. | Instance acc. | Instance AUC |
+|---|---|---:|---:|---:|---:|---:|
+| 10/1000 | random | 0.278 | 0.269 | 0.753 | 0.959 | 0.973 |
+| 10/1000 | cancellation | 0.068 | 0.083 | 0.918 | 0.991 | 0.996 |
+| 10/5000 | random | 0.040 | 0.047 | 0.954 | 0.995 | 0.999 |
+| 10/5000 | cancellation | 0.036 | 0.040 | 0.960 | 0.996 | 0.999 |
+| 50/1000 | random | 0.398 | 0.398 | 0.632 | 0.991 | 0.996 |
+| 50/1000 | cancellation | 0.296 | 0.307 | 0.712 | 0.993 | 0.998 |
+| 50/5000 | random | 0.180 | 0.203 | 0.804 | 0.995 | 0.999 |
+| 50/5000 | cancellation | 0.162 | 0.174 | 0.834 | 0.996 | 0.999 |
+
+Interpretation: expected-signed-sum MSE is a fair and surprisingly strong baseline, especially with more data.  On the random-sign setting used in the main table, exact signed likelihood has lower aggregate signed-count error at every reported bag/train setting, while both methods reach similar rounded signed-count accuracy with enough data.
 
 ## FashionMNIST Robustness
 
@@ -436,6 +474,24 @@ Interpretation:
 - The earlier apparent `n64 > n16` advantage is not a fair fixed-instance-budget conclusion: `n16/train1000` sees `16,000` image instances per epoch, while `n64/train1000` sees `64,000`.
 - Therefore, the safe claim is that count/histogram supervision benefits from aggregate-labeled image volume under a strong pretrained representation.
 - Do not claim larger bags are intrinsically better or more scalable than fully supervised learning without matched annotation-budget baselines.
+
+### CIFAR-10 Pretrained ResNet-18 MSE Baseline
+
+Purpose: compare the pretrained one-vs-rest count likelihood against a simple pretrained MSE histogram/proportion-matching baseline under the same backbone family and Ma-style optimizer.
+
+Status reported:
+
+- Completed: `n16/train1000`, seeds `0,1`.
+- Running: `n64/train1000`, seeds `0,1`; partial epoch around `98--99/500`, current accuracies about `14%`, ETA about 7 hours.
+
+Completed n16 result:
+
+| Setting | Objective | Mean final inst. acc. | Mean hist MAE |
+|---|---|---:|---:|
+| n16 train1000 | pretrained MSE | 0.6676 | 0.702 |
+| n16 train1000 | pretrained OVR count | 0.9024 | 0.260 |
+
+Interpretation: pretrained MSE is much stronger than the from-scratch CIFAR MSE row, but it is still far below the pretrained one-vs-rest count likelihood at the same `n16/train1000` setting.  This directly supports the claim that the exact/count aggregate objective can matter even when the backbone representation is strong.
 
 ### CIFAR-10 Fixed-Instance-Budget Diagnostic
 

@@ -10,50 +10,47 @@
   arrow/.style={-{Latex[length=1.8mm]}, line width=0.45pt, draw=black!55}
 ]
 
-\node[font=\bfseries\scriptsize, anchor=west] at (-0.15, 2.78) {bag $B=\{x_i\}_{i=1}^n$};
-\node[inst, draw=blue!75, fill=blue!16] (x1) at (0.10, 2.18) {$x_1$};
-\node[inst, draw=green!55!black, fill=green!16] at (0.68, 2.18) {$x_2$};
-\node[inst, draw=orange!85!black, fill=orange!18] at (1.26, 2.18) {$x_3$};
-\node[inst, draw=violet!75, fill=violet!16] at (0.10, 1.60) {$x_4$};
-\node[inst, draw=cyan!75!black, fill=cyan!16] at (0.68, 1.60) {$x_5$};
-\node[inst, draw=magenta!70!black, fill=magenta!16] (xn) at (1.26, 1.60) {$x_n$};
-\node[align=center, font=\scriptsize, text=black!60] at (0.68, 0.92) {hidden instance\\labels unobserved};
+\node[font=\bfseries\scriptsize, anchor=west] at (-0.15, 3.05) {bag $B=\{x_i\}_{i=1}^n$};
+\draw[dashed, rounded corners=3pt, fill=black!2, draw=black!25] (-0.10, 2.72) rectangle (0.95, 0.98);
+\node[inst, draw=blue!75, fill=blue!16] (x1) at (0.42, 2.38) {$x_1$};
+\node[inst, draw=green!55!black, fill=green!16] (x2) at (0.42, 1.95) {$x_2$};
+\node[font=\bfseries\tiny, text=black!45] at (0.42, 1.58) {$\vdots$};
+\node[inst, draw=magenta!70!black, fill=magenta!16] (xn) at (0.42, 1.22) {$x_n$};
+\node[align=center, font=\scriptsize, text=black!60] at (0.42, 0.55) {hidden instance\\labels unobserved};
 
-\node[block, minimum width=0.95cm, minimum height=2.20cm, fill=blue!5] (net) at (2.85, 1.85)
+\node[block, minimum width=0.95cm, minimum height=2.20cm, fill=blue!5] (net) at (2.15, 1.85)
   {\rotatebox{90}{instance network $f_\theta$}};
-\draw[arrow] (x1.east) to[out=10, in=180] (net.west |- x1.east);
-\draw[arrow] (xn.east) to[out=-10, in=180] (net.west |- xn.east);
+\draw[arrow] (x1.east) to[out=8, in=180] (net.west |- x1.east);
+\draw[arrow] (x2.east) -- (net.west |- x2.east);
+\draw[arrow] (xn.east) to[out=-8, in=180] (net.west |- xn.east);
 
-\node[vec, draw=blue!75, fill=blue!10] (p1) at (4.45, 2.32) {$p_1$\\\tiny scores or class PMF};
-\node[font=\bfseries\tiny, text=black!45] at (4.45, 1.85) {$\vdots$};
-\node[vec, draw=magenta!70!black, fill=magenta!10] (pn) at (4.45, 1.38) {$p_n$\\\tiny scores or class PMF};
-\draw[arrow] (net.east |- p1.west) -- (p1.west);
-\draw[arrow] (net.east |- pn.west) -- (pn.west);
+\node[vec, draw=blue!75, fill=blue!10] (d1) at (3.85, 2.45) {$d_1$\\\tiny finite-support PMF};
+\node[vec, draw=green!55!black, fill=green!10] (d2) at (3.85, 1.85) {$d_2$\\\tiny finite-support PMF};
+\node[font=\bfseries\tiny, text=black!45] at (3.85, 1.42) {$\vdots$};
+\node[vec, draw=magenta!70!black, fill=magenta!10] (dn) at (3.85, 0.95) {$d_n$\\\tiny finite-support PMF};
+\draw[arrow] (net.east |- d1.west) -- (d1.west);
+\draw[arrow] (net.east |- d2.west) -- (d2.west);
+\draw[arrow] (net.east |- dn.west) -- (dn.west);
 
-\node[vec, draw=blue!75, fill=blue!10] (d1) at (6.35, 2.32) {$d_1$\\\tiny finite-support PMF};
-\node[font=\bfseries\tiny, text=black!45] at (6.35, 1.85) {$\vdots$};
-\node[vec, draw=magenta!70!black, fill=magenta!10] (dn) at (6.35, 1.38) {$d_n$\\\tiny finite-support PMF};
-\draw[arrow] (p1.east) -- (d1.west);
-\draw[arrow] (pn.east) -- (dn.west);
-
-\node[block, minimum width=1.20cm, minimum height=2.20cm, fill=red!5, draw=red!65!black] (conv) at (8.25, 1.85)
+\node[block, minimum width=1.20cm, minimum height=2.20cm, fill=red!5, draw=red!65!black] (conv) at (5.75, 1.85)
   {\rotatebox{90}{1D convolution / FFT tree}};
 \draw[arrow] (d1.east) -- (conv.west |- d1.east);
+\draw[arrow] (d2.east) -- (conv.west |- d2.east);
 \draw[arrow] (dn.east) -- (conv.west |- dn.east);
 
-\node[vec, minimum width=1.85cm, draw=red!65!black, fill=red!6] (pmf) at (10.20, 1.85)
+\node[vec, minimum width=1.85cm, draw=red!65!black, fill=red!6] (pmf) at (7.75, 2.22)
   {$P_\theta(Y)$\\\tiny $d_1 * \cdots * d_n$};
-\node[block, minimum width=1.55cm, fill=black!3] (loss) at (12.25, 1.85)
+\node[block, minimum width=1.85cm, fill=black!3] (loss) at (7.75, 1.28)
   {bag loss\\\tiny $-\log P_\theta(Y=y)$};
 \draw[arrow] (conv.east) -- (pmf.west);
-\draw[arrow] (pmf.east) -- (loss.west);
+\draw[arrow] (pmf.south) -- (loss.north);
 
-\node[anchor=north west, align=left, font=\tiny, draw=black!20, rounded corners=2pt, inner sep=2pt, fill=white] at (-0.10, 0.35) {
+\node[anchor=north west, align=left, font=\tiny, draw=black!20, rounded corners=2pt, inner sep=2pt, fill=white] at (-0.10, 0.10) {
   Binary counts, integer sums, signed sums, and one-vs-rest histograms all use the same convolutional bag-prediction interface.
 };
 
 \end{tikzpicture}
 }
-\caption{Convolutional aggregate pipeline.  The instance network emits per-instance scores or class probabilities, which define finite-support atomic PMFs $d_i$.  A deterministic convolutional layer computes the aggregate PMF $P_\theta(Y)$, and the observed bag label selects the likelihood term used for training.}
+\caption{Convolutional aggregate pipeline.  The instance network emits finite-support atomic PMFs $d_i$ for each instance.  A deterministic convolutional layer computes the aggregate PMF $P_\theta(Y)$, and the observed bag label selects the likelihood term used for training.}
 \label{fig:method-schematic}
 \end{figure}

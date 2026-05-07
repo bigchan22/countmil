@@ -2,82 +2,45 @@
 
 \subsection{Experimental Setup}
 
-We evaluate aggregate-supervised instance learning under five aggregate-label themes:
+We evaluate finite-support aggregation under five aggregate-label themes:
 \begin{enumerate}
-  \item binary count labels;
-  \item integer-valued sum labels;
-  \item signed count labels;
-  \item histogram or class-count labels;
+  \item ordinal integer-valued sum labels;
+  \item signed count labels with cancellation;
+  \item Bernoulli count labels as a recovery of prior count loss;
+  \item class-count and histogram labels connecting to LLP;
   \item runtime of exact aggregate backends.
 \end{enumerate}
 Unless otherwise stated, MNIST-family experiments use LeNet-style instance networks, bags are sampled on the fly, and tables report means over three random seeds.
 Hidden instance labels are never used for training; they are used only for evaluation.
 Implementation details are summarized in Appendix~\ref{app:implementation-details}.
-Within each theme, additional datasets such as FashionMNIST, SVHN, UltraMNIST, or CIFAR-10 are used as supporting evidence rather than separate experiment families.
 Each subsection changes the observed aggregate label while keeping the same finite-support convolutional likelihood interface.
 
 \paragraph{Metrics.}
-Across the experimental tables, MAE columns report the mean absolute difference between the predicted aggregate and the observed aggregate over test bags.
-When the model outputs a full aggregate PMF, we report either the maximum-probability aggregate or the PMF expectation as indicated by the table label.
+Across the experimental tables, aggregate MAE columns report the mean absolute difference between the predicted aggregate and the observed aggregate over test bags.
+For expected-value baselines, the predicted aggregate is the scalar expectation trained by the baseline.
+For exact-likelihood rows, the prediction rule uses the aggregate PMF statistic specified by the corresponding table: count, integer-valued sum, signed count, or histogram count.
 For histograms, count MAE is the mean absolute class-count error averaged over classes and bags,
 \begin{equation}
-  \frac{1}{N}\sum_{B}\frac{1}{C}\sum_{c=1}^C |\hat{h}_{Bc}-h_{Bc}|,
+  \frac{1}{N}\sum_{B}\frac{1}{C}\sum_{c=1}^C |\hat{h}_{Bc}-h_{Bc}|.
 \end{equation}
 Rows labelled MSE denote MSE training objectives; MAE and accuracy columns are evaluation metrics computed after training.
-Hidden-instance AUC or accuracy is never used for model selection unless explicitly stated.
+Columns labelled instance accuracy use held-out instance labels only for evaluation, never for training.
+Instance accuracy is never used for model selection unless explicitly stated.
 
-%%% Draft aggregate-types schematic.  Kept for later revision; current arrows
-%%% overstate the relation between the individual aggregate types and the shared
-%%% convolutional likelihood operation.
-% \begin{figure}[t]
-% \centering
-% \input{figures/aggregate_types.tex}
-% \caption{Aggregate-label types used in the experiments.  The instance model supplies an atomic PMF on a finite support; only the support and contribution values change across binary counts, integer-valued sums, signed sums, and one-vs-rest histograms.}
-% \label{fig:aggregate-types}
-% \end{figure}
+\subsection{Ordinal Sum Labels}
 
-\subsection{Binary Count Labels}
-
-Plain count-likelihood training recovers high hidden-instance accuracy across bag sizes.
-For MNIST-Bags, we make MNIST binary by choosing digit $9$ as the positive
-class and treating digits $0$--$8$ as negative.
-The learner observes the number of target-digit images in the bag; hidden
-instance labels are used only for evaluation.
-This validation case verifies that the convolutional formulation behaves like the established Bernoulli count probability while sharing the same implementation pattern as the new aggregate types.
-FashionMNIST target-count results are recorded in the experiment report; the main table uses MNIST so that the hidden-instance metric is consistent with the other result tables.
-
-\begin{table}[t]
-\centering
-\caption{Binary count labels.  Count likelihood recovers accurate hidden target detectors on MNIST target-count bags.}
-\label{tab:binary-countmil}
-\begin{tabular}{lllcc}
-\toprule
-Data & Bag/train & Method & Count MAE & Hidden acc. \\
-\midrule
-MNIST & $10/1000$ & exact count & $0.115$ & $0.988$ \\
-MNIST & $10/5000$ & exact count & $0.090$ & $0.991$ \\
-MNIST & $50/1000$ & exact count & $0.686$ & $0.987$ \\
-MNIST & $50/5000$ & exact count & $0.460$ & $0.991$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Integer-Valued Sum Labels}
-
-Digit-sum supervision is an instance of integer-valued aggregate labeling: the learner observes a single scalar while each hidden instance label has ten possible values.
-Here $z_i$ is the original MNIST digit value in $\{0,\ldots,9\}$ and the bag
-label is $Y_{\rm sum}=\sum_i z_i$.
-Results show that exact finite-support likelihood recovers hidden digit predictors more efficiently than matching only the expected aggregate.
-For comparison, we report a simple MSE baseline that regresses the scalar expected sum $\sum_i \mathbb{E}[z_i]$.
+Digit-sum supervision is an integer-valued aggregate label: the learner observes a single scalar while each hidden instance label has ten possible values.
+Here $z_i$ is the original MNIST digit value in $\{0,\ldots,9\}$ and the bag label is $Y_{\rm sum}=\sum_i z_i$.
+Exact finite-support likelihood uses the full induced distribution over possible sums, whereas an expected-value baseline regresses only $\sum_i \mathbb{E}[z_i]$ to the observed sum.
 
 \begin{table}[t]
 \centering
 \small
-\caption{Integer-valued sum labels.  Exact likelihood uses the full convolved PMF over sums, whereas MSE regresses only the expected sum.  SVHN rows report two-seed means; UltraMNIST reports best-checkpoint mean $\pm$ std. over five seeds.}
+\caption{Ordinal sum labels.  Exact likelihood uses the full convolved PMF over sums, whereas MSE regresses only the expected sum.  SVHN rows use ResNet-18 backbones; UltraMNIST reports best-checkpoint mean $\pm$ std. over five seeds.}
 \label{tab:digit-sum}
 \begin{tabular}{lllcc}
 \toprule
-Data & Bag/train & Method & Sum MAE & Hidden acc. \\
+Data & Bag/train & Method & Sum MAE & Instance acc. \\
 \midrule
 MNIST & $10/1000$ & exact sum & $0.612$ & $.982$ \\
 MNIST & $10/1000$ & MSE sum & $2.535$ & $.226$ \\
@@ -88,111 +51,137 @@ MNIST & $50/1000$ & MSE sum & $6.274$ & $.248$ \\
 MNIST & $50/5000$ & exact sum & $2.229$ & $.887$ \\
 MNIST & $50/5000$ & MSE sum & $2.594$ & $.817$ \\
 SVHN & $10/5000$ & exact sum, scratch & $5.812$ & $.229$ \\
-SVHN & $10/5000$ & exact sum, pretr. & $1.467$ & $.952$ \\
+SVHN & $10/5000$ & MSE sum, scratch & $5.328$ & $.249$ \\
+SVHN & $10/5000$ & exact sum, pretr. & $1.324$ & $.955$ \\
+SVHN & $10/5000$ & MSE sum, pretr. & $2.109$ & $.826$ \\
 UltraMNIST & $3$--$5/800$ & exact sum & $.341{\pm}.038$ & $.974{\pm}.003$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.92\linewidth]{figures/ordinal_sum_instance_accuracy.pdf}
-\caption{Hidden digit recovery from digit-sum labels.  Exact finite-support likelihood uses the full convolved sum distribution, while MSE matches only the expected sum.  Instance labels are used only for evaluation.}
-\label{fig:ordinal-sum-instance-accuracy}
-\end{figure}
-
 For $n=10$ and $1000$ training bags, the MSE baseline has substantially worse aggregate error and hidden digit recovery than the exact likelihood.
 With more training bags it improves, but the exact likelihood remains stronger in this table.
 For $n=50$, the MSE baseline can recover some hidden digit structure while still making large aggregate errors, because small expectation errors accumulate across many digits.
-SVHN and UltraMNIST strengthen the same digit-sum story beyond MNIST: pretraining makes natural RGB house-number digit sums usable, while UltraMNIST gives a clean-patch benchmark with high hidden digit recovery.
-These rows support the interpretation of Eq.~\eqref{eq:aggregate-support-width}: changing the finite support and image domain creates a new sum-label problem without changing the aggregate likelihood layer.
+SVHN and UltraMNIST support the same conclusion beyond MNIST: pretraining makes natural RGB house-number digit sums usable, and exact likelihood remains substantially stronger than expected-sum regression even with the same pretrained ResNet-18 backbone.
+On SVHN with $5000$ bags, the pretrained exact-likelihood model reaches $95.46\%$ hidden digit accuracy and $65.00\%$ exact sum accuracy, while the pretrained MSE baseline reaches $82.58\%$ hidden digit accuracy and $22.58\%$ exact sum accuracy.
+UltraMNIST gives a controlled patch-based benchmark with high hidden digit recovery.
 
-\subsection{Signed Count Labels}
+\subsection{Signed Aggregates with Cancellation}
 
 Signed counts test an aggregate that is not reducible to ordinary class proportions.
-We again use the digit-$9$ target indicator, but each instance carries a known
-random sign; target-digit images contribute $+1$ or $-1$, while all other
-digits contribute $0$.
+We again use the digit-$9$ target indicator, but each instance carries a known random sign; target-digit images contribute $+1$ or $-1$, while all other digits contribute $0$.
 Even with random signs, the observed signed sum is many-to-one: positive and negative contributions can cancel, so different latent assignments can yield the same bag label.
-The likelihood nevertheless yields accurate hidden target detectors, especially with more training bags.
-FashionMNIST signed-count results are recorded in the experiment report; the main table uses MNIST so that the hidden-instance metric is consistent with the other result tables.
+The exact likelihood nevertheless yields lower signed-count error than a simple expected-signed-sum MSE baseline.
 
 \begin{table}[t]
 \centering
-\caption{Signed count labels with random known signs.  Signed sums are many-to-one because positive and negative contributions can cancel, but the likelihood still recovers accurate hidden target detectors.}
+\caption{Signed aggregates with random known signs.  MSE regresses the expected signed sum $\sum_i s_i p_i$, while exact signed uses the full finite-support likelihood.  MNIST rows report three-seed means; FashionMNIST rows report seed 0--1 means; CIFAR-10 rows are seed-0 pretrained ResNet-18 probes.}
 \label{tab:signed}
 \begin{tabular}{lllcc}
 \toprule
-Data & Bag/train & Method & Signed MAE & Hidden acc. \\
+Data & Bag/train & Method & Signed MAE & Instance acc. \\
 \midrule
+MNIST & $10/1000$ & MSE signed & $0.269$ & $0.959$ \\
 MNIST & $10/1000$ & exact signed & $0.095$ & $0.990$ \\
+MNIST & $10/5000$ & MSE signed & $0.047$ & $0.995$ \\
 MNIST & $10/5000$ & exact signed & $0.045$ & $0.996$ \\
+MNIST & $50/1000$ & MSE signed & $0.398$ & $0.991$ \\
 MNIST & $50/1000$ & exact signed & $0.243$ & $0.994$ \\
+MNIST & $50/5000$ & MSE signed & $0.203$ & $0.995$ \\
 MNIST & $50/5000$ & exact signed & $0.198$ & $0.996$ \\
+\midrule
+FashionMNIST & $n=10$ & MSE signed & $0.121$ & $0.987$ \\
+FashionMNIST & $n=10$ & exact signed & $0.113$ & $0.988$ \\
+FashionMNIST & $n=50$ & MSE signed & $0.413$ & $0.988$ \\
+FashionMNIST & $n=50$ & exact signed & $0.381$ & $0.990$ \\
+CIFAR-10 & $n=16$ & exact signed, pretr. & $0.343$ & $0.974$ \\
+CIFAR-10 & $n=64$ & exact signed, pretr. & $0.753$ & $0.980$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Histogram Count Labels}
+Both methods recover accurate target detectors with enough data, but the likelihood uses the full signed aggregate distribution rather than only $\sum_i s_i p_i$ and gives lower signed-count error.
+FashionMNIST shows the same pattern beyond MNIST: MSE is close in instance recovery, but exact likelihood is consistently better on the signed aggregate.
+The CIFAR-10 pretrained probes further show that signed finite-support aggregation can recover target-class detectors in a harder natural-image setting, reaching instance AUCs of $98.23\%$ for $n=16$ and $99.19\%$ for $n=64$.
+This setting is a direct example of why finite-support aggregation is not only a reformulation of ordinary nonnegative counts: cancellation changes the inverse problem even when the hidden instance variable remains Bernoulli.
 
-Histogram supervision is richer than scalar sums, and LLP baselines are strong on MNIST-family data.
-For MNIST histograms, the hidden category is the original digit class and the
-observed label is the vector of digit counts in the bag.
-These experiments compare exact one-vs-rest count likelihood (OVR count) with standard LLP-style proportion-matching objectives across MNIST and CIFAR-10 histogram labels.
-Table~\ref{tab:histogram-llp-pvc} reports the histogram results.
-The main table focuses on MSE proportion matching as a simple expected-histogram baseline and compares it with the exact one-vs-rest count likelihood.
-The advantage is clearest for larger bags: at $n=50$ and $1000$ training bags, one-vs-rest count likelihood improves digit accuracy from $11.6\%$ to $98.5\%$ and reduces count MAE from $1.683$ to $0.137$.
-Additional CE/KL LLP baselines are strong on MNIST histograms and are recorded in the experiment report; we omit them here to keep the main table focused on the effect of replacing squared-error aggregate matching with an exact count likelihood.
-CIFAR-10 with ResNet-18 evaluates the same histogram objectives in a standard image benchmark.
-Prior LLP-PVC results use a ResNet-18 backbone, and Ma et al.'s appendix specifies ImageNet-pretrained initialization.
-We evaluate both randomly initialized and ImageNet-pretrained ResNet-18 backbones because the representation source has a large effect on LLP performance.
-The from-scratch setting evaluates the same count-likelihood pipeline without external pretrained features, while the pretrained setting matches the backbone initialization specified for LLP-PVC.
+\subsection{Recovery of Bernoulli Count Loss}
+
+Binary Count-MIL validates the connection to prior count-loss work.
+For MNIST-Bags, we make MNIST binary by choosing digit $9$ as the positive class and treating digits $0$--$8$ as negative.
+The learner observes the number of target-digit images in the bag; hidden instance labels are used only for evaluation.
+This case verifies that the convolutional formulation recovers the established Bernoulli count probability while sharing the same implementation pattern as the new aggregate types.
+
+\begin{table}[t]
+\centering
+\caption{Bernoulli count labels.  Count likelihood recovers accurate hidden target detectors on MNIST target-count bags.}
+\label{tab:binary-countmil}
+\begin{tabular}{lllcc}
+\toprule
+Data & Bag/train & Method & Count MAE & Instance acc. \\
+\midrule
+MNIST & $10/1000$ & exact count & $0.115$ & $0.988$ \\
+MNIST & $10/5000$ & exact count & $0.090$ & $0.991$ \\
+MNIST & $50/1000$ & exact count & $0.686$ & $0.987$ \\
+MNIST & $50/5000$ & exact count & $0.460$ & $0.991$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Class Histograms and LLP Connections}
+
+Histogram supervision is included mainly to connect the proposed finite-support view to recent LLP-PVC work.
+For MNIST histograms, the hidden category is the original digit class and the observed label is the vector of digit counts in the bag.
+We evaluate the classwise one-vs-rest count likelihood (OVR count), which corresponds to the Bernoulli count-likelihood component of LLP-PVC, rather than a full joint multiclass histogram likelihood.
+The comparison here is deliberately simple: MSE matches expected class counts, while OVR count scores the observed count with the exact classwise count PMF.
 
 \begin{table}[t]
 \centering
 \scriptsize
 \setlength{\tabcolsep}{4pt}
-\caption{Histogram supervision across datasets.  Count MAE is mean absolute class-count error.  OVR count denotes the classwise one-vs-rest count likelihood in Section~\ref{sec:convolutional-bag-prediction}; MSE is a proportion-matching LLP objective.  CIFAR-10 pretrained rows use ImageNet initialization.}
+\caption{Representative histogram-supervision results.  Count MAE is mean absolute class-count error.  OVR count denotes the classwise one-vs-rest count likelihood in Section~\ref{sec:convolutional-bag-prediction}.  CIFAR-10 $16/1000$ MSE is final over seeds 0--1; CIFAR-10 $64/1000$ MSE is a running seed 0--1 mean around epoch 413 of 500.}
 \label{tab:histogram-llp-pvc}
 \begin{tabular}{llllcc}
 \toprule
-Data & Bag/train & Backbone & Method & Count MAE & Hidden acc. \\
+Data & Bag/train & Backbone & Method & Count MAE & Instance acc. \\
 \midrule
-MNIST & $10/1000$ & LeNet & MSE & $.163$ & $.962$ \\
-MNIST & $10/1000$ & LeNet & OVR count & $.032$ & $.983$ \\
-MNIST & $10/5000$ & LeNet & MSE & $.127$ & $.974$ \\
-MNIST & $10/5000$ & LeNet & OVR count & $.016$ & $.992$ \\
-MNIST & $50/1000$ & LeNet & MSE & $1.683$ & $.116$ \\
-MNIST & $50/1000$ & LeNet & OVR count & $.137$ & $.985$ \\
 MNIST & $50/5000$ & LeNet & MSE & $1.684$ & $.116$ \\
 MNIST & $50/5000$ & LeNet & OVR count & $.080$ & $.992$ \\
 \midrule
-CIFAR-10 & $16/1000$ & scratch R18 & MSE & $.825$ & $.476$ \\
-CIFAR-10 & $16/1000$ & scratch R18 & OVR count & $.838$ & $.527$ \\
-CIFAR-10 & $64/1000$ & scratch R18 & MSE & $2.013$ & $.270$ \\
-CIFAR-10 & $64/1000$ & scratch R18 & OVR count & $1.855$ & $.496$ \\
-CIFAR-10 & $128/1000$ & scratch R18 & MSE & $2.829$ & $.226$ \\
-CIFAR-10 & $128/1000$ & scratch R18 & OVR count & $2.707$ & $.488$ \\
-CIFAR-10 & $16/1000$ & pretrained R18 & OVR count & $.260$ & $.902$ \\
-CIFAR-10 & $64/1000$ & pretrained R18 & OVR count & $.678$ & $.914$ \\
-CIFAR-10 & $64/250$ & pretrained R18 & OVR count & $1.115$ & $.803$ \\
-CIFAR-10 & $64/250$ & pretrained R18 & best hist. & $1.013$ & $.806$ \\
+CIFAR-10 & $16/1000$ & pretr. R18 & MSE & $.702$ & $.668$ \\
+CIFAR-10 & $16/1000$ & pretr. R18 & OVR count & $.260$ & $.902$ \\
+CIFAR-10 & $64/1000$ & pretr. R18 & MSE & $1.855$ & $.272$ \\
+CIFAR-10 & $64/1000$ & pretr. R18 & OVR count & $.678$ & $.914$ \\
+CIFAR-10 & $64/250$ & pretr. R18 & OVR count & $1.115$ & $.803$ \\
+CIFAR-10 & $64/250$ & pretr. R18 & best by hist. MAE & $1.013$ & $.806$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The from-scratch results are substantially below the pretrained setting, confirming that backbone initialization is a major factor in this comparison.
-With ImageNet-pretrained ResNet-18 and the one-vs-rest count objective, the $n=16$ and $n=64$ settings reach about $90.2\%$ and $91.4\%$ final instance accuracy, respectively.
+% Full histogram table retained for future use:
+% MNIST & $10/1000$ & LeNet & MSE & $.181$ & $.955$ \\
+% MNIST & $10/1000$ & LeNet & OVR count & $.032$ & $.983$ \\
+% MNIST & $10/5000$ & LeNet & MSE & $.129$ & $.974$ \\
+% MNIST & $10/5000$ & LeNet & OVR count & $.016$ & $.992$ \\
+% MNIST & $50/1000$ & LeNet & MSE & $1.683$ & $.116$ \\
+% MNIST & $50/1000$ & LeNet & OVR count & $.137$ & $.985$ \\
+% MNIST & $50/5000$ & LeNet & MSE & $1.684$ & $.116$ \\
+% MNIST & $50/5000$ & LeNet & OVR count & $.080$ & $.992$ \\
+% CIFAR-10 & $16/1000$ & pretr. R18 & MSE & $.702$ & $.668$ \\
+% CIFAR-10 & $16/1000$ & pretr. R18 & OVR count & $.260$ & $.902$ \\
+% CIFAR-10 & $64/1000$ & pretr. R18 & MSE & $1.855$ & $.272$ \\
+% CIFAR-10 & $64/1000$ & pretr. R18 & OVR count & $.678$ & $.914$ \\
+% CIFAR-10 & $64/250$ & pretr. R18 & OVR count & $1.115$ & $.803$ \\
+% CIFAR-10 & $64/250$ & pretr. R18 & best by hist. MAE & $1.013$ & $.806$ \\
+
+On the representative MNIST large-bag setting, OVR count likelihood improves over MSE proportion matching in count MAE and hidden digit accuracy; the omitted smaller-bag rows follow the same pattern.
+This supports the connection to class-count LLP objectives without making the histogram setting the main novelty claim.
+The CIFAR-10 rows are narrower: they show that OVR count likelihood is effective with ImageNet-pretrained ResNet-18 features and that it substantially outperforms a simple pretrained MSE histogram baseline at $n=16$ and $n=64$.
 However, the $n=64$, train $1000$ setting exposes four times as many image instances per epoch as $n=16$, train $1000$.
 The fixed-instance-budget setting, $n=64$ with $250$ train bags, reaches only about $80.3\%$ final instance accuracy and $80.6\%$ when selecting by observed histogram MAE.
-Thus the CIFAR-10 results show that count likelihood benefits from a strong pretrained representation.
-They also show that more aggregate-labeled bags or sampled image instances can improve hidden-category recovery under this protocol, while the $n=64$ improvement is explained by greater total image exposure or aggregate observations rather than bag size alone.
+Thus the CIFAR-10 results should be read as evidence that count likelihood can use aggregate-labeled image volume effectively under a strong representation, not as evidence that larger bags are intrinsically superior.
 
-The CIFAR-100 coarse experiment used 20 coarse classes, bag size $50$, train bags $1000$, and two seeds.
-One-vs-rest count likelihood reaches about $30\%$ hidden coarse-class accuracy, above the $5\%$ random baseline.
-CIFAR-10 provides the direct LLP-PVC comparison, while CIFAR-100 coarse labels probe a higher-class-count setting.
-
-\subsection{Runtime}
+\subsection{Backend Runtime}
 
 Our FFT-tree backend computes batched multiclass one-vs-rest count PMFs on GPU and gives large practical speedups over CPU dynamic programming in large-bag benchmarks.
 This addresses a practical limitation of DP-based count losses: exact count probabilities need not be tied to a sequential CPU implementation.

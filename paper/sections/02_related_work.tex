@@ -4,13 +4,13 @@
 Classical multiple-instance learning (MIL) supervises bags rather than instances~\cite{dietterich1997mil,maron1998mil,andrew2002misvm,carbonneau2018milsurvey}.
 The standard positive-bag assumption is a noisy OR over hidden instance labels: a bag is positive when at least one instance is positive.
 Neural MIL models learn bag-level predictors end-to-end~\cite{wang2018minn}, and attention-based MIL~\cite{ilse2018attention} learns a bag representation through learned attention weights.
-These models are strong baselines for bag prediction, but attention weights are not guaranteed to be calibrated instance posteriors.
+These models are strong baselines for bag prediction, but attention weights are not guaranteed to be calibrated instance attributions.
 Count-based extensions use the number of positive instances as a stronger bag label.
 Shukla et al.~\cite{shukla2023count} formulate count-based weak supervision around the differentiable probability that exactly $k$ Bernoulli outputs are true, and use dynamic programming to compute the resulting count loss.
 Related count supervision has also appeared in temporal localization~\cite{schroeter2019occurrence}.
 Our binary Bernoulli likelihood is not new in this setting: it recovers the count probability used by Shukla et al.
 Binary Count-MIL is included as an equivalence check and baseline connection.
-Our contribution is the finite-support convolutional generalization and its use for signed, integer-valued, posterior, and histogram aggregates.
+Our contribution is the finite-support convolutional generalization and its use for signed, integer-valued, and histogram aggregates.
 
 \paragraph{Learning from label proportions.}
 Learning from label proportions (LLP) observes class proportions or histograms over bags~\cite{quadrianto2009llp,yu2014llp}.

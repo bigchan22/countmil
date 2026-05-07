@@ -5,15 +5,15 @@ Classical binary MIL uses a positive bag label to indicate that at least one ins
 Many weak-supervision settings provide more structured aggregate labels: the number of positive instances, a class histogram, a signed count, or a scalar integer-valued sum.
 The central problem is to learn an instance-level predictor from such aggregate observations without using instance labels during training.
 
-This paper studies aggregate-supervised MIL through finite-support likelihoods.
+This paper studies aggregate-supervised MIL through a finite-support convolutional aggregator.
 Each instance $x_i$ is mapped to a probability mass function over a finite set of integer-valued contributions.
-The observed bag label is an aggregate value, so the bag likelihood is the coefficient of that value in the convolution of the instance-level atomic PMFs.
+The aggregator then returns the mathematically implied distribution of the observed bag aggregate by convolving the instance-level atomic PMFs.
 For Bernoulli contributions this recovers the standard count probability used in prior count-loss work.
 The same construction also gives exact likelihoods for signed counts, digit-sum labels, and one-vs-rest class-count objectives.
-We refer to this as atomic PMF generality: the atomic support size and contribution values define the weak-label problem, while the convolutional aggregator is unchanged.
-The interface is deliberately narrow: a backbone model outputs instance-level scores, and the aggregate layer converts these scores into finite-support atomic PMFs before computing the bag likelihood.
+We refer to this as finite-support aggregation: the atomic support size and contribution values define the weak-label problem, while the convolutional aggregator is unchanged.
+The formulation separates the instance model from the aggregate likelihood: a backbone model outputs instance-level scores, and the aggregate layer converts these scores into finite-support atomic PMFs before computing the bag likelihood.
 The method is therefore not tied to a particular architecture.
-Changing the weak label changes the contribution map and convolution support, not the backbone.
+Changing the weak label changes the contribution map and convolution support, not the backbone, the optimizer, or the probabilistic rule used to obtain the bag-level distribution.
 
 \input{figures/method_schematic}
 
@@ -23,12 +23,11 @@ Our focus is the finite-support aggregate layer that covers these cases while al
 
 Our contributions are:
 \begin{itemize}
-  \item We formulate aggregate-supervised Count-MIL as finite-support convolution of instance contribution distributions, explicitly recovering Bernoulli count loss as a special case rather than claiming it as new.
+  \item We formulate aggregate-supervised Count-MIL as a backbone-agnostic finite-support convolutional aggregator that turns instance contribution PMFs into an exact aggregate PMF, explicitly recovering Bernoulli count loss as a special case rather than claiming it as new.
   \item We show that the same backbone-agnostic likelihood layer extends to signed counts, digit-sum labels, and one-vs-rest histogram class counts by changing only the finite-support contribution map.
-  \item We derive count-conditioned posterior marginals for instance recovery and uncertainty diagnostics under binary count supervision.
   \item We implement practical convolutional backends, including grouped signed convolution and a GPU FFT-tree backend that parallelizes large multiclass one-vs-rest PMFs beyond CPU dynamic programming.
   \item We evaluate hidden-instance recovery across binary, signed, digit-sum, SVHN/UltraMNIST sum, histogram, and CIFAR-10 histogram settings, with cautious comparison to LLP proportion-matching baselines and LLP-PVC reference results.
 \end{itemize}
 
-Empirically, the clearest gains appear for aggregate types where expectation or proportion matching discards information, especially digit sums and signed counts.
-The CIFAR-10 comparison shows that count likelihood can work well with strong pretrained features, but the fixed-instance-budget result attributes the large-bag improvement to greater sampled image exposure rather than to bag size alone.
+Empirically, the largest improvements occur for aggregate types where expectation or proportion matching discards information, especially digit sums and signed counts.
+The CIFAR-10 comparison shows that count likelihood achieves high instance accuracy when paired with ImageNet-pretrained features, but the fixed-instance-budget result attributes the large-bag improvement to greater sampled image exposure rather than to bag size alone.
