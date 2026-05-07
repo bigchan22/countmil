@@ -100,7 +100,10 @@ f^\nu_{\lambda,\mu}(q,t)
 The conjecture remains open in general; the case where $\mu$ is a single-row partition is known explicitly as the \emph{Pieri rule}~\cite[p.~340]{Macdonald1995}.
 
 \paragraph{Reduction to signed finite-support aggregation.}
-Because $b_\lambda(u;q,t)$ depends on the cell $u$ only through its arm--leg pair $(a_\lambda(u),\ell_\lambda(u))$, the factorization in Eq.~\eqref{eq:stanley-factorization} can be regrouped by arm--leg type into the form
+Two observations connect Eq.~\eqref{eq:stanley-factorization} to signed bag-level counting.
+First, the atomic factor $b_\lambda(u;q,t)$ depends on the cell $u$ only through its arm--leg pair $(a_\lambda(u),\ell_\lambda(u))$, so cells from different partitions or different positions but sharing the same value $(a,\ell)$ all contribute the same factor $b(a,\ell)$ to $f^\nu_{\lambda,\mu}(q,t)$, and may therefore be grouped together.
+Second, the conjectural subsets enter Eq.~\eqref{eq:stanley-factorization} with opposite multiplicative roles: cells in $Z^\nu_{\lambda,\mu}\subseteq\nu$ appear in the numerator, while cells in $X^\nu_{\lambda,\mu}\subseteq\lambda$ and $Y^\nu_{\lambda,\mu}\subseteq\mu$ appear in the denominator.
+Letting $+1$ (resp.\ $-1$) signify a numerator (resp.\ denominator) contribution and grouping cells by arm--leg type, the multiplicities collapse into a single signed integer exponent per type, yielding
 \begin{equation}
 \label{eq:lr-as-signed-count}
 f^\nu_{\lambda,\mu}(q,t)
@@ -109,11 +112,13 @@ f^\nu_{\lambda,\mu}(q,t)
 \qquad
 \beta_{\lambda,\mu,\nu,a,\ell}
 \;=\;
-\sum_{u\in\mathcal{B}_{\lambda,\mu,\nu,a,\ell}} s_u\,z_u,
+\sum_{u\in\mathcal{B}_{\lambda,\mu,\nu,a,\ell}} s_u\,z_u.
 \end{equation}
-where $\mathcal{B}_{\lambda,\mu,\nu,a,\ell}$ is the bag of all cells in $\lambda\sqcup\mu\sqcup\nu$ sharing arm--leg type $(a,\ell)$, the sign is $s_u=+1$ for $u\in\nu$ and $s_u=-1$ for $u\in\lambda\sqcup\mu$, and $z_u\in\{0,1\}$ is a latent selection indicator.
-The exponents $\beta_{\lambda,\mu,\nu,a,\ell}$ are read off from the rational expression of $f^\nu_{\lambda,\mu}(q,t)$, while the underlying selections $\{z_u\}$ are unobserved.
-Eq.~\eqref{eq:lr-as-signed-count} is exactly the signed finite-support aggregate-likelihood setting of Section~\ref{sec:problem-setup}: each triple $(\lambda,\mu,\nu)$ produces a family of bags indexed by $(a,\ell)$, each with a signed integer label, and the same convolutional bag-prediction layer applies without modification.
+Here $\mathcal{B}_{\lambda,\mu,\nu,a,\ell}=\{u\in\lambda\sqcup\mu\sqcup\nu : (a_u,\ell_u)=(a,\ell)\}$ is the arm--leg bag, the sign is $s_u=+1$ for $u\in\nu$ and $s_u=-1$ for $u\in\lambda\sqcup\mu$, and $z_u\in\{0,1\}$ indicates whether the cell $u$ belongs to the conjectural selected subset $X^\nu_{\lambda,\mu}\cup Y^\nu_{\lambda,\mu}\cup Z^\nu_{\lambda,\mu}$.
+The exponents $\beta_{\lambda,\mu,\nu,a,\ell}$ are read off from the rational expression of $f^\nu_{\lambda,\mu}(q,t)$, while the underlying selections $\{z_u\}$ are unobserved and need not be unique: distinct latent selections can produce the same vector of observed exponents, exactly the cancellation phenomenon that distinguishes signed counting from plain Bernoulli counting.
+
+Identifying instances with cells, bags with arm--leg equivalence classes, the aggregate label with the observed exponent $\beta_{\lambda,\mu,\nu,a,\ell}$, and the latent selection with membership in the conjectural subset, Eq.~\eqref{eq:lr-as-signed-count} is exactly the signed finite-support aggregate-likelihood setting of Section~\ref{sec:problem-setup}.
+Each triple $(\lambda,\mu,\nu)$ produces a family of such bags indexed by $(a,\ell)$, each with a signed integer label, and the convolutional bag-prediction layer of the main paper applies without modification.
 
 \paragraph{Empirical note.}
 In preliminary experiments using the framework of this paper, we observed over $98\%$ bag-level exponent accuracy on out-of-distribution Pieri- and Stanley-type triples, indicating that exact signed-count likelihood can recover latent cell selections consistent with the conjectural factorization.
