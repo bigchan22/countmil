@@ -20,9 +20,9 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 from countmil.aggregators import AggregatePMF, aggregate_nll, finite_support_convolution
-from countmil.datasets import SignedMNISTBags, collate_mnist_bags
+from countmil.datasets import CIFARSignedBags, SignedMNISTBags, collate_mnist_bags
 from countmil.metrics import binary_auc
-from countmil.models import ShuklaMNISTSelector
+from countmil.models import ShuklaMNISTSelector, make_cifar_classifier
 from countmil.training.run import make_run_dir, write_run_metadata
 from countmil.training.seed import set_seed
 
@@ -95,7 +95,16 @@ def expected_signed_count(probs: torch.Tensor, signs: torch.Tensor, mask: torch.
     return (probs * signs.to(probs.dtype) * mask.to(probs.dtype)).sum(dim=1)
 
 
-def _evaluate(model: ShuklaMNISTSelector, loader: DataLoader, device: torch.device) -> dict[str, float]:
+def _predict_target_proba(model: torch.nn.Module, x: torch.Tensor) -> torch.Tensor:
+    probs = model.predict_proba(x)
+    if probs.ndim == 3:
+        if probs.shape[-1] != 2:
+            raise ValueError("multiclass signed models must emit two target/non-target probabilities")
+        return probs[..., 1]
+    return probs
+
+
+def _evaluate(model: torch.nn.Module, loader: DataLoader, device: torch.device) -> dict[str, float]:
     model.eval()
     total_nll = 0.0
     total_bags = 0
@@ -113,7 +122,7 @@ def _evaluate(model: ShuklaMNISTSelector, loader: DataLoader, device: torch.devi
             signed_counts = batch["signed_count"].to(device)
             hidden = batch["instance_labels"].to(device)
 
-            probs = model.predict_proba(x)
+            probs = _predict_target_proba(model, x)
             pmf = signed_count_pmf(probs, signs, mask)
             nll = aggregate_nll(pmf, signed_counts)
             total_nll += nll.sum().item()
@@ -156,6 +165,10 @@ def main() -> None:
     parser.add_argument("--objective", choices=["nll", "mse"], default=None)
     parser.add_argument("--dataset-root", default=None)
     parser.add_argument("--dataset", default=None)
+    parser.add_argument("--label-level", choices=["coarse", "fine"], default=None)
+    parser.add_argument("--model", choices=["mnist_cnn", "small_cnn", "resnet18"], default=None)
+    parser.add_argument("--pretrained", action="store_true")
+    parser.add_argument("--augment", action="store_true")
     parser.add_argument("--target-digit", type=int, default=None)
     parser.add_argument("--bag-size-mean", type=int, default=None)
     parser.add_argument("--bag-size-std", type=float, default=None)
@@ -176,6 +189,10 @@ def main() -> None:
         "dataset_root": "data",
         "objective": "nll",
         "dataset": "MNIST",
+        "label_level": "coarse",
+        "model": "mnist_cnn",
+        "pretrained": False,
+        "augment": False,
         "target_digit": 9,
         "bag_size_mean": 10,
         "bag_size_std": 2.0,
@@ -192,6 +209,8 @@ def main() -> None:
         "dataset_root": args.dataset_root,
         "objective": args.objective,
         "dataset": args.dataset,
+        "label_level": args.label_level,
+        "model": args.model,
         "target_digit": args.target_digit,
         "bag_size_mean": args.bag_size_mean,
         "bag_size_std": args.bag_size_std,
@@ -202,6 +221,12 @@ def main() -> None:
             cfg[key] = value
     if args.cancellation_heavy:
         cfg["cancellation_heavy"] = True
+    if args.pretrained:
+        cfg["pretrained"] = True
+    if args.augment:
+        cfg["augment"] = True
+    if str(cfg["dataset"]).upper().replace("-", "") in {"CIFAR10", "CIFAR100"} and args.model is None:
+        cfg["model"] = "resnet18"
 
     seed = int(cfg["seed"])
     set_seed(seed)
@@ -214,32 +239,64 @@ def main() -> None:
     results_dir.mkdir(parents=True, exist_ok=True)
     metrics_path = run_dir / "metrics.jsonl"
 
-    train_ds = SignedMNISTBags(
-        root=cfg["dataset_root"],
-        dataset=str(cfg["dataset"]),
-        split="train",
-        num_bags=int(cfg["train_bags"]),
-        bag_size=int(cfg["bag_size_mean"]),
-        bag_size_std=float(cfg["bag_size_std"]),
-        target_digit=int(cfg["target_digit"]),
-        cancellation_heavy=bool(cfg["cancellation_heavy"]),
-        seed=seed,
-    )
-    test_ds = SignedMNISTBags(
-        root=cfg["dataset_root"],
-        dataset=str(cfg["dataset"]),
-        split="test",
-        num_bags=int(args.test_bags),
-        bag_size=int(cfg["bag_size_mean"]),
-        bag_size_std=float(cfg["bag_size_std"]),
-        target_digit=int(cfg["target_digit"]),
-        cancellation_heavy=bool(cfg["cancellation_heavy"]),
-        seed=seed + 10_000,
-    )
+    dataset_name = str(cfg["dataset"]).upper().replace("-", "")
+    if dataset_name in {"CIFAR10", "CIFAR100"}:
+        train_ds = CIFARSignedBags(
+            root=cfg["dataset_root"],
+            dataset=str(cfg["dataset"]),
+            split="train",
+            label_level=str(cfg["label_level"]),
+            num_bags=int(cfg["train_bags"]),
+            bag_size=int(cfg["bag_size_mean"]),
+            bag_size_std=float(cfg["bag_size_std"]),
+            target_label=int(cfg["target_digit"]),
+            cancellation_heavy=bool(cfg["cancellation_heavy"]),
+            seed=seed,
+            augment=bool(cfg["augment"]),
+        )
+        test_ds = CIFARSignedBags(
+            root=cfg["dataset_root"],
+            dataset=str(cfg["dataset"]),
+            split="test",
+            label_level=str(cfg["label_level"]),
+            num_bags=int(args.test_bags),
+            bag_size=int(cfg["bag_size_mean"]),
+            bag_size_std=float(cfg["bag_size_std"]),
+            target_label=int(cfg["target_digit"]),
+            cancellation_heavy=bool(cfg["cancellation_heavy"]),
+            seed=seed + 10_000,
+            augment=False,
+        )
+    else:
+        train_ds = SignedMNISTBags(
+            root=cfg["dataset_root"],
+            dataset=str(cfg["dataset"]),
+            split="train",
+            num_bags=int(cfg["train_bags"]),
+            bag_size=int(cfg["bag_size_mean"]),
+            bag_size_std=float(cfg["bag_size_std"]),
+            target_digit=int(cfg["target_digit"]),
+            cancellation_heavy=bool(cfg["cancellation_heavy"]),
+            seed=seed,
+        )
+        test_ds = SignedMNISTBags(
+            root=cfg["dataset_root"],
+            dataset=str(cfg["dataset"]),
+            split="test",
+            num_bags=int(args.test_bags),
+            bag_size=int(cfg["bag_size_mean"]),
+            bag_size_std=float(cfg["bag_size_std"]),
+            target_digit=int(cfg["target_digit"]),
+            cancellation_heavy=bool(cfg["cancellation_heavy"]),
+            seed=seed + 10_000,
+        )
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, collate_fn=collate_mnist_bags)
     test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, collate_fn=collate_mnist_bags)
 
-    model = ShuklaMNISTSelector().to(device)
+    if dataset_name in {"CIFAR10", "CIFAR100"}:
+        model = make_cifar_classifier(str(cfg["model"]), num_classes=2, pretrained=bool(cfg["pretrained"])).to(device)
+    else:
+        model = ShuklaMNISTSelector().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay, betas=(0.9, 0.999))
 
     best = {"instance_auc": -math.inf}
@@ -256,7 +313,7 @@ def main() -> None:
             mask = batch["mask"].to(device)
             signs = batch["signs"].to(device)
             signed_counts = batch["signed_count"].to(device)
-            probs = model.predict_proba(x)
+            probs = _predict_target_proba(model, x)
             if objective == "nll":
                 pmf = signed_count_pmf(probs, signs, mask)
                 loss = aggregate_nll(pmf, signed_counts).mean()

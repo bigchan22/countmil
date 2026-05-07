@@ -163,6 +163,84 @@ class CIFARHistogramBags(Dataset):
         }
 
 
+class CIFARSignedBags(Dataset):
+    """CIFAR bags with signed binary target-class counts."""
+
+    def __init__(
+        self,
+        root: str | Path = "data",
+        dataset: str = "CIFAR10",
+        split: Split = "train",
+        label_level: str = "coarse",
+        num_bags: int = 1000,
+        bag_size: int = 16,
+        bag_size_std: Optional[float] = None,
+        target_label: int = 9,
+        cancellation_heavy: bool = False,
+        seed: int = 0,
+        augment: bool = False,
+    ) -> None:
+        if bag_size < 1:
+            raise ValueError("bag_size must be positive")
+        self.images, self.labels, self.num_classes = load_cifar_family(root, dataset, split, label_level)
+        if not 0 <= int(target_label) < self.num_classes:
+            raise ValueError(f"target_label must be in [0,{self.num_classes})")
+        self.num_bags = int(num_bags)
+        self.bag_size = int(bag_size)
+        self.bag_size_std = bag_size_std
+        self.target_label = int(target_label)
+        self.cancellation_heavy = bool(cancellation_heavy)
+        self.seed = int(seed)
+        self.augment = bool(augment)
+
+    def __len__(self) -> int:
+        return self.num_bags
+
+    def _generator(self, idx: int) -> torch.Generator:
+        gen = torch.Generator()
+        gen.manual_seed(self.seed + int(idx))
+        return gen
+
+    def _sample_bag_size(self, gen: torch.Generator) -> int:
+        if self.bag_size_std is None or self.bag_size_std <= 0:
+            return self.bag_size
+        sample = torch.normal(
+            mean=torch.tensor(float(self.bag_size)),
+            std=torch.tensor(float(self.bag_size_std)),
+            generator=gen,
+        )
+        return max(1, int(round(float(sample.item()))))
+
+    def _augment_images(self, images: torch.Tensor, gen: torch.Generator) -> torch.Tensor:
+        return CIFARHistogramBags._augment_images(self, images, gen)
+
+    def __getitem__(self, idx: int) -> dict[str, torch.Tensor]:
+        gen = self._generator(idx)
+        bag_size = self._sample_bag_size(gen)
+        indices = torch.randint(0, self.images.shape[0], (bag_size,), generator=gen)
+        labels = self.labels[indices]
+        is_target = (labels == self.target_label).long()
+        if self.cancellation_heavy:
+            signs = torch.ones(bag_size, dtype=torch.long)
+            signs[1::2] = -1
+            signs = signs[torch.randperm(bag_size, generator=gen)]
+        else:
+            signs = torch.randint(0, 2, (bag_size,), generator=gen).mul(2).sub(1).long()
+        signed_labels = signs * is_target
+        instances = self.images[indices]
+        if self.augment:
+            instances = self._augment_images(instances, gen)
+        return {
+            "instances": instances,
+            "labels": labels,
+            "digits": labels,
+            "instance_labels": is_target,
+            "signs": signs,
+            "signed_instance_labels": signed_labels,
+            "signed_count": signed_labels.sum().long(),
+        }
+
+
 def collate_cifar_bags(batch: list[dict[str, torch.Tensor]]) -> dict[str, torch.Tensor]:
     max_len = max(item["instances"].shape[0] for item in batch)
     batch_size = len(batch)

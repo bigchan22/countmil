@@ -8,7 +8,7 @@ from .atomic_sum import (
     collate_ordinal_sum_bags,
     load_svhn_family,
 )
-from .cifar import CIFARHistogramBags, collate_cifar_bags, load_cifar_family
+from .cifar import CIFARHistogramBags, CIFARSignedBags, collate_cifar_bags, load_cifar_family
 from .mnist import (
     MNISTBags,
     MNISTDigitHistogramBags,
@@ -22,6 +22,7 @@ from .mnist import (
 
 __all__ = [
     "CIFARHistogramBags",
+    "CIFARSignedBags",
     "MNISTOrdinalSumBags",
     "MNISTBags",
     "MNISTDigitHistogramBags",

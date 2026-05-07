@@ -6,7 +6,7 @@ from pathlib import Path
 
 import torch
 
-from countmil.datasets import CIFARHistogramBags, collate_cifar_bags, load_cifar_family
+from countmil.datasets import CIFARHistogramBags, CIFARSignedBags, collate_cifar_bags, collate_mnist_bags, load_cifar_family
 
 
 def _write_pickle(path: Path, obj: dict) -> None:
@@ -60,6 +60,23 @@ class CIFARDatasetTests(unittest.TestCase):
             aug_item = aug[0]
             self.assertEqual(tuple(aug_item["instances"].shape), (4, 3, 32, 32))
             self.assertEqual(aug_item["class_counts"].tolist(), item["class_counts"].tolist())
+
+            signed = CIFARSignedBags(
+                root=root,
+                dataset="CIFAR100",
+                split="train",
+                num_bags=1,
+                bag_size=4,
+                bag_size_std=0,
+                target_label=2,
+                seed=1,
+            )
+            signed_item = signed[0]
+            self.assertTrue(torch.equal(signed_item["signed_instance_labels"], signed_item["signs"] * signed_item["instance_labels"]))
+            self.assertEqual(signed_item["signed_count"].item(), signed_item["signed_instance_labels"].sum().item())
+            signed_batch = collate_mnist_bags([signed_item])
+            self.assertEqual(tuple(signed_batch["instances"].shape), (1, 4, 3, 32, 32))
+            self.assertTrue(signed_batch["mask"].all())
 
 
 if __name__ == "__main__":
