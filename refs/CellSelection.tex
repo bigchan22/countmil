@@ -1,0 +1,805 @@
+%%%%%%%% ICML 2026 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
+
+\documentclass{article}
+
+% Recommended, but optional, packages for figures and better typesetting:
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs} % for professional tables
+
+% hyperref makes hyperlinks in the resulting PDF.
+% If your build breaks (sometimes temporarily if a hyperlink spans a page)
+% please comment out the following usepackage line and replace
+% \usepackage{icml2026} with \usepackage[nohyperref]{icml2026} above.
+\usepackage{hyperref}
+
+
+% Attempt to make hyperref and algorithmic work together better:
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% Use the following line for the initial blind version submitted for review:
+\usepackage{icml2026}
+
+% For preprint, use
+% \usepackage[preprint]{icml2026}
+
+% If accepted, instead use the following line for the camera-ready submission:
+% \usepackage[accepted]{icml2026}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+
+\usepackage{ytableau}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+
+
+% if you use cleveref..
+\usepackage[capitalize,noabbrev]{cleveref}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THEOREMS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{observation}[theorem]{Observation}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+
+\newcommand\rows{\operatorname{rows}}
+\newcommand\cols{\operatorname{cols}}
+
+
+% Todonotes is useful during development; simply uncomment the next line
+%    and comment out the line below the next line to turn off comments
+%\usepackage[disable,textsize=tiny]{todonotes}
+\usepackage[textsize=tiny]{todonotes}
+
+% The \icmltitle you define below is probably too long as a header.
+% Therefore, a short form for the running title is supplied here:
+\icmltitlerunning{Differentiable Counting via Convolution}
+
+\begin{document}
+
+\twocolumn[
+    \icmltitle{Differentiable Counting for Latent Rule Discovery via Convolution}
+
+  % It is OKAY to include author information, even for blind submissions: the
+  % style file will automatically remove it for you unless you've provided
+  % the [accepted] option to the icml2026 package.
+
+  % List of affiliations: The first argument should be a (short) identifier you
+  % will use later to specify author affiliations Academic affiliations
+  % should list Department, University, City, Region, Country Industry
+  % affiliations should list Company, City, Region, Country
+
+  % You can specify symbols, otherwise they are numbered in order. Ideally, you
+  % should not use this facility. Affiliations will be numbered in order of
+  % appearance and this is the preferred way.
+  \icmlsetsymbol{equal}{*}
+
+  \begin{icmlauthorlist}
+    \icmlauthor{Byung-Hak Hwang}{KIAS}
+    \icmlauthor{Chul-hee Lee}{CMC}
+    \icmlauthor{Chanho Min}{Ajou}
+    %\icmlauthor{}{sch}
+    % \icmlauthor{Firstname8 Lastname8}{sch}
+    % \icmlauthor{Firstname8 Lastname8}{yyy,comp}
+    %\icmlauthor{}{sch}
+    %\icmlauthor{}{sch}
+  \end{icmlauthorlist}
+
+    \icmlaffiliation{KIAS}{School of Mathematics, Korea Institute for Advanced Study}
+    \icmlaffiliation{CMC}{CMC}
+    \icmlaffiliation{Ajou}{Ajou University}
+
+  \icmlcorrespondingauthor{Chanho Min}{first1.last1@xxx.edu}
+  % \icmlcorrespondingauthor{Firstname2 Lastname2}{first2.last2@www.uk}
+
+  % You may provide any keywords that you find helpful for describing your
+  % paper; these are used to populate the "keywords" metadata in the PDF but
+  % will not be shown in the document
+  \icmlkeywords{Weakly Supervised Learning, Attention Mechanisms, AI for Math, Multiple Instance Learning, Rule Discovery from Counts}
+
+  \vskip 0.3in
+]
+
+% this must go after the closing bracket ] following \twocolumn[ ...
+
+% This command actually creates the footnote in the first column listing the
+% affiliations and the copyright notice. The command takes one argument, which
+% is text to display at the start of the footnote. The \icmlEqualContribution
+% command is standard text for equal contribution. Remove it (just {}) if you
+% do not need this facility.
+
+% Use ONE of the following lines. DO NOT remove the command.
+% If you have no special notice, KEEP empty braces:
+\printAffiliationsAndNotice{}  % no special notice (required even if empty)
+% Or, if applicable, use the standard equal contribution text:
+% \printAffiliationsAndNotice{\icmlEqualContribution}
+
+\begin{abstract}
+    We study \textit{Latent Counting}, where only an aggregate count $Y=\sum_i z_i$ is observed for a bag of unlabeled instances, and the goal is to learn a latent instance-level selection rule that extrapolates to larger, unseen bags.
+    Our approach combines a differentiable \textbf{Probabilistic Convolutional Aggregator} that computes the exact probability mass function of $Y$ with a \textbf{Purely-Relative Transformer} that removes absolute features and conditions attention only on learnable pairwise relations.
+    We demonstrate our approach on a challenging rule-discovery problem in mathematics, the conjectural $(q,t)$-Littlewood--Richardson formula, achieving $>98\%$ accuracy while extrapolating beyond the training regime.
+    More broadly, these results suggest that explicitly modeling integer-valued aggregation can support rule discovery under weak supervision.
+\end{abstract}
+
+	\section{Introduction}
+	
+	\paragraph{The Challenge of Blind Counting.} 
+	Scientific discovery often necessitates inferring the discrete, atomic rules that govern complex systems based solely on aggregate observations. In fields ranging from particle physics to computational biology, researchers frequently observe a global property—such as a net charge or a total cell count—while the individual components contributing to that sum remain unlabeled. This setting gives rise to the problem of \textit{bag-level integer summation}: given only a total count, one must infer the latent selection rule determining which instances in the bag contribute to the sum. 
+	
+	\paragraph{Limitations of current MIL.} 
+	This task is formally an instance of Multiple Instance Learning (MIL). However, standard MIL aggregation functions are ill-suited for exact integer inference. 
+    \texttt{Max-pooling}, designed for classification, detects only the \textit{existence} of a signal (0 vs. 1) and fails to capture multiplicity.
+    \texttt{Mean}/\texttt{sum}-pooling, typically used for regression, treat the target as continuous, blurring discrete structure.
+    More fundamentally, such aggregation schemes do not model the probability mass function (PMF) of the aggregate itself, and therefore cannot represent exact integer-valued distributions.
+
+\paragraph{Proposed Method: Convolutional MIL with Purely-Relative Representation.}
+To reconcile differentiable learning with exact integer aggregation and robust extrapolation, we propose a two-part framework: \textbf{Probabilistic Convolutional Aggregator} and \textbf{Purely-Relative Transformer}.
+The Probabilistic Convolutional Aggregator replaces mean/sum pooling by modeling each instance selection as a Bernoulli random variable and computing the probability distribution of the integer aggregates via convolution.
+The Purely-Relative Transformer then promotes scale-robust generalization by removing absolute features and conditioning attention only on learnable pairwise relative relations between tokens, discouraging shortcut learning tied to absolute coordinates and encouraging structure-consistent rule extrapolation beyond the training regime.
+
+
+    
+	% \paragraph{Proposed Method: Convolutional MIL.} 
+	% To reconcile differentiable learning with exact integer aggregation, we propose \textbf{Probabilistic Convolutional Aggregator}. Rather than summing expected values, we treat the latent selection of each instance as a Bernoulli random variable and compute the exact distribution of their sum. Since the PMF of a sum is the convolution of per-instance PMFs, we can efficiently compute the likelihood of an observed integer aggregate. This allows us to learn sharp, discrete selection rules within a fully differentiable framework, without resorting to continuous approximations.
+	
+	\paragraph{Case Study: The $(q,t)$-Littlewood--Richardson Problem.} 
+	We validate our framework on an important open problem in mathematics: a conjectural factorization formula for the $(q,t)$-Littlewood--Richardson (LR) coefficients arising in the theory of Macdonald polynomials.
+    We recast recovery of the signed exponents in the factorization as a latent signed counting problem.
+    This perspective fits naturally within our probabilistic aggregation framework.
+	
+	\paragraph{Contributions.} 
+    We contribute in three ways:
+	\begin{itemize}
+		\item \textbf{Methodological:} We introduce a generic \textit{Probabilistic Counting Wrapper} that enables standard neural backbones to model exact integer-supported PMFs via differentiable convolution.
+		\item \textbf{Architectural:} We propose the \textit{Purely-Relative Transformer}, a backbone that enforces translational symmetry and locality, facilitating generalization beyond the training size regime.
+		\item \textbf{Scientific:} We achieve high exact-match performance on the $(q,t)$-LR problem and demonstrate that the model recovers the classical Pieri rule as a \textit{sparse subset} of its learned selection patterns.
+	\end{itemize}
+	
+	\section{Related Work}
+	\label{sec:related_work}
+	
+	\subsection{Machine Learning for Mathematical Discovery}
+	Recent work applies deep learning to pure mathematics, from symbolic manipulation to pattern discovery and hypothesis generation. Early work by \cite{Lample2020Deep} demonstrated that Transformers could solve integration and differential equations by treating them as translation tasks.
+    More recently, AI has guided human intuition in open problems, uncovering novel relationships between knot invariants \cite{davies2021advancing} and discovering graph-theoretic counterexamples via reinforcement learning \cite{wagner2021constructions}.
+
+    We study a weakly supervised variant to infer latent instance selections from aggregate integer supervision, requiring discrete, rule-like structure rather than smooth regression.
+
+	
+    \subsection{Multiple Instance Learning (MIL)}
+    Our formulation falls within the Multiple Instance Learning (MIL) paradigm, where each training example is a bag of instances annotated only with a bag-level label.
+    Early MIL formulations typically treated bag labels as binary
+    indicators of the existence of at least one positive instance, a setting that
+    motivated max/mean pooling and related aggregation rules~\cite{dietterich1997solving,maron1998multiple}.
+    Modern set-function architectures (e.g. Deep Sets) justify sum/mean pooling as 
+    universal approximators for permutation-invariant functions, while attention-based 
+    pooling has become popular for its empirical performance and interpretability~\cite{zaheer2017deep,ilse2018attention}.
+    
+    Standard MIL pooling operations (max/mean/attention) are designed for 
+    classification or real-valued regression and output continuous scores; they do not 
+    explicitly model the discrete distribution of an integer sum over instances.
+    Shukla et al.~\yrcite{shukla2023unified} address discrete counts directly by 
+    proposing a differentiable method. Their algorithm relies on dynamic programming to obtain exact count probabilities, and is evaluated on synthetic benchmarks derived from MNIST. 
+    While this formulation is powerful, the DP-style computation is not easily parallelizable, motivating alternative discrete aggregation methods that remain GPU-friendly and transferable to domain-specific tasks.
+    % While this count-probability formulation is powerful, the dynamic-programming 
+    % style computation used in the paper is not presented as a simple, fully
+    % GPU-parallel operation. This motivates approaches that obtain
+    % bag-level counts via GPU-friendly aggregation and are validated on realistic,
+    % domain-specific tasks rather than only on synthetic image benchmarks.
+    	
+	% \subsection{Transformers and Relative Positional Encodings}
+	% To generalize beyond training configurations, the model must be invariant to absolute position. Standard Transformers \cite{vaswani2017attention} rely on absolute positional encodings, which struggle to extrapolate beyond the training sequence length \cite{press2022train}. 
+	
+	% Relative Positional Encodings (RPE) \cite{shaw2018self, dai2019transformer} address this by encoding the distance between tokens rather than their coordinates. In the visual domain, \cite{parmar2018image} introduced local attention windows for 2D images to capture translation equivariance. We extend these ideas to the domain of Young diagrams. Unlike the dense, rectangular grids in \cite{parmar2018image}, partitions are not ... and rectangular. Our Windowed Geometric Attention enforces a hard locality constraint similar to the receptive fields in CNNs.	
+
+\subsection{Transformers and Relative Positional Encodings}
+Transformers, built on self-attention, are a general-purpose architecture for sequence and vision tasks~\cite{vaswani2017attention}.
+Because Transformers do not encode order or coordinates intrinsically, they require positional information; absolute encodings can hurt generalization to unseen configurations (e.g., longer sequences), as highlighted in work on length extrapolation~\cite{press2022train}.
+
+Relative positional encodings (RPE) instead model pairwise relations (e.g., distances) rather than absolute coordinates, improving performance and robustness in language and other sequence tasks~\cite{shaw2018self,dai2019transformer}.
+In vision,
+local attention / windowing schemes (e.g., Image Transformer, Swin Transformer)
+combine spatial locality with attention on 2D grids~\cite{parmar2018image,liu2021swin}.
+Because many RPE and windowing designs assume regularly indexed 1D sequences
+or dense rectangular 2D patch grids, applying them to more flexible or irregular
+coordinate sets requires additional design choices (for example,
+how distances are measured or neighborhoods defined), which can limit
+applicability to non-rectangular or structured domains.
+	
+\section{Problem Setup and Learning Objectives}
+\label{sec:problem_formulation}
+
+We formalize the task of inferring instance-level structure from aggregate integer-valued supervision as a weakly supervised learning problem. We consider two variations: latent counting and latent signed counting, where positive and negative contributions may cancel.
+
+\subsection{Problem 1: Latent Counting as the Base Case}
+Consider a dataset where each input is a bag $\mathcal{B} = \{x_1, \dots, x_N\}$ of $N$ unordered instances. Each instance $x_i$ has a latent binary selection variable $z_i \in \{0,1\}$ indicating whether it contributes to the observed aggregate, and $z_i$ is never observed.
+
+The only supervision provided is the aggregate count $Y \in \mathbb{N}$, representing the total number of selected instances:
+\[
+    Y = \sum_{i=1}^N z_i.
+\]
+The goal is to learn $p_i=P(z_i=1)$ so that the induced sum distribution assigns high likelihood to the observed $Y$.
+
+\subsection{Problem 2: Latent Signed Counting}
+In many physical and mathematical contexts, contributions can be signed, such as charge, spin, or inclusion--exclusion from numerator--denominator structure, leading to cancellation. We extend the base formulation by associating each instance $x_i$ with a fixed known sign $s_i \in \{-1,+1\}$.
+
+The observed target is now the \textit{net integer sum} $Y \in \mathbb{Z}$:
+\[
+    Y = \sum_{i=1}^N s_i \cdot z_i.
+\]
+This introduces a fundamental challenge: \textbf{cancellation}. For example, $Y=0$ may arise from selecting nothing or from selecting offsetting positive/negative instances. More generally, multiple distinct latent selections can yield the same observed sum, making the inverse problem more ambiguous than unsigned counting.
+
+    
+\subsection{The Dual Objective: Prediction and Discovery}
+In standard supervised learning, predicting $Y$ accurately is often sufficient. In our setting, we also seek an interpretable instance-level explanation of the observed aggregate. Accordingly, our goal is twofold:
+
+\begin{itemize}
+    \item \textbf{Predictive Goal:} Minimize the negative log-likelihood of the observed aggregate $Y$ under the distribution induced by the predicted instance-level selection probabilities.
+    \item \textbf{Discovery Goal:} Infer instance-level selection probabilities $\hat{p}_i$ that provide a plausible and interpretable explanation of the observed aggregate.
+\end{itemize}
+
+Crucially, our goal extends beyond minimizing prediction error on $Y$. We aim to learn a selection rule that produces consistent, interpretable instance-level attributions explaining the observed aggregate.
+	
+	
+	\section{A Mathematical Problem as MIL}
+	\label{sec:background}
+	
+	To ground our generic formulation, we focus on a specific object in mathematics: the $(q,t)$-Littlewood--Richardson coefficients. This provides a perfect testbed for Latent Signed Counting.
+	
+	\subsection{Partitions and Their Cells}
+	A partition $\lambda = (\lambda_1, \lambda_2, \dots, \lambda_k)$ is a sequence of non-increasing positive integers, visualized as a grid of cells (Figure~\ref{fig:partition}). We identify a partition with its corresponding diagram. We denote $|\lambda| := \lambda_1+\dots+\lambda_k$.
+    Also, denote by $\rows(\lambda)$ (resp., $\cols(\lambda)$) the number of rows (resp., columns)
+    of $\lambda$, i.e., $\rows(\lambda) = k$ and $\cols(\lambda)=\lambda_1$.
+    For any cell $u = (r, c)$ in row $r$ and column $c$, we define two intrinsic features:
+	\begin{itemize}
+		\item \textbf{Arm length} $a_\lambda(u)$: number of cells to the right of $u$.
+        \item \textbf{Leg length} $\ell_\lambda(u)$: number of cells below $u$.
+	\end{itemize}
+    \begin{figure}
+        \[
+        \begin{ytableau}
+           {~} & {u} & {a} & {a} \\
+           {~} & {\ell} & {~} \\
+           {~}
+        \end{ytableau}
+        \]
+        \caption{A partition $(4,3,1)$}
+        \label{fig:partition}
+    \end{figure}
+    % We say that a cell $u$ is of shape $(a_\lambda(u),\ell_\lambda(u))$.
+    The following rational function serves as an atomic building block:
+    for nonnegative integers $a$ and $\ell$,
+    \[
+        b(a,\ell) := \frac{1-q^{a}t^{\ell+1}}{1-q^{a+1}t^{\ell}},
+    \]
+    and for a partition $\lambda$ and a cell $u\in\lambda$,
+    \( b_\lambda(u; q,t) := b(a_\lambda(u), \ell_\lambda(u)) \).
+    For example, consider the cell $u=(1,2)$ in the partition shown in Figure~\ref{fig:partition}.
+    Its arm length $a_\lambda(u)$ and leg length $\ell_\lambda(u)$ are $2$ and $1$, respectively.
+    The cells contributing to $a_\lambda(u)$ and $\ell_\lambda(u)$ are indicated by $a$ and $\ell$, respectively.
+    Although the row and column indices and the arm and leg lengths of a cell $u$ depend on the partition containing $u$, we write them as $r_u$, $c_u$, $a_u$, and $\ell_u$ when the partition is clear from the context.
+    
+    \subsection{$(q,t)$-Littlewood--Richardson coefficients}
+    Littlewood--Richardson (LR) coefficients $c^\nu_{\lambda,\mu}$ and their $(q,t)$-generalizations
+    $f^\nu_{\lambda,\mu}(q,t)$ are important objects that arise in many areas of mathematics; see e.g. \cite{LittlewoodRichardson1934,Macdonald1995,KnutsonTao1999,Vakil2006}.
+    % While we do not provide the definitions of $c^\nu_{\lambda,\mu}$ and $f^\nu_{\lambda,\mu}(q,t)$,
+    % their basic properties are as follows:
+    % \begin{itemize}
+    %     \item They are indexed by triples of partitions $(\lambda,\mu,\nu)$ with $\lambda,\mu\subseteq\nu$
+    %           and $|\lambda|+|\mu|=|\nu|$.
+    %     \item Each $c^\nu_{\lambda,\mu}$ is a nonnegative integer, while $f^\nu_{\lambda,\mu}(q,t)$
+    %           is a rational function in $q$ and $t$.
+    %     \item $f^\nu_{\lambda,\mu}(0,0)=c^\nu_{\lambda,\mu}$.
+    % \end{itemize}
+    Each $c^\nu_{\lambda,\mu}$ is a nonnegative integer, while $f^\nu_{\lambda,\mu}(q,t)$ is a rational function in $q$ and $t$ such that $f^\nu_{\lambda,\mu}(0,0)=c^\nu_{\lambda,\mu}$.
+    Thus $f^\nu_{\lambda,\mu}(q,t)$ refines the classical coefficients $c^\nu_{\lambda,\mu}$.
+    While $c^\nu_{\lambda,\mu}$ is well understood, the structure of $f^\nu_{\lambda,\mu}(q,t)$ remains much less so.
+    % While many properties of $c^\nu_{\lambda,\mu}$ are well understood and explicit formulas exist, the structure of $f^\nu_{\lambda,\mu}(q,t)$ is substantially more intricate and remains poorly understood in general, due to their greater algebraic and combinatorial complexity.
+
+    Stanley proposed a conjectural structural description of $f^\nu_{\lambda,\mu}(q,t)$
+    for those triples with $c^\nu_{\lambda,\mu}=1$ (Conjecture~8.5 in \cite{Stanley1989}), which we reformulate as follows:
+    \begin{conjecture} \label{conj:stanley_conjecture}
+        Let $\lambda,\mu,\nu$ be partitions with $c^\nu_{\lambda,\mu}=1$. Then there exist subsets
+        $X^\nu_{\lambda,\mu}\subseteq\lambda$, $Y^\nu_{\lambda,\mu}\subseteq\mu$, and
+        $Z^\nu_{\lambda,\mu}\subseteq\nu$ such that
+        \begin{equation} \label{eq:f_nlm-form}
+            f^\nu_{\lambda,\mu}(q,t) =
+            \dfrac{\prod_{u\in Z^\nu_{\lambda,\mu}} b_\nu(u;q,t)}
+                  {\prod_{u\in X^\nu_{\lambda,\mu}} b_\lambda(u;q,t)
+                   \times\prod_{u\in Y^\nu_{\lambda,\mu}} b_\mu(u;q,t)}.
+        \end{equation}
+    \end{conjecture}
+    Informally, the conjecture posits a latent selection rule on cells of $\lambda,\mu,\nu$ such that $f^\nu_{\lambda,\mu}(q,t)$ factors into local cell contributions determined by the selected subsets.
+    Note that such selections $X^\nu_{\lambda,\mu}$, $Y^\nu_{\lambda,\mu}$ and $Z^\nu_{\lambda,\mu}$ may not be unique.
+
+    The conjecture is still widely open, but some very special cases are known.
+    The most notable case is the case where $\mu$ is a single row partition ($\rows(\mu)=1$).
+    In this case, Macdonald gave an explicit description of the sets $X^\nu_{\lambda,\mu}$,
+    $Y^\nu_{\lambda,\mu}$, and $Z^\nu_{\lambda,\mu}$; see p. 340 in \cite{Macdonald1995} for details.
+    We illustrate an example of the description in Figure~\ref{fig:Pieri}.
+    The rule for this specific case is called the \emph{Pieri rule}, which will play a role
+    in training and testing our model.
+
+
+    
+    \begin{figure}
+        \ytableausetup{centertableaux, smalltableaux}
+        \[
+        \lambda = \begin{ytableau}
+           {~} & *(yellow!50){~} & *(yellow!50){~} & {~} \\
+           {~} & *(yellow!50){~} & *(yellow!50){~} \\
+           {~}
+        \end{ytableau} \qquad
+        \mu = \begin{ytableau}
+           *(green!50){~} & *(green!50){~} & *(green!50){~}
+        \end{ytableau} \qquad
+        \nu = \begin{ytableau}
+           {~} & *(blue!50){~} & *(blue!50){~} & {~} & *(blue!50){~} \\
+           {~} & *(blue!50){~} & *(blue!50){~} \\
+           {~} & *(blue!50){~} & *(blue!50){~}
+        \end{ytableau}
+        \]
+        \caption{Example of the Pieri rule.
+        Let $\lambda=(4,3,1)$, $\mu=(3)$, and $\nu=(5,3,3)$, then by the Pieri rule,
+        the sets $X^\nu_{\lambda,\mu}$ (in yellow), $Y^\nu_{\lambda,\mu}$ (in green),
+        and $Z^\nu_{\lambda,\mu}$ (in blue) give $f^\nu_{\lambda,\mu}$ in the sense of
+        Eq.~\eqref{eq:f_nlm-form}.}
+        \label{fig:Pieri}
+    \end{figure}
+
+    
+    \subsection{Mapping to MIL}
+    Since each atomic rational function $b_\lambda(u;q,t)$ is determined by only
+    the arm and leg lengths $(a_u, \ell_u)$, some cancellations may appear
+    in Eq.~\eqref{eq:f_nlm-form}. Hence we can rewrite $f^\nu_{\lambda,\mu}(q,t)$ as follows:
+	\begin{observation}
+		If $c^{\nu}_{\lambda,\mu}=1$, then $f^\nu_{\lambda,\mu}(q,t)$ factors
+        into terms grouped by $(a,\ell)$:
+		\[ \label{eq:factored_f}
+			f^{\nu}_{\lambda,\mu}(q,t) = \prod_{(a,\ell)\in \mathbb{Z}_{\ge 0}^2} b(a,\ell)^{\beta_{\lambda, \mu, \nu, a,\ell}}.
+		\]
+		The exponent $\beta_{\lambda, \mu, \nu, a,\ell}$ represents the net signed count of selected cells sharing the value $(a,\ell)$.
+        % More precisely, a cell in $\nu$ (resp., $\lambda$ or $\mu$) has the value $(a,\ell)$, then it contributes $+1$ (resp., $-1$) to $\beta_{\lambda, \mu, \nu, a,\ell}$.
+        More precisely, each selected cell $u$ with $(a_u,\ell_u)=(a,\ell)$ contributes $+1$ if $u\in\nu$ and $-1$ if $u\in\lambda\sqcup\mu$.
+        See Figure~\ref{fig:cell_selection} for the visualization of the observation.
+	\end{observation}
+	
+	Each triple $(\lambda,\mu,\nu)$ yields finitely many bags indexed by arm--leg pairs $(a,\ell)$, and we summarize the associated notation below.
+	\begin{itemize}
+    
+            \item \textbf{Index set $\mathcal S_{\lambda,\mu,\nu}$:}
+                the set of distinct arm--leg pairs $(a_u,\ell_u)$ attained by cells $u\in\lambda\sqcup\mu\sqcup\nu$.
+                % Unique collection of all $(a(u),\ell(u))$ for all $u\in \lambda\sqcup\mu\sqcup\nu$.
+            \item \textbf{Bag $\mathcal{B}_{\lambda, \mu, \nu, a,\ell}$:}
+                all cells $u\in \lambda\sqcup\mu\sqcup\nu$ having the same value $(a,\ell)$.
+		\item \textbf{Label $\beta_{\lambda,\mu,\nu,a,\ell}$:}
+            the observed exponent.
+		\item \textbf{Latent Variable $z_u$:}
+            an indicator of whether cell $u$ is selected, $z_u\in\{0,1\}$.
+		\item \textbf{Sign $s_u$:}
+            $+1$ if $u \in \nu$, $-1$ if $u \in \lambda \sqcup \mu$.
+	\end{itemize}
+	
+    Our goal is to train a model such that, for every bag $(\lambda, \mu, \nu, a,\ell)$,
+    \[
+\beta_{\lambda,\mu,\nu,a,\ell}=\sum_{u\in\mathcal{B}_{\lambda, \mu, \nu, a,\ell}} s_u \cdot z_u .
+    \]
+    \input{./figure-selection_example.tex}
+    % Figure~\ref{fig:cell_selection} depicts the 
+
+\section{Methodology}
+\paragraph{Overview.}
+Our system consists of two modules: a selector backbone $f_\theta$ and Probabilistic Convolutional Aggregator $\mathcal{A}$.
+Given a triplet $(\lambda,\mu,\nu)$, we treat all cells as tokens and apply the Purely-Relative Transformer in parallel to produce a selection probability $p_i$ for each token $u_i$.
+From each $p_i$, we construct an atomic PMF $\mathbf d_i$, whose support depends on whether $u_i\in \nu$ or not.
+The aggregator $\mathcal{A}$ maps the collection of atomic PMFs $\{\mathbf d_i\}$ to a family of exact bag-level distributions indexed by $(a,\ell)$:
+\[
+\mathcal{A}\!\left(\{\mathbf d_i\}\right)
+=\Big(\hat{P}_{\lambda,\mu,\nu,a,\ell}\Big)_{(a,\ell)\in \mathcal S_{\lambda,\mu,\nu}},
+\]
+where $\hat{P}_{\lambda,\mu,\nu,a,\ell}$ denotes the model-estimated PMF of the bag exponent $\beta_{\lambda,\mu,\nu,a,\ell}$.
+A point prediction is obtained by
+\[
+\widehat{\beta}_{\lambda,\mu,\nu,a,\ell}
+:= \arg\max_{k\in\mathbb{Z}} \hat{P}_{\lambda,\mu,\nu,a,\ell}(k).
+\]
+This construction enables end-to-end maximum-likelihood training under aggregate-only supervision.
+While $\mathcal{A}$ can wrap any backbone $f_\theta$, the purely-relative design of $f_\theta$ is crucial for extrapolation to larger grids.
+Figure~\ref{fig:pipeline} illustrates the overview of the pipeline.
+
+    \input{./figure-pipeline.tex}
+
+
+
+	\subsection{Methodology I: Probabilistic Convolutional Aggregator}
+	\label{sec:method_conv}
+
+    We propose a differentiable aggregation layer that solves the \textit{Latent Counting} problem (Problem~1) and naturally extends to the \textit{Signed} case (Problem~2). 
+    The layer can wrap an arbitrary backbone, mapping its instance-level selection probabilities to bag-level PMFs via convolution.
+
+\subsubsection{The Latent Counting Framework}
+\label{sec:universal_framework}
+
+First, we consider the general case of summing independent binary random variables. Standard approaches often approximate the sum of the binary selections $Y=\sum_i z_i$ using expectations, i.e., $\hat{Y}=\sum_i p_i$. This reduces the entire uncertainty of the discrete random sum to a single scalar. For instance, if $N=10$ and $p_i=0.5$ for all $i$, the expectation surrogate yields $\hat{Y}=5$, whereas the true object of interest is the full PMF of $Y$, supported on $\{0,1,\dots,10\}$, i.e., an $11$-dimensional distribution.
+
+Accordingly, we compute the full PMF of the sum. 
+Let $p_i\in[0,1]$ denote the predicted selection probability for instance $i$.
+The Bernoulli PMF of $z_i$ is represented as a length-2 vector
+\[
+\mathbf d_i = (1-p_i,\; p_i).
+\]
+Since the $z_i$ are independent, the PMF of their sum is obtained by discrete convolution of the individual PMFs:
+\[
+P \;=\; \mathbf d_1 * \mathbf d_2 * \cdots * \mathbf d_N.
+\]
+
+
+\paragraph{Relation to prior work.}
+Shukla et al.~\cite{shukla2023unified} compute the exact count probability via a dynamic-programming recursion with time $O(ks)$ for a fixed sum and $O(k^2)$ to obtain all sums. 
+Our aggregator produces the same PMF, but we adopt a convolutional viewpoint that maps the recursion to repeated 1D convolutions. 
+This form is implementation-friendly in our setting, since each input induces many bags and the aggregations can be batched via grouped Conv1D kernels on GPUs.
+
+
+
+	\subsubsection{Extension to Signed Domains}
+	We generalize to \textit{Latent Signed Counting}, where each instance has a known sign $s_i\in\{-1,+1\}$ and the observed label is
+	$Y=\sum_i s_i z_i\in\mathbb{Z}$.
+	Each instance contributes either $0$ or $s_i$, hence the atomic PMF:
+	\[
+		\mathbf d_i=
+		\begin{cases}
+			(0,1-p_i, p_i) & s_i=1,\\
+			(p_i, 1-p_i , 0)   & s_i=-1.
+		\end{cases}
+	\]
+	For a bag with $K$ instances, the signed sum lies in $[-K,K]$.
+	When $s_i=-1$, the mass at $k=-1$ corresponds to a left shift, allowing exact cancellation via the same convolution operator.
+	Training minimizes the signed negative log-likelihood.
+	
+\subsubsection{Scalable implementation via grouped 1D convolution}
+\label{sec:implementation}
+
+The convolutional view yields a direct and efficient implementation.
+For each bag, we start from a point-mass PMF at $0$ and iteratively convolve it with the atomic PMFs.
+% \[
+% P \;=\; \mathbf d_1 * \mathbf d_2 * \cdots * \mathbf d_K.
+% \]
+% where each $\mathbf{d_i}$ is a length-3 kernel.
+Since each triplet $(\lambda,\mu,\nu)$ induces many bags indexed by $(a,\ell)$, we batch all bags and compute these convolutions in parallel using standard grouped 1D convolutions. 
+This avoids per-instance Python loops and maps the entire aggregation step to a small number of GPU kernels.
+
+Optionally, the sequential chain can be further accelerated by a balanced divide-and-conquer schedule:
+\[
+\big(\mathbf d_1 * \mathbf d_2 * \mathbf d_3 * \mathbf d_4\big)
+\;=\;
+\big(\mathbf d_1 * \mathbf d_2\big) * \big(\mathbf d_3 * \mathbf d_4\big),
+\]
+which reduces the convolution depth at the cost of intermediate kernels with larger support.
+In our current regime, bags are small enough that the straightforward grouped-convolution implementation is sufficient, but this suggests a clear path to scaling (e.g., via balanced trees or FFT-based methods for larger bags).
+
+	
+
+	
+\subsection{Methodology II: Purely-Relative Transformer}
+\label{sec:method_selector}
+While the Convolutional Aggregator (Section \ref{sec:method_conv}) handles exact integer arithmetic, the system's ability to discover valid laws depends on a ``Selector'' backbone $f_\theta$ identifying consistent substructures.
+We address the \textit{Extrapolation Gap}:
+while standard models achieve $>99.99\%$ accuracy on random splits, they fail on larger grids, indicating overfitting to absolute coordinates or features.
+To bridge this gap, we introduce the \textbf{Purely-Relative Transformer}, a backbone specifically designed to rely exclusively on relative spatial and shape dependencies, ensuring invariance to grid size and absolute position.
+
+\subsubsection{Input Representation}
+
+\paragraph{Tokens.}
+The input is the union of cells from three partitions $\lambda, \mu,\nu$.
+Each cell $u\in \lambda\sqcup \mu\sqcup \nu$ is treated as a token. % $u \in \mathcal{V}$.
+We associate each token with a source identifier $\mathrm{id}_u \in \{1,2,3\}$ indicating whether $u$ comes from $\lambda$, $\mu$, or $\nu$.
+We also compute geometric quantities (row/column $(r_u,c_u)$ and arm/leg $(a_u,\ell_u)$) as metadata.
+
+\paragraph{Standard Transformer (absolute).}
+As a conventional baseline, we embed the raw scalars and add absolute positional encodings:
+\begin{align*}
+\mathbf{x}_u^{\mathrm{std}} &= [r_u,\ c_u,\ a_u,\ \ell_u,\ \mathrm{id}_u] \in \mathbb{R}^5, \\
+h_{u,\mathrm{std}}^{(0)} &= \mathrm{Linear}(\mathbf{x}_u^{\mathrm{std}}) + \mathrm{PE}(r_u,c_u).
+\end{align*}
+
+\paragraph{Ours (ID-only input).}
+To eliminate absolute geometric channels from the token features, our model uses an \emph{ID-only} input:
+\begin{align*}
+\mathbf{x}_u^{\mathrm{ours}} = [\mathrm{id}_u] \in \mathbb{R}^1,\quad 
+h_{u,\mathrm{ours}}^{(0)} = \mathrm{EmbedID}(\mathrm{id}_u),
+\end{align*}
+where $\mathrm{EmbedID}(\cdot)$ is a learnable embedding (or equivalently a linear map applied to a one-hot encoding of $\mathrm{id}_u$).
+Crucially, our model does \emph{not} provide $(r_u,c_u,a_u,\ell_u)$ to the token features and does not use absolute positional encodings.
+
+\subsubsection{Relative Attention}
+
+\paragraph{Standard attention.}
+Standard Transformers inject absolute location information into token representations via positional encodings.
+The attention logits are
+\[
+e^{\mathrm{std}}_{ij} \;=\; \frac{\langle Q_i, K_j\rangle}{\sqrt{d}}.
+\]
+% with $Q_i = h_i W_Q$ and $K_j = h_j W_K$.
+
+\paragraph{Our model's attention.}
+Our model removes standard positional encodings and uses ID-only token embeddings at initialization.
+Geometric structure is injected \emph{only} as an additive relative bias on the attention logits:
+\[
+e^{\mathrm{ours}}_{ij} \;=\; \frac{\langle Q_i, K_j\rangle}{\sqrt{d}} \;+\; b_{\mathrm{rel}}(i,j).
+\]
+
+\paragraph{Relative bias.}
+We parameterize $b_{\mathrm{rel}}(i,j)$ as a sum of learnable lookup tables over relative differences:
+\[
+b_{\mathrm{rel}}(i,j)=
+b_{r}(\Delta r_{ij}) + b_{c}(\Delta c_{ij})+\; b_{a}(\Delta a_{ij}) + b_{\ell}(\Delta \ell_{ij}),
+\]
+where $\Delta r_{ij}=r_{u_i}-r_{u_j}$, $\Delta c_{ij}=c_{u_i}-c_{u_j}$,
+$\Delta a_{ij}=a_{u_i}-a_{u_j}$, and $\Delta \ell_{ij}=\ell_{u_i}-\ell_{u_j}$.
+Later, we optionally clamp these differences to a fixed window to support size extrapolation.
+\subsection{Window Clamping}
+\label{sec:clamping}
+
+A key obstacle to extrapolation on larger grids is that relative offsets grow in magnitude: as the grid expands, $\Delta r$ and $\Delta c$ can take values never observed during training. Yet many mathematical rules depend primarily on \emph{local} distances and beyond a neighborhood, only coarse directional information is needed.
+
+We encode this bias by applying window-clamping to all relative-difference inputs to a fixed range $[-K,K]$:
+\[
+\mathrm{clamp}(x;K) = \max(-K,\min(x,K)).
+\]
+Clamping maps every offset to $[-K,K]$, eliminating unseen magnitudes at inference time while preserving the sign ($-K$ vs.\ $+K$).
+
+\section{Experiments}
+\label{sec:experiments}
+	
+We evaluate whether, under aggregate-only supervision, the proposed Probabilistic Convolutional Aggregator and Purely-Relative Transformer enable a model to (i) extrapolate a consistent rule to out-of-distribution regimes beyond the training domain and (ii) infer coherent instance-level selections in identifiable cases.
+
+% We emphasize out-of-distribution (OOD) generalization to larger, unseen configurations, and quantify rule coherence by comparing the predicted selected-cell set to known mathematical rules in Pieri cases.
+
+\subsection{Dataset construction and splits}
+\label{sec:dataset_setup}
+
+\textbf{Training set (general + Pieri augmentation), $D_{\text{train}}$.}
+Our core training distribution consists of $(\lambda,\mu,\nu)$ triplets generated by an external procedure, restricted to small shapes where computation is feasible:
+\[
+    \rows(\lambda),\rows(\mu) \le 4,\quad \cols(\lambda),\cols(\mu) \le 8,
+\]
+together with their corresponding $\nu$ satisfying $c^\nu_{\lambda,\mu}=1$.
+However, the ``$\rows \le 4$'' regime is extremely limited and provides only a few examples of strip-like configurations that dominate known closed-form Pieri cases.
+We therefore augment training with Pieri instances of size up to 6 (that is, $\rows(\lambda),\cols(\lambda)\le 6$ and $\mu=(k)$ where $k\le 6$).
+Thus, $D_{\text{train}}$ combines (a) small-regime general instances ($\rows \le 4$, $\cols \le 8$) and (b) Pieri instances up to size 6.
+
+\textbf{Test set 1 (general OOD test set), $D_{\text{test1}}$.}
+To assess extrapolation beyond the training size regime, we construct a general evaluation set at larger configurations, denoted $D_{\text{test1}}$.
+We generate general triplets with up to 6 rows and then remove any overlap with the training set to prevent leakage:
+\( D_{\text{test1}} \cap D_{\text{train}} = \emptyset. \)
+
+\textbf{Test set 2 (extreme OOD test set), $D_{\text{test2}}$.}
+Ideally, one would also evaluate on \emph{general} triplets at even larger sizes (e.g., rows 8). 
+In practice, generating general $(q,t)$-LR exponents at this scale is computationally prohibitive.
+To still probe extreme extrapolation, we therefore construct a second OOD set, denoted $D_{\text{test2}}$, using Pieri cases at size up to 8 rows.
+We again enforce de-duplication by excluding any Pieri 8 instances that appear in training.
+
+\subsection{Evaluation Metrics}
+\label{sec:metrics}
+
+\textbf{(1) Bag-level aggregate accuracy.}
+Each triplet $(\lambda,\mu,\nu)$ decomposes into multiple disjoint bags indexed by $ \mathcal{B}_{\lambda, \mu, \nu, a,\ell}$, each with an integer target $\beta_{\lambda,\mu,\nu,a,\ell}$.
+We report the \emph{bag-level accuracy} as the fraction of bags whose predicted exponent matches the ground truth exactly:
+\begin{align*}
+&\mathrm{Acc}_{\mathrm{bag}}\\
+&~~:= \frac{1}{M}\sum_{(\lambda,\mu,\nu)\in D}\ \sum_{(a,\ell)\in \mathcal S_{\lambda,\mu,\nu}}
+\mathbb{I}\!\left(\widehat{\beta}_{\lambda,\mu,\nu,a,\ell}=\beta_{\lambda,\mu,\nu,a,\ell}\right),
+\end{align*}
+where $M$ is the total number of bags in dataset $D$:
+\( M:= \sum_{(\lambda,\mu,\nu)\in D}\left|\mathcal S_{\lambda,\mu,\nu}\right|. \)
+
+
+\textbf{(2) Instance-level rule coherence on Pieri cases.}
+For Pieri instances, a known rule specifies a reference selected-cell set $\mathcal{Z}_{\text{Pieri}}$.
+Our selector produces an instance-level probability $p_u \in [0,1]$ for each cell $u$, interpreted as the probability that $u$ is selected.
+We convert these probabilities into a predicted selected-cell set using a fixed threshold,
+\[
+\hat{\mathcal{Z}} \;=\; \{u \in\lambda\sqcup\mu\sqcup\nu : p_u \ge 0.5\},
+\]
+and compare it to $\mathcal{Z}_{\text{Pieri}}$.
+To obtain near-binary selection probabilities $p_u$, we add a small entropy regularizer during training.
+As a result, thresholding at $0.5$ yields stable predicted sets with few near-threshold probabilities.
+We quantify coherence using two indicators:
+\[
+\text{Inclusion} = \mathbb{I}\big(\hat{\mathcal{Z}} \subseteq \mathcal{Z}_{\text{Pieri}}\big), \quad
+\text{ExactSet} = \mathbb{I}\big(\hat{\mathcal{Z}} = \mathcal{Z}_{\text{Pieri}}\big).
+\]
+We report the inclusion rate and exact-set-match rate over Pieri test samples.
+
+\paragraph{Training details.}
+Unless otherwise stated, we use a Transformer selector with 4 layers, 4 heads, and model width 128.
+We train for 200 epochs with batch size 512 using Adam (learning rate $10^{-3}$).
+During training, selection probabilities are computed as $p=\sigma(l/\tau)$ and we anneal the temperature from $\tau=10$ to $\tau=1$; we also add an entropy regularizer with coefficient $0.01$.
+For relative-bias attention, we use window clamping with $K=2$, so the model distinguishes only coarse relative relations (e.g., adjacent vs.\ far, and direction) rather than exact long-range distances.
+All test results are averaged over 5 random seeds; we report mean and standard deviation.
+
+
+
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Aggregate Counting Performance}
+\label{sec:quant_results}
+
+\begin{table}[h]
+	\centering
+\caption{\textbf{Counting performance (bag-level accuracy).}
+A sum-pooling regression baseline trained with MSE performs poorly, whereas the proposed Probabilistic Convolutional Aggregator achieves near-perfect accuracy.}
+
+	\label{tab:ablation_counting}
+	\begin{tabular}{lcc}
+		\toprule
+		\textbf{Method} & 		$\mathrm{Acc}_{\text{bag}}(D_{\text{train}})$ &
+		$\mathrm{Acc}_{\text{bag}}(D_{\text{test1}})$  \\
+		\midrule
+		Regression (MSE Loss) & 58.34 & 64.30 \\
+		\textbf{Convolution (Ours)} & \textbf{99.99} & \textbf{98.47} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+\paragraph{Effect of PMF aggregation.}
+We test whether aggregation benefits from explicitly modeling the full distribution of an integer-valued sum.
+To control for the selector, both methods use the same backbone $f_\theta$ (the Purely-Relative Transformer described in Section~\ref{sec:method_selector}) and differ only in the aggregation objective.
+As a continuous surrogate, we train a sum-pooling regressor that predicts $\hat{\beta}_{sum}=\sum_i p_i$ and minimizes an MSE loss.
+In contrast, our Probabilistic Convolutional Aggregator constructs an exact PMF of the aggregate $\hat{P}$ and maximizes the log-likelihood of the observed integer target.
+Table~\ref{tab:ablation_counting} shows that the MSE regressor achieves only $58.34\%$ bag-level accuracy on $D_{\text{train}}$, whereas the PMF-based objective reaches $99.99\%$ on $D_{\text{train}}$ and $98.47\%$ on $D_{\text{test1}}$.
+This gap is consistent with the fact that our supervision consists of multiple signed bag-level counts, where a continuous regression surrogate discards distributional information needed for stable learning. 
+Unlike the standard Transformer baseline, our Purely-Relative Transformer uses relative biases for both spatial offsets $(\Delta r,\Delta c)$ and intrinsic shape offsets $(\Delta a,\Delta \ell)$, which improves OOD extrapolation.
+
+
+
+
+
+
+\subsection{Out-of-Distribution Generalization}
+\label{sec:ood_results}
+\begin{table}[t]
+	\centering
+\caption{\textbf{Out-of-distribution performance.}
+Bag-level accuracy on two OOD splits, $D_{\text{test1}}$ and $D_{\text{test2}}$.}
+	\label{tab:headline_main}
+	\begin{tabular}{lcc}
+		\toprule
+		\textbf{Model} &
+		$\mathrm{Acc}_{\text{bag}}(D_{\text{test1}})$ &
+		$\mathrm{Acc}_{\text{bag}}(D_{\text{test2}})$ \\
+		\midrule
+		Transformer & 91.67(1.13) & 86.01(3.07) \\
+		\textbf{Ours} & \textbf{98.47(0.35)} & \textbf{98.22(0.48)} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+In this task, in-distribution (ID) evaluation can be misleading: with the Convolutional Aggregator fixed, all compared backbones achieve saturated bag-level accuracy on an ID $8{:}2$ split of the training distribution ($\mathrm{Acc}_{\mathrm{bag}}\ge 99.99\%$).
+The central challenge is therefore out-of-distribution (OOD) generalization to unseen and structurally different configurations, as is common in rule-learning settings.
+We evaluate extrapolation on two OOD splits: $D_{\text{test1}}$ (general instances with $\rows \le 6$) and $D_{\text{test2}}$ (Pieri instances with $\rows,\cols \le 8$).
+All models share the same Probabilistic Convolutional Aggregator, and we vary only the selector backbone to isolate the effect of architectural inductive biases on OOD transfer.
+
+\paragraph{Out-of-distribution performance.}
+Table~\ref{tab:headline_main} summarizes bag-level accuracy on two OOD splits.
+Relative to a standard Transformer, our purely-relative backbone improves accuracy from $91.67\%\to 98.47\%$ on $D_{\text{test1}}$ and from $86.01\%\to 98.22\%$ on the harder extrapolation set $D_{\text{test2}}$.
+Notably, our method also exhibits substantially lower run-to-run variability (standard deviations $0.35$ and $0.48$), suggesting that removing absolute positional shortcuts yields more stable optimization and transfer across OOD regimes.
+
+
+\paragraph{Ablation: positional information as a shortcut.}
+Table~\ref{tab:ablation_pe_hurt_ours} shows that any access to absolute position can hurt OOD transfer.
+Even with relative attention biases, positional encodings introduce an implicit absolute-position channel that the model can exploit in the small training regime but cannot extrapolate reliably to larger grids.
+Removing PE forces the backbone to rely on purely relative cues that remain well-defined across OOD regimes.
+
+
+
+\paragraph{Ablation: relative spatial bias alone.}
+We next ask whether adding relative spatial bias to attention (while keeping standard positional encodings) improves extrapolation.
+Table~\ref{tab:ablation_rel_rc} shows that, under the standard Transformer backbone, switching from absolute attention to a relative $(r,c)$ bias does not consistently improve OOD accuracy.
+This suggests that relative bias by itself is not the main driver of transfer when absolute positional signals are still available.
+
+
+\paragraph{Summary.}
+Overall, OOD generalization is driven primarily by removing absolute-value channels, whereas a relative $(r,c)$ bias alone provides limited benefit when absolute shortcuts remain.
+
+
+
+\begin{table}[t]
+	\centering
+\caption{\textbf{Ablation: positional encodings.}
+Removing PE improves OOD bag-level accuracy while keeping relative biases fixed.}
+	\label{tab:ablation_pe_hurt_ours}
+	\begin{tabular}{lcc}
+		\toprule
+		\textbf{Variant (Ours)} &
+		$\mathrm{Acc}_{\text{bag}}(D_{\text{test1}})$ &
+		$\mathrm{Acc}_{\text{bag}}(D_{\text{test2}})$ \\
+		\midrule
+		Ours + PE & 94.41(2.81) & 89.44(4.09) \\
+		\textbf{Ours} & \textbf{98.47(0.35)} & \textbf{98.22(0.48)} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+
+\begin{table}[t]
+	\centering
+\caption{\textbf{Ablation: relative spatial bias alone.}
+Under a standard Transformer with PE$(r,c)$, replacing absolute attention with a relative $(r,c)$ bias provides limited OOD improvement.}
+
+
+	\label{tab:ablation_rel_rc}
+	\begin{tabular}{lcc}
+		\toprule
+		\textbf{Variant} &
+		$\mathrm{Acc}_{\text{bag}}(D_{\text{test1}})$ &
+		$\mathrm{Acc}_{\text{bag}}(D_{\text{test2}})$ \\
+		\midrule
+		Transformer & 91.67(1.13) & 86.01(3.07) \\
+		Relative $(r,c)$ & 92.75(4.85) & 87.52(2.69) \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\subsection{Instance-Level Coherence on Pieri Cases}
+\label{sec:pieri_coherence}
+
+Our ultimate goal is rule discovery from the predicted selected set $\hat{\mathcal Z}$, but for general instances the latent selections $\{z_u\}$ are unobserved, making instance-level evaluation unavailable. We therefore use Pieri cases, where a proved rule provides a reference set $\mathcal Z_{\text{Pieri}}$, as a qualitative anchor. Exact set agreement is not the primary objective: even within Pieri regimes, valid instance-level selections need not be unique, and different selections can induce the same aggregate signed counts. Despite not being optimized to match Pieri targets, we observe \textbf{100\% inclusion} and \textbf{66.08\% exact-set match}, indicating broad consistency with classical Pieri structure.
+This is especially informative because Pieri instances appear in the OOD split $D_{\text{test2}}$: although the selector is trained only on small regimes, it still produces Pieri-consistent selections under extrapolation, suggesting that it learns a transferable rule rather than memorizing absolute patterns.
+
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+We proposed a differentiable framework for Latent Signed Counting that learns instance-level selection rules from integer-valued aggregate supervision. The core component, the Probabilistic Convolutional Aggregator, computes the PMF of a signed sum via convolution, enabling end-to-end maximum-likelihood training.
+
+We demonstrated the approach on a challenging mathematical rule-discovery task, the conjectural $(q,t)$-Littlewood--Richardson factorization problem, and demonstrated improved extrapolation with the Purely-Relative Transformer, which removes absolute positional shortcuts through relative attention biases with window clamping. Although motivated by this mathematical setting, the methodology is domain-agnostic; identifying and validating applications in other scientific domains with integer aggregate measurements is an important direction for future work.
+
+
+
+
+\section*{Impact Statement}
+This paper presents work whose goal is to advance the field of Machine
+Learning. There are many potential societal consequences of our work, none
+which we feel must be specifically highlighted here.
+
+
+\bibliography{reference}  
+\bibliographystyle{icml2026}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% APPENDIX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
+% This document was modified from the file originally made available by
+% Pat Langley and Andrea Danyluk for ICML-2K. This version was created
+% by Iain Murray in 2018, and modified by Alexandre Bouchard in
+% 2019 and 2021 and by Csaba Szepesvari, Gang Niu and Sivan Sabato in 2022.
+% Modified again in 2023 and 2024 by Sivan Sabato and Jonathan Scarlett.
+% Previous contributors include Dan Roy, Lise Getoor and Tobias
+% Scheffer, which was slightly modified from the 2010 version by
+% Thorsten Joachims & Johannes Fuernkranz, slightly modified from the
+% 2009 version by Kiri Wagstaff and Sam Roweis's 2008 version, which is
+% slightly modified from Prasad Tadepalli's 2007 version which is a
+% lightly changed version of the previous year's version by Andrew
+% Moore, which was in turn edited from those of Kristian Kersting and
+% Codrina Lauth. Alex Smola contributed to the algorithmic style files.
