@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 import torch
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 from countmil.aggregators import AggregatePMF, aggregate_nll, finite_support_convolution
@@ -86,6 +87,14 @@ def _expected_value(pmf: AggregatePMF) -> torch.Tensor:
     return (pmf.probs * values).sum(dim=-1)
 
 
+def expected_signed_count(probs: torch.Tensor, signs: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+    """Return E[sum_i signs_i z_i] for Bernoulli target probabilities."""
+
+    if probs.shape != signs.shape or probs.shape != mask.shape:
+        raise ValueError("probs, signs, and mask must have the same shape")
+    return (probs * signs.to(probs.dtype) * mask.to(probs.dtype)).sum(dim=1)
+
+
 def _evaluate(model: ShuklaMNISTSelector, loader: DataLoader, device: torch.device) -> dict[str, float]:
     model.eval()
     total_nll = 0.0
@@ -144,6 +153,7 @@ def _evaluate(model: ShuklaMNISTSelector, loader: DataLoader, device: torch.devi
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=None)
+    parser.add_argument("--objective", choices=["nll", "mse"], default=None)
     parser.add_argument("--dataset-root", default=None)
     parser.add_argument("--dataset", default=None)
     parser.add_argument("--target-digit", type=int, default=None)
@@ -164,6 +174,7 @@ def main() -> None:
 
     cfg = {
         "dataset_root": "data",
+        "objective": "nll",
         "dataset": "MNIST",
         "target_digit": 9,
         "bag_size_mean": 10,
@@ -179,6 +190,7 @@ def main() -> None:
         cfg["cancellation_heavy"] = cfg["cancellation_split"]
     for key, value in {
         "dataset_root": args.dataset_root,
+        "objective": args.objective,
         "dataset": args.dataset,
         "target_digit": args.target_digit,
         "bag_size_mean": args.bag_size_mean,
@@ -195,7 +207,8 @@ def main() -> None:
     set_seed(seed)
     device = torch.device(args.device if args.device == "cpu" or torch.cuda.is_available() else "cpu")
 
-    run_dir = make_run_dir(args.run_root, "signed_mnist", "conv", str(cfg["dataset"]), seed)
+    objective = str(cfg["objective"])
+    run_dir = make_run_dir(args.run_root, "signed_mnist", f"conv_{objective}", str(cfg["dataset"]), seed)
     write_run_metadata(run_dir, {**cfg, "epochs": args.epochs, "batch_size": args.batch_size}, seed)
     results_dir = Path(args.results_dir)
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -244,8 +257,14 @@ def main() -> None:
             signs = batch["signs"].to(device)
             signed_counts = batch["signed_count"].to(device)
             probs = model.predict_proba(x)
-            pmf = signed_count_pmf(probs, signs, mask)
-            loss = aggregate_nll(pmf, signed_counts).mean()
+            if objective == "nll":
+                pmf = signed_count_pmf(probs, signs, mask)
+                loss = aggregate_nll(pmf, signed_counts).mean()
+            elif objective == "mse":
+                expected = expected_signed_count(probs, signs, mask)
+                loss = F.mse_loss(expected, signed_counts.to(probs.dtype))
+            else:
+                raise ValueError(f"unknown objective: {objective}")
 
             optimizer.zero_grad()
             loss.backward()
@@ -260,12 +279,14 @@ def main() -> None:
             peak_mb = torch.cuda.max_memory_allocated(device) / (1024**2)
         else:
             peak_mb = 0.0
-        metrics.update({"epoch": epoch, "train_nll": total_loss / max(total_seen, 1)})
+        metrics.update({"epoch": epoch, "train_loss": total_loss / max(total_seen, 1)})
+        if objective == "nll":
+            metrics["train_nll"] = metrics["train_loss"]
         metrics.update({"epoch_seconds": time.perf_counter() - epoch_start, "peak_cuda_mem_mb": peak_mb})
         with metrics_path.open("a") as f:
             f.write(json.dumps(metrics, sort_keys=True) + "\n")
         print(
-            f"epoch={epoch:03d} train_nll={metrics['train_nll']:.4f} "
+            f"epoch={epoch:03d} train_loss={metrics['train_loss']:.4f} "
             f"test_nll={metrics['nll']:.4f} signed_mae={metrics['signed_count_mae']:.3f} "
             f"zero_acc={metrics['zero_signed_count_acc']:.3f} "
             f"inst_auc={metrics['instance_auc']:.4f} "
@@ -277,7 +298,8 @@ def main() -> None:
 
     summary = {"best": best, "config": cfg, "run_dir": str(run_dir)}
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
-    summary_path = results_dir / f"signed_mnist_conv_s{seed}.json"
+    suffix = "conv" if objective == "nll" else f"conv_{objective}"
+    summary_path = results_dir / f"signed_mnist_{suffix}_s{seed}.json"
     summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True))
     print(f"wrote {summary_path}")
 

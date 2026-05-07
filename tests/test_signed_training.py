@@ -2,7 +2,7 @@ import unittest
 
 import torch
 
-from scripts.train_signed_mnist import signed_count_pmf
+from scripts.train_signed_mnist import expected_signed_count, signed_count_pmf
 
 
 class SignedTrainingTests(unittest.TestCase):
@@ -36,6 +36,28 @@ class SignedTrainingTests(unittest.TestCase):
 
         pmf = signed_count_pmf(probs, signs, mask)
         loss = pmf.probs.square().mean()
+        loss.backward()
+
+        self.assertIsNotNone(logits.grad)
+        self.assertGreater(logits.grad.abs().sum().item(), 0.0)
+
+    def test_expected_signed_count_masks_padding(self):
+        probs = torch.tensor([[0.5, 0.25, 1.0]])
+        signs = torch.tensor([[1, -1, 1]])
+        mask = torch.tensor([[True, True, False]])
+
+        expected = expected_signed_count(probs, signs, mask)
+
+        self.assertTrue(torch.allclose(expected, torch.tensor([0.25])))
+
+    def test_expected_signed_count_keeps_gradients(self):
+        logits = torch.randn(2, 4, requires_grad=True)
+        probs = torch.sigmoid(logits)
+        signs = torch.tensor([[1, -1, 1, -1], [-1, 1, 1, -1]])
+        mask = torch.ones_like(probs, dtype=torch.bool)
+
+        expected = expected_signed_count(probs, signs, mask)
+        loss = expected.square().mean()
         loss.backward()
 
         self.assertIsNotNone(logits.grad)
