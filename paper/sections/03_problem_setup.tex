@@ -39,6 +39,8 @@ and the observed aggregate is
 For most experiments $d=1$.
 For histograms, $d$ can be the number of classes, although our scalable implementation uses one-dimensional one-vs-rest count likelihoods.
 The learner observes $(x_{1:n},a_{1:n},y)$ when side information is present, but not the individual $C_i$ values.
+When discussing individual scalar tasks, we write $Y_{\rm count}$ for ordinary nonnegative counts, $Y_{\rm sum}$ for integer-valued sums such as digit sums, and $Y_{\pm}$ for signed counts.
+These are task-specific instances of the generic aggregate $Y$ in Eq.~\eqref{eq:aggregate-sum}.
 
 \begin{proposition}[Finite-support convolution law]
 \label{prop:finite-support-convolution}

@@ -17,9 +17,9 @@ Within each theme, additional datasets such as FashionMNIST, SVHN, UltraMNIST, o
 Each subsection changes the observed aggregate label while keeping the same finite-support convolutional likelihood interface.
 
 \paragraph{Metrics.}
-Across the experimental tables, ``Agg. MAE'' is the mean absolute difference between the predicted aggregate and the observed aggregate over test bags.
+Across the experimental tables, MAE columns report the mean absolute difference between the predicted aggregate and the observed aggregate over test bags.
 When the model outputs a full aggregate PMF, we report either the maximum-probability aggregate or the PMF expectation as indicated by the table label.
-For histograms, Agg. MAE is the mean absolute class-count error averaged over classes and bags,
+For histograms, count MAE is the mean absolute class-count error averaged over classes and bags,
 \begin{equation}
   \frac{1}{N}\sum_{B}\frac{1}{C}\sum_{c=1}^C |\hat{h}_{Bc}-h_{Bc}|,
 \end{equation}
@@ -38,28 +38,26 @@ Hidden-instance AUC or accuracy is never used for model selection unless explici
 
 \subsection{Binary Count Labels}
 
-Plain count-likelihood training recovers high hidden-instance AUC across bag sizes.
+Plain count-likelihood training recovers high hidden-instance accuracy across bag sizes.
 For MNIST-Bags, we make MNIST binary by choosing digit $9$ as the positive
 class and treating digits $0$--$8$ as negative.
 The learner observes the number of target-digit images in the bag; hidden
 instance labels are used only for evaluation.
 This validation case verifies that the convolutional formulation behaves like the established Bernoulli count probability while sharing the same implementation pattern as the new aggregate types.
-FashionMNIST rows test the same target-count objective on a different image domain.
+FashionMNIST target-count results are recorded in the experiment report; the main table uses MNIST so that the hidden-instance metric is consistent with the other result tables.
 
 \begin{table}[t]
 \centering
-\caption{Binary count labels.  Count likelihood recovers accurate hidden target detectors on MNIST and FashionMNIST target-count bags.}
+\caption{Binary count labels.  Count likelihood recovers accurate hidden target detectors on MNIST target-count bags.}
 \label{tab:binary-countmil}
 \begin{tabular}{lllcc}
 \toprule
-Data & Bag/train & Method & Agg. MAE & Hidden AUC \\
+Data & Bag/train & Method & Count MAE & Hidden acc. \\
 \midrule
-MNIST & $10/1000$ & exact count & $0.115$ & $0.999$ \\
-MNIST & $10/5000$ & exact count & $0.090$ & $0.999$ \\
-MNIST & $50/1000$ & exact count & $0.686$ & $0.998$ \\
-MNIST & $50/5000$ & exact count & $0.460$ & $0.999$ \\
-Fashion & $10/1000$ & exact count & $0.183$ & $0.997$ \\
-Fashion & $50/1000$ & exact count & $0.886$ & $0.998$ \\
+MNIST & $10/1000$ & exact count & $0.115$ & $0.988$ \\
+MNIST & $10/5000$ & exact count & $0.090$ & $0.991$ \\
+MNIST & $50/1000$ & exact count & $0.686$ & $0.987$ \\
+MNIST & $50/5000$ & exact count & $0.460$ & $0.991$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -68,7 +66,7 @@ Fashion & $50/1000$ & exact count & $0.886$ & $0.998$ \\
 
 Digit-sum supervision is an instance of integer-valued aggregate labeling: the learner observes a single scalar while each hidden instance label has ten possible values.
 Here $z_i$ is the original MNIST digit value in $\{0,\ldots,9\}$ and the bag
-label is $Y=\sum_i z_i$.
+label is $Y_{\rm sum}=\sum_i z_i$.
 Results show that exact finite-support likelihood recovers hidden digit predictors more efficiently than matching only the expected aggregate.
 For comparison, we report a simple MSE baseline that regresses the scalar expected sum $\sum_i \mathbb{E}[z_i]$.
 
@@ -79,7 +77,7 @@ For comparison, we report a simple MSE baseline that regresses the scalar expect
 \label{tab:digit-sum}
 \begin{tabular}{lllcc}
 \toprule
-Data & Bag/train & Method & Agg. MAE & Hidden acc. \\
+Data & Bag/train & Method & Sum MAE & Hidden acc. \\
 \midrule
 MNIST & $10/1000$ & exact sum & $0.612$ & $.982$ \\
 MNIST & $10/1000$ & MSE sum & $2.535$ & $.226$ \\
@@ -116,23 +114,21 @@ We again use the digit-$9$ target indicator, but each instance carries a known
 random sign; target-digit images contribute $+1$ or $-1$, while all other
 digits contribute $0$.
 Even with random signs, the observed signed sum is many-to-one: positive and negative contributions can cancel, so different latent assignments can yield the same bag label.
-The likelihood nevertheless yields accurate instance ranking, especially with more training bags.
-FashionMNIST rows show the same high hidden-instance ranking accuracy on a different visual domain.
+The likelihood nevertheless yields accurate hidden target detectors, especially with more training bags.
+FashionMNIST signed-count results are recorded in the experiment report; the main table uses MNIST so that the hidden-instance metric is consistent with the other result tables.
 
 \begin{table}[t]
 \centering
-\caption{Signed count labels with random known signs.  Signed sums are many-to-one because positive and negative contributions can cancel, but the likelihood still recovers accurate instance rankings.}
+\caption{Signed count labels with random known signs.  Signed sums are many-to-one because positive and negative contributions can cancel, but the likelihood still recovers accurate hidden target detectors.}
 \label{tab:signed}
 \begin{tabular}{lllcc}
 \toprule
-Data & Bag/train & Method & Agg. MAE & Hidden AUC \\
+Data & Bag/train & Method & Signed MAE & Hidden acc. \\
 \midrule
-MNIST & $10/1000$ & exact signed & $0.095$ & $0.995$ \\
-MNIST & $10/5000$ & exact signed & $0.045$ & $0.999$ \\
-MNIST & $50/1000$ & exact signed & $0.243$ & $0.999$ \\
-MNIST & $50/5000$ & exact signed & $0.198$ & $0.999$ \\
-Fashion & $10/1000$ & exact signed & $0.113$ & $0.998$ \\
-Fashion & $50/1000$ & exact signed & $0.381$ & $0.998$ \\
+MNIST & $10/1000$ & exact signed & $0.095$ & $0.990$ \\
+MNIST & $10/5000$ & exact signed & $0.045$ & $0.996$ \\
+MNIST & $50/1000$ & exact signed & $0.243$ & $0.994$ \\
+MNIST & $50/5000$ & exact signed & $0.198$ & $0.996$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -156,11 +152,11 @@ The from-scratch setting evaluates the same count-likelihood pipeline without ex
 \centering
 \scriptsize
 \setlength{\tabcolsep}{4pt}
-\caption{Histogram supervision across datasets.  Agg. MAE is mean absolute class-count error.  OVR count denotes the classwise one-vs-rest count likelihood in Section~\ref{sec:convolutional-bag-prediction}; MSE is a proportion-matching LLP objective.  CIFAR-10 pretrained rows use ImageNet initialization.}
+\caption{Histogram supervision across datasets.  Count MAE is mean absolute class-count error.  OVR count denotes the classwise one-vs-rest count likelihood in Section~\ref{sec:convolutional-bag-prediction}; MSE is a proportion-matching LLP objective.  CIFAR-10 pretrained rows use ImageNet initialization.}
 \label{tab:histogram-llp-pvc}
 \begin{tabular}{llllcc}
 \toprule
-Data & Bag/train & Backbone & Method & Agg. MAE & Hidden acc. \\
+Data & Bag/train & Backbone & Method & Count MAE & Hidden acc. \\
 \midrule
 MNIST & $10/1000$ & LeNet & MSE & $.163$ & $.962$ \\
 MNIST & $10/1000$ & LeNet & OVR count & $.032$ & $.983$ \\

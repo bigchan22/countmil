@@ -89,7 +89,7 @@ digit are positive and all other MNIST digits are negative; training observes
 only the bag count, not the individual $z_i$.
 For Bernoulli target indicators,
 \begin{equation}
-  d_i = (1-p_i, p_i), \qquad Y=\sum_i z_i.
+  d_i = (1-p_i, p_i), \qquad Y_{\rm count}=\sum_i z_i.
 \end{equation}
 Equivalently, each instance contributes a length-two one-dimensional kernel over support $\{0,1\}$:
 \begin{equation}
@@ -104,7 +104,7 @@ This recovers the standard binary count likelihood.
 \paragraph{Signed counts.}
 For known signs $s_i \in \{-1,+1\}$ and latent target indicators $z_i \in \{0,1\}$,
 \begin{equation}
-  Y = \sum_i s_i z_i.
+  Y_{\pm} = \sum_i s_i z_i.
 \end{equation}
 Signed MNIST uses the same target-digit construction as binary MNIST, but each
 instance also has an observed sign.
@@ -124,12 +124,12 @@ In array order $[-1,0,+1]$, the corresponding signed kernels are
   \qquad
   \kappa_i^{(-)} = [p_i,\;1-p_i,\;0].
 \end{equation}
-This setting exposes cancellation: many distinct latent assignments can yield the same observed aggregate, especially when $Y=0$.
+This setting exposes cancellation: many distinct latent assignments can yield the same observed aggregate, especially when $Y_{\pm}=0$.
 
 \paragraph{Integer-valued sums.}
 For hidden finite integer values $z_i \in \{0,\ldots,K-1\}$, the observed bag label is
 \begin{equation}
-  Y = \sum_i z_i,
+  Y_{\rm sum} = \sum_i z_i,
 \end{equation}
 so the label is a scalar sum rather than a class proportion.
 Unlike expected-sum regression, the likelihood uses the full induced distribution over possible sums.
