@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 import torch
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 from countmil.aggregators import AggregatePMF, aggregate_nll, finite_support_convolution
@@ -69,6 +70,14 @@ def ordinal_sum_pmf(class_probs: torch.Tensor, mask: torch.Tensor) -> AggregateP
     zero_atom[0] = 1.0
     atoms = torch.where(mask.unsqueeze(-1), class_probs, zero_atom)
     return finite_support_convolution(atoms, support_min=0)
+
+
+def expected_sum_from_instance_probs(class_probs: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+    """Return E[sum_i z_i] from per-instance ordinal PMFs."""
+
+    support = torch.arange(class_probs.shape[-1], device=class_probs.device, dtype=class_probs.dtype)
+    expected_instances = (class_probs * support).sum(dim=-1)
+    return (expected_instances * mask.to(class_probs.dtype)).sum(dim=1)
 
 
 def _tail_mean(values: list[float], tail: int = 5) -> float:
@@ -168,6 +177,7 @@ def _build_model(cfg: dict[str, Any]) -> torch.nn.Module:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=None)
+    parser.add_argument("--objective", choices=["pca", "mse"], default=None)
     parser.add_argument("--experiment", choices=["mnist_sum", "svhn_sum", "ultramnist"], default=None)
     parser.add_argument("--dataset-root", default=None)
     parser.add_argument("--dataset", default=None)
@@ -196,6 +206,7 @@ def main() -> None:
 
     cfg: dict[str, Any] = {
         "experiment": "mnist_sum",
+        "objective": "pca",
         "dataset_root": "data",
         "dataset": "MNIST",
         "download": False,
@@ -219,6 +230,7 @@ def main() -> None:
     cfg.update(_parse_simple_yaml(args.config))
     for key, value in {
         "experiment": args.experiment,
+        "objective": args.objective,
         "dataset_root": args.dataset_root,
         "dataset": args.dataset,
         "model": args.model,
@@ -281,7 +293,8 @@ def main() -> None:
     model = _build_model(cfg).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=float(cfg["lr"]), weight_decay=float(cfg["weight_decay"]))
 
-    run_dir = make_run_dir(args.run_root, "atomic_sum", "pca", str(cfg["experiment"]), seed)
+    objective = str(cfg["objective"])
+    run_dir = make_run_dir(args.run_root, "atomic_sum", objective, str(cfg["experiment"]), seed)
     write_run_metadata(run_dir, {**cfg, "epochs": args.epochs, "batch_size": args.batch_size}, seed)
     results_dir = Path(args.results_dir)
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -289,7 +302,7 @@ def main() -> None:
 
     history: dict[str, list[float]] = {"nll": [], "sum_acc": [], "expected_sum_mae": [], "aggregate_ece": [], "instance_label_acc": []}
     final: dict[str, float] = {}
-    best = {"nll": math.inf}
+    best = {"nll": math.inf, "expected_sum_mae": math.inf}
     for epoch in range(1, args.epochs + 1):
         if device.type == "cuda":
             torch.cuda.reset_peak_memory_stats(device)
@@ -303,8 +316,14 @@ def main() -> None:
             mask = batch["mask"].to(device)
             sums = batch["sum"].to(device)
             probs = model.predict_proba(x)
-            pmf = ordinal_sum_pmf(probs, mask)
-            loss = aggregate_nll(pmf, sums).mean()
+            if objective == "pca":
+                pmf = ordinal_sum_pmf(probs, mask)
+                loss = aggregate_nll(pmf, sums).mean()
+            elif objective == "mse":
+                expected_sum = expected_sum_from_instance_probs(probs, mask)
+                loss = F.mse_loss(expected_sum, sums.to(probs.dtype))
+            else:
+                raise ValueError(f"unknown objective: {objective}")
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -317,18 +336,22 @@ def main() -> None:
             peak_mb = torch.cuda.max_memory_allocated(device) / (1024**2)
         else:
             peak_mb = 0.0
-        metrics.update({"epoch": epoch, "train_nll": total_loss / max(total_seen, 1)})
+        metrics.update({"epoch": epoch, "train_loss": total_loss / max(total_seen, 1)})
+        if objective == "pca":
+            metrics["train_nll"] = metrics["train_loss"]
         metrics.update({"epoch_seconds": time.perf_counter() - start, "peak_cuda_mem_mb": peak_mb})
         with metrics_path.open("a") as f:
             f.write(json.dumps(metrics, sort_keys=True) + "\n")
         for key in history:
             history[key].append(float(metrics[key]))
         final = metrics
-        if metrics["nll"] < best["nll"]:
+        selection_value = metrics["nll"] if objective == "pca" else metrics["expected_sum_mae"]
+        best_value = best["nll"] if objective == "pca" else best["expected_sum_mae"]
+        if selection_value < best_value:
             best = metrics
             torch.save({"model": model.state_dict(), "config": cfg, "metrics": metrics}, run_dir / "checkpoint_best.pt")
         print(
-            f"epoch={epoch:03d} train_nll={metrics['train_nll']:.4f} "
+            f"epoch={epoch:03d} train_loss={metrics['train_loss']:.4f} "
             f"test_nll={metrics['nll']:.4f} acc={metrics['sum_acc']:.4f} "
             f"exp_mae={metrics['expected_sum_mae']:.3f} inst_acc={metrics['instance_label_acc']:.4f} "
             f"time={metrics['epoch_seconds']:.2f}s mem={metrics['peak_cuda_mem_mb']:.1f}MB"
@@ -339,12 +362,12 @@ def main() -> None:
         "best": best,
         "final": final,
         "tail5": tail5,
-        "selection_metric": "test_nll",
+        "selection_metric": "test_nll" if objective == "pca" else "expected_sum_mae",
         "config": cfg,
         "run_dir": str(run_dir),
     }
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
-    summary_path = results_dir / f"{cfg['experiment']}_pca_s{seed}.json"
+    summary_path = results_dir / f"{cfg['experiment']}_{objective}_s{seed}.json"
     summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True))
     print(f"wrote {summary_path}")
 

@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 
 from countmil.datasets import TensorOrdinalSumBags, collate_ordinal_sum_bags
 from countmil.metrics import multiclass_ece_from_pmf
-from scripts.train_atomic_sum import _evaluate, ordinal_sum_pmf
+from scripts.train_atomic_sum import _evaluate, expected_sum_from_instance_probs, ordinal_sum_pmf
 
 
 class AtomicSumTrainingTests(unittest.TestCase):
@@ -30,6 +30,29 @@ class AtomicSumTrainingTests(unittest.TestCase):
         mask = torch.ones(2, 4, dtype=torch.bool)
         pmf = ordinal_sum_pmf(probs, mask)
         loss = -pmf.probs[:, 3].clamp_min(1e-12).log().mean()
+        loss.backward()
+        self.assertIsNotNone(logits.grad)
+
+    def test_expected_sum_from_instance_probs_masks_padding(self):
+        probs = torch.tensor(
+            [
+                [
+                    [0.0, 1.0, 0.0],
+                    [0.0, 0.0, 1.0],
+                    [0.0, 0.0, 1.0],
+                ]
+            ]
+        )
+        mask = torch.tensor([[True, True, False]])
+        expected = expected_sum_from_instance_probs(probs, mask)
+        self.assertTrue(torch.allclose(expected, torch.tensor([3.0])))
+
+    def test_expected_sum_from_instance_probs_keeps_gradients(self):
+        logits = torch.randn(2, 4, 5, requires_grad=True)
+        probs = torch.softmax(logits, dim=-1)
+        mask = torch.ones(2, 4, dtype=torch.bool)
+        expected = expected_sum_from_instance_probs(probs, mask)
+        loss = expected.square().mean()
         loss.backward()
         self.assertIsNotNone(logits.grad)
 
