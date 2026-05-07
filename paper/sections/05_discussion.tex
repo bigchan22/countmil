@@ -8,9 +8,9 @@ The SVHN and UltraMNIST results strengthen the digit-sum evidence: the same inte
 The signed FashionMNIST and CIFAR-10 probes make the same point for cancellation aggregates: the method is not tied to MNIST digits or to nonnegative counts.
 Together with binary, ordinal, signed, and histogram benchmarks, these results support the view that \method{} is a finite-support aggregate-likelihood layer rather than a collection of task-specific losses.
 
-Histogram labels are substantially richer, and standard LLP/proportion-matching baselines can already be strong.
-On MNIST histogram supervision, the main comparison shows that exact one-vs-rest count likelihood improves over CE/KL and MSE proportion matching, especially for larger bags, suggesting that likelihood fidelity can still matter when the aggregate label is rich.
-This distinction defines the scope of the method: it provides a unified likelihood framework for finite-support aggregate labels beyond ordinary binary counts and class proportions, while standard LLP objectives remain strong when the observed label is already a rich class histogram.
+Histogram labels are substantially richer, and standard LLP objectives can already be strong.
+We include the histogram setting mainly to connect the finite-support view to LLP-PVC-style one-vs-rest count likelihoods.
+Our main comparison shows that exact classwise count likelihood improves over MSE expected-count matching, while we do not claim a new full joint histogram likelihood or a reproduction of full LLP-PVC.
 
 The same formulation is modular with respect to the instance model.
 Backbone choice determines the quality of the atomic PMFs, while the aggregate likelihood is determined by the weak label: binary counts, signed counts, integer-valued sums, and one-vs-rest histograms all use the same convolutional bag-prediction interface.

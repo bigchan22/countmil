@@ -61,12 +61,12 @@ The finite-support convolutional aggregator is the deterministic map
 which assigns probability mass to aggregate value $y$.
 \end{definition}
 
-Definition~\ref{def:finite-support-aggregator} separates four choices that are often coupled in task-specific weak-supervision losses:
+Definition~\ref{def:finite-support-aggregator} separates four choices often coupled in task-specific weak-supervision losses:
 \begin{itemize}
-  \item \emph{Backbone independence.}  The neural network supplies only atomic PMFs; the aggregate layer is unchanged for an MLP, CNN, transformer, or pretrained encoder.
-  \item \emph{Kernel independence.}  A binary count, signed count, digit sum, multiplicity count, or one-vs-rest class count is specified by the contribution map $\Phi$ and supports $\mathcal{S}_i$, not by designing a new bag model.
-  \item \emph{Objective and backend independence.}  The aggregator returns a full aggregate PMF, which can be trained with negative log likelihood or another distributional loss, and can be evaluated by dynamic programming, direct convolution, grouped convolution, or FFT-tree multiplication.
-  \item \emph{Conditional-independence scope.}  Under conditionally independent latent contributions $C_i$ given the observed bag, this PMF is exact; when this modeling assumption is only approximate, the same layer is a structured aggregate likelihood approximation.
+  \item \emph{Backbone independence.}  The network supplies atomic PMFs; the aggregate layer is unchanged across MLPs, CNNs, transformers, or pretrained encoders.
+  \item \emph{Kernel independence.}  Binary counts, signed counts, digit sums, and one-vs-rest class counts are specified by $\Phi$ and $\mathcal{S}_i$, not by new bag models.
+  \item \emph{Objective and backend independence.}  The aggregator returns a full PMF that can be trained with NLL and evaluated by DP, direct convolution, grouped convolution, or FFT-tree multiplication.
+  \item \emph{Conditional-independence scope.}  The PMF is exact under conditionally independent latent contributions; otherwise it is a structured aggregate-likelihood approximation.
 \end{itemize}
 In this paper we use the aggregate negative log likelihood $-\log \mathsf{Agg}(d_1,\ldots,d_n)(y)$ for the observed weak label $y$.
 
@@ -102,27 +102,7 @@ and its probability mass function is the discrete convolution
 
 Proposition~\ref{prop:finite-support-convolution} shows why Definition~\ref{def:finite-support-aggregator} is the mathematically correct aggregate PMF under the conditional-independence model.
 The aggregator is not a heuristic pooling rule: once the atomic contribution distributions $d_i$ are predicted, the bag-label distribution is determined exactly by convolution.
-Different weak-label tasks differ mainly in the support $\mathcal{S}_i$, the contribution map $\Phi$, and which side information is observed.
-
-\begin{table}[t]
-\centering
-\small
-\caption{Weak-label tasks as kernel choices for the same finite-support convolutional aggregator.  The atomic support and contribution map determine the local PMF; convolution gives the aggregate PMF used for the bag label.}
-\label{tab:problem-task-kernels}
-\begin{tabular}{lllll}
-\toprule
-Task & Atomic support & Atomic PMF / kernel & Bag label & Aggregate width \\
-\midrule
-Binary count & $\{0,1\}$ & $[1-p_i,p_i]$ & number of positives & $n+1$ \\
-Integer-valued sum & $\{0,\ldots,K-1\}$ & categorical PMF & scalar sum & $n(K-1)+1$ \\
-Signed count & $\{-1,0,+1\}$ & sign-shifted Bernoulli & signed sum & $2n+1$ \\
-Multiplicity & $\{0,\ldots,m_i\}$ & local count PMF & total multiplicity & $\sum_i m_i+1$ \\
-OVR histogram & $\{0,1\}$ per class & $[1-p_{ic},p_{ic}]$ & count of class $c$ & $n+1$ per class \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Binary Count-MIL is therefore the simplest case of Eq.~\eqref{eq:aggregate-sum}; it is not new by itself.
-The broader formulation covers signed counts, integer-valued sums, multiplicity counts, and one-vs-rest histograms by changing the finite-support kernel while keeping the same convolutional aggregator.
+Different weak-label tasks differ mainly in the support $\mathcal{S}_i$, the contribution map $\Phi$, and which side information is observed; concrete kernels are summarized in Table~\ref{tab:method-kernels}.
+Binary Count-MIL is therefore the simplest case of Eq.~\eqref{eq:aggregate-sum}, while signed counts, integer-valued sums, multiplicity counts, and one-vs-rest histograms change the finite-support kernel but keep the same aggregator.
 In our experiments, bags are sampled on the fly with replacement from the corresponding train or test split.
 Thus an image may appear in multiple bags, but train and test bags are always drawn from disjoint dataset splits.

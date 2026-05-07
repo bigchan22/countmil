@@ -26,8 +26,8 @@ Our contributions are:
   \item We formulate aggregate-supervised Count-MIL as a backbone-agnostic finite-support convolutional aggregator that turns instance contribution PMFs into an exact aggregate PMF, explicitly recovering Bernoulli count loss as a special case rather than claiming it as new.
   \item We show that the same backbone-agnostic likelihood layer extends to signed counts, digit-sum labels, and one-vs-rest histogram class counts by changing only the finite-support contribution map.
   \item We implement practical convolutional backends, including grouped signed convolution and a GPU FFT-tree backend that parallelizes large multiclass one-vs-rest PMFs beyond CPU dynamic programming.
-  \item We evaluate hidden-instance recovery across binary, signed, digit-sum, SVHN/UltraMNIST sum, histogram, and CIFAR-10 histogram settings, with cautious comparison to LLP proportion-matching baselines and LLP-PVC reference results.
+  \item We evaluate hidden-instance recovery across binary, signed, digit-sum, SVHN/UltraMNIST sum, and one-vs-rest class-count settings, using histogram experiments mainly to connect the formulation to LLP-PVC-style count likelihoods.
 \end{itemize}
 
-Empirically, the largest improvements occur for aggregate types where expectation or proportion matching discards information, especially digit sums and signed counts.
+Empirically, the largest improvements occur for aggregate types where expectation matching discards information, especially digit sums and signed counts.
 The CIFAR-10 comparison shows that count likelihood achieves high instance accuracy when paired with ImageNet-pretrained features, but the fixed-instance-budget result attributes the large-bag improvement to greater sampled image exposure rather than to bag size alone.

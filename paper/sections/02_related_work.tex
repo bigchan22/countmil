@@ -1,31 +1,17 @@
 \section{Related Work}
 
 \paragraph{Multiple-instance learning and count loss.}
-Classical multiple-instance learning (MIL) supervises bags rather than instances~\cite{dietterich1997mil,maron1998mil,andrew2002misvm,carbonneau2018milsurvey}.
-The standard positive-bag assumption is a noisy OR over hidden instance labels: a bag is positive when at least one instance is positive.
-Neural MIL models learn bag-level predictors end-to-end~\cite{wang2018minn}, and attention-based MIL~\cite{ilse2018attention} learns a bag representation through learned attention weights.
-These models are strong baselines for bag prediction, but attention weights are not guaranteed to be calibrated instance attributions.
-Count-based extensions use the number of positive instances as a stronger bag label.
-Shukla et al.~\cite{shukla2023count} formulate count-based weak supervision around the differentiable probability that exactly $k$ Bernoulli outputs are true, and use dynamic programming to compute the resulting count loss.
-Related count supervision has also appeared in temporal localization~\cite{schroeter2019occurrence}.
-Our binary Bernoulli likelihood is not new in this setting: it recovers the count probability used by Shukla et al.
-Binary Count-MIL is included as an equivalence check and baseline connection.
-Our contribution is the finite-support convolutional generalization and its use for signed, integer-valued, and histogram aggregates.
+Classical multiple-instance learning supervises bags rather than instances~\cite{dietterich1997mil,maron1998mil,andrew2002misvm,carbonneau2018milsurvey}; neural and attention MIL learn bag predictors end-to-end~\cite{wang2018minn,ilse2018attention}.
+Count-based weak supervision gives a stronger bag label by observing the number of positive instances.
+Shukla et al.~\cite{shukla2023count} compute the exact probability that $k$ Bernoulli outputs are true, and related count supervision appears in temporal localization~\cite{schroeter2019occurrence}.
+Our Bernoulli case recovers this count probability; the contribution is the finite-support convolutional formulation that also covers signed, integer-valued, and classwise histogram aggregates.
 
 \paragraph{Learning from label proportions.}
-Learning from label proportions (LLP) observes class proportions or histograms over bags~\cite{quadrianto2009llp,yu2014llp}.
-Early and applied work studied probabilistic or application-specific proportion learning~\cite{sun2017probabilistic,bortsova2018emphysema}, while later deep LLP methods considered multiclass training, adversarial training, consistency regularization, pseudo-labeling, and two-stage objectives~\cite{hsu2019multiclass,dulacarnold2019deep,liu2019llpgan,tsai2020consistency,liu2021twostage,yang2021featurelabel,ma2025hil}.
-Recent theoretical LLP work studies mutual-contamination reductions, label-noise reductions, unbiased risk estimators, general losses, and sample-complexity bounds~\cite{scott2020mutual,zhang2022labelnoise,busa2023easyllp,wei2023uum,applebaum2025generalupm,busafekete2025sample}.
-Simple proportion matching trains predicted bag proportions to match observed proportions, but it can over-smooth instance predictions.
-LLP-PVC~\cite{ma2026llppvc} reframes label proportions as proportional-value classification and uses efficient divide-and-conquer count-likelihood computation.
-Our histogram one-vs-rest count likelihood is closely related to one part of this PVC view: for each class, the class count is a Bernoulli aggregate over one-vs-rest instance probabilities.
-This connection also clarifies the scope of the histogram experiments.
-We do not present class-histogram count likelihood as an invention independent of LLP-PVC, and we do not reproduce the full LLP-PVC algorithm.
-Instead, the classwise count-likelihood experiments compare the shared one-vs-rest count component while the paper's broader finite-support formulation also covers scalar integer-valued sums and signed counts.
+Learning from label proportions observes class proportions or histograms over bags~\cite{quadrianto2009llp,yu2014llp}, with probabilistic, deep, pseudo-labeling, consistency, and two-stage variants~\cite{sun2017probabilistic,bortsova2018emphysema,hsu2019multiclass,dulacarnold2019deep,liu2019llpgan,tsai2020consistency,liu2021twostage,yang2021featurelabel,ma2025hil} and recent theoretical analyses~\cite{scott2020mutual,zhang2022labelnoise,busa2023easyllp,wei2023uum,applebaum2025generalupm,busafekete2025sample}.
+LLP-PVC~\cite{ma2026llppvc} reframes label proportions as proportional-value classification and uses efficient count-likelihood computation.
+Our one-vs-rest histogram experiment is included to connect to this count-likelihood component, not to claim a new full joint histogram likelihood; the broader contribution is the same aggregate layer applied to scalar sums and signed counts.
 
 \paragraph{Efficient aggregate inference.}
-Dynamic programming computes Bernoulli count probabilities exactly but can become expensive for large bags and many classes.
-Recent LLP/PVC work highlights this practical issue when comparing against count-loss methods~\cite{ma2026llppvc}: exact dynamic programs are mathematically appropriate for Bernoulli counts, but their sequential structure is not the most natural fit for modern GPU training.
-Convolutional formulations admit parallel direct and FFT-based backends~\cite{cooley1965fft}.
-We implement sequential convolution for moderate-size training experiments and an FFT-tree backend for large-bag multiclass one-vs-rest count benchmarks.
-This makes the computational comparison a backend question: the same aggregate likelihood can be evaluated by dynamic programming, direct convolution, or FFT-tree convolution depending on support size and hardware.
+Dynamic programming computes Bernoulli count probabilities exactly but is sequential and can be expensive for large bags and many classes~\cite{ma2026llppvc}.
+The same finite-support likelihood can instead be evaluated by direct convolution or FFT polynomial multiplication~\cite{cooley1965fft}.
+We use sequential convolution for moderate aggregate supports and a GPU FFT-tree backend for large one-vs-rest count PMFs; this changes the backend, not the statistical objective.
