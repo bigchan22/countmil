@@ -3,33 +3,34 @@
 
 Multiple-instance learning (MIL) studies settings where supervision is observed for a bag while the labels of individual instances remain latent.
 Classical binary MIL uses a positive bag label to indicate that at least one instance is positive.
-Many weak-supervision settings provide more structured aggregate labels: the number of positive instances, a class histogram, a signed count, or a scalar integer-valued sum.
-Such aggregates also arise in theoretical studies in mathematics and physics, where the underlying instance contributions carry combinatorial or algebraic meaning (Appendix~\ref{app:qtlr-origin}).
+Many aggregate-supervision settings provide more structured labels: the number of positive instances, a class histogram, a signed count, or a scalar integer-valued sum.
+Similar aggregate labels arise in algebraic combinatorics and mathematical physics, where latent contributions often have combinatorial or algebraic structure (Appendix~\ref{app:qtlr-origin}).
 The central problem is to learn an instance-level predictor from such aggregate observations without using instance labels during training.
 
-This paper studies aggregate-supervised MIL through a finite-support convolutional aggregator.
+\method{} is a finite-support convolutional likelihood layer for aggregate-supervised MIL.
 Each instance $x_i$ is mapped to a probability mass function over a finite set of integer-valued contributions.
-The aggregator then returns the mathematically implied distribution of the observed bag aggregate by convolving the instance-level atomic PMFs.
+The layer returns the mathematically implied distribution of the observed aggregate label by convolving the instance-level atomic PMFs.
 For Bernoulli contributions this recovers the standard count probability used in prior count-loss work.
 The same construction also gives exact likelihoods for signed counts, digit-sum labels, and one-vs-rest class-count objectives.
-We refer to this as finite-support aggregation: the atomic support size and contribution values define the weak-label problem, while the convolutional aggregator is unchanged.
-The formulation separates the instance model from the aggregate likelihood: a backbone model outputs instance-level scores, and the aggregate layer converts these scores into finite-support atomic PMFs before computing the bag likelihood.
+We refer to this family as finite-support aggregate likelihoods: the atomic support size and contribution values define the aggregate-supervision task, while \method{} is unchanged.
+The formulation separates the instance model from the aggregate likelihood: a backbone model outputs instance-level scores, and the likelihood layer converts these scores into finite-support atomic PMFs before computing the aggregate likelihood.
 The method is therefore not tied to a particular architecture.
-Changing the weak label changes the contribution map and convolution support, not the backbone, the optimizer, or the probabilistic rule used to obtain the bag-level distribution.
+Changing the aggregate label changes only the contribution map and aggregate support; the instance backbone, optimizer, and aggregation rule remain unchanged.
 
 \input{figures/method_schematic}
 
-This view also clarifies the boundary with prior work.
+This view also makes the novelty boundary explicit.
 Binary Bernoulli counts recover existing count-loss objectives, and one-vs-rest class-count likelihoods are closely related to the count-likelihood component of LLP-PVC.
-Our focus is the finite-support aggregate layer that covers these cases while also extending to signed and integer-valued sum labels.
+Our focus is the finite-support likelihood layer that covers these cases while also extending to signed and integer-valued sum labels.
+\method{} is thus a finite-support generalization of the exact count-likelihood component used in recent state-of-the-art count-based weak-supervision and LLP methods: $\{0,1\}$ atoms recover ordinary count loss, classwise one-vs-rest atoms recover the LLP-PVC count-likelihood component, and signed or integer-valued atoms extend the same rule beyond Bernoulli counts.
 
 Our contributions are:
 \begin{itemize}
-  \item We formulate aggregate-supervised Count-MIL as a backbone-agnostic finite-support convolutional aggregator that turns instance contribution PMFs into an exact aggregate PMF, explicitly recovering Bernoulli count loss as a special case rather than claiming it as new.
-  \item We show that the same backbone-agnostic likelihood layer extends to signed counts, digit-sum labels, and one-vs-rest histogram class counts by changing only the finite-support contribution map.
+  \item We show that exact Bernoulli count likelihoods used in recent count-based weak-supervision methods are the $\{0,1\}$ instance of a broader finite-support convolutional likelihood family.
+  \item We extend this count-likelihood component to signed counts, digit-sum labels, and one-vs-rest class-count objectives by changing only the finite-support contribution map.
   \item We implement practical convolutional backends, including grouped signed convolution and a GPU FFT-tree backend that parallelizes large multiclass one-vs-rest PMFs beyond CPU dynamic programming.
-  \item We evaluate hidden-instance recovery across binary, signed, digit-sum, SVHN/UltraMNIST sum, and one-vs-rest class-count settings, using histogram experiments mainly to connect the formulation to LLP-PVC-style count likelihoods.
+  \item We evaluate hidden-instance recovery across Bernoulli count, signed-count, digit-sum, SVHN sum, and one-vs-rest class-count settings.
 \end{itemize}
 
 Empirically, the largest improvements occur for aggregate types where expectation matching discards information, especially digit sums and signed counts.
-The CIFAR-10 comparison shows that count likelihood achieves high instance accuracy when paired with ImageNet-pretrained features, but the fixed-instance-budget result attributes the large-bag improvement to greater sampled image exposure rather than to bag size alone.
+The CIFAR-10 comparison shows that one-vs-rest count likelihood achieves high instance accuracy when paired with ImageNet-pretrained features, but the fixed-instance-budget result attributes the large-bag improvement to greater sampled image exposure rather than to bag size alone.

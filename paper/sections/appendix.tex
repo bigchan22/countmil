@@ -1,14 +1,15 @@
 \section{Implementation details}
 \label{app:implementation-details}
 
-All weak-supervision experiments sample bags on the fly rather than pregenerating fixed bag files.
+All aggregate-supervision experiments sample bags on the fly rather than pregenerating fixed bag files.
+Within each seed and configuration, paired methods use the same deterministic held-out bag sampler so aggregate MAE and hidden-instance metrics are computed on the same test bags.
 Instance labels are used only for evaluation metrics such as hidden-instance AUC or hidden digit accuracy.
 MNIST-family experiments use LeNet-style instance classifiers, Adam with learning rate $5\times 10^{-4}$, weight decay $10^{-4}$, and 50 epochs.
 The main MNIST-family configurations use seeds $0,1,2$, test on 1000 sampled bags, and evaluate mean bag sizes 10 and 50 with standard deviations 2 and 10.
 
 \paragraph{Backend implementation.}
 Sequential finite-support convolution accumulates shifted copies of the current aggregate PMF and is used for the moderate-size binary, signed, and integer-valued sum experiments.
-Dynamic programming is used as a Shukla-style Bernoulli count baseline and computes the same binary count coefficients as the convolutional formulation.
+Dynamic programming is used as a Shukla-style Bernoulli count baseline and computes the same Bernoulli count coefficients as \method{}.
 For grouped signed binary aggregates, each active group starts as a point mass at zero on support $[-K_{\max},K_{\max}]$.
 For one signed instance, the grouped GPU backend applies a length-three channelwise kernel and padding one.
 Because PyTorch's \texttt{conv1d} operator is cross-correlation rather than mathematical convolution, the implementation stores the kernel in the order
@@ -19,15 +20,44 @@ so the left kernel entry shifts probability mass toward larger aggregate values 
 This is only an implementation orientation; in mathematical support order $[-1,0,+1]$ the signed kernels are the atoms described in Section~\ref{sec:convolutional-bag-prediction}.
 
 For digit-sum, the atom width is the number of finite digit values, for example ten for MNIST digits.
-For histogram experiments, we avoid a full $C$-dimensional joint histogram over classes and instead compute $C$ one-vs-rest one-dimensional count likelihoods in parallel.
+For class-count experiments, we avoid a full $C$-dimensional joint histogram over classes and instead compute $C$ one-vs-rest one-dimensional count likelihoods in parallel.
 This keeps the aggregate support one-dimensional for each class and makes large bags practical on GPU.
 The FFT-tree backend is useful for this setting because the same pairwise polynomial products are batched over classes and bags.
 Padding or masked positions are represented by deterministic zero-contribution atoms, such as $[1,0]$ for Bernoulli counts, $[0,1,0]$ for signed support $[-1,0,+1]$, and $[1,0,\ldots,0]$ for integer-valued sums.
+The main multiclass one-vs-rest runtime benchmark is produced by \texttt{scripts/bench\_multiclass\_ovr\_fft.py}; the reported CUDA run is stored in \texttt{results/bench\_multiclass\_ovr\_fft\_cuda\_20260505/}.
+This benchmark compares CPU Bernoulli count DP with batched GPU FFT-tree convolution for forward aggregate PMF computation only, not full training.
+
+\begin{algorithm}[t]
+\caption{Convolutional aggregate prediction for one minibatch}
+\label{alg:bag-prediction}
+\begin{algorithmic}[1]
+\Require Bags $\{(x_{b1:n_b}, a_{b1:n_b}, y_b)\}_{b=1}^B$, backbone $f_\theta$, contribution map $\Phi$, backend $\mathsf{Conv}$
+\Ensure Loss $\mathcal{L}$ and aggregate-label scores $\{s_b\}_{b=1}^B$
+\For{$b=1,\ldots,B$}
+  \State $H_b \gets f_\theta(x_{b1:n_b})$
+  \For{$i=1,\ldots,n_b$}
+    \State $d_{bi} \gets \Phi(H_{bi}, a_{bi})$
+  \EndFor
+  \If{classwise one-vs-rest count objective}
+    \For{$c=1,\ldots,C$}
+      \State $m_{bc} \gets \mathsf{Conv}(\{[1-p_{bic},p_{bic}]\}_{i=1}^{n_b})$
+      \State $p_{bc} \gets m_{bc}(h_{bc})$
+    \EndFor
+    \State $s_b \gets \prod_{c=1}^C p_{bc}^{1/C}$ \Comment{composite score}
+    \State $\ell_b \gets -C^{-1}\sum_{c=1}^C \log p_{bc}$
+  \Else
+    \State $m_b \gets \mathsf{Conv}(\{d_{bi}\}_{i=1}^{n_b})$
+    \State $s_b \gets m_b(y_b)$; $\ell_b \gets -\log s_b$
+  \EndIf
+\EndFor
+\State \Return $\mathcal{L}=B^{-1}\sum_{b=1}^B \ell_b$, $\{s_b\}_{b=1}^B$
+\end{algorithmic}
+\end{algorithm}
 
 \begin{table}[t]
 \centering
 \small
-\caption{Exact aggregate backends.  $n$ is bag size, $S$ is atomic support size, $T=n(S-1)+1$ is aggregate PMF width, and $C$ is number of one-vs-rest classes.}
+\caption{\method{} backend implementations.  $n$ is bag size, $S$ is atomic support size, $T=n(S-1)+1$ is aggregate PMF width, and $C$ is number of one-vs-rest classes.}
 \label{tab:backends}
 \begin{tabular}{p{0.18\linewidth}p{0.24\linewidth}p{0.20\linewidth}p{0.25\linewidth}}
 \toprule
@@ -36,30 +66,55 @@ Backend & Setting & Work per bag & Use \\
 DP & Bernoulli count & $O(nT)$ & Shukla-style count baseline \\
 Sequential convolution & finite support & $O(nST)$ & main moderate-bag experiments \\
 Grouped convolution & signed Bernoulli & $O(nT)$, batched groups & signed GPU implementation \\
-FFT-tree & finite support / OVR & $O(CT\log T\log n)$ & runtime, OVR histograms \\
+FFT-tree & finite support / one-vs-rest & $O(CT\log T\log n)$ & runtime, classwise counts \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{Histogram and CIFAR settings.}
-Histogram count-likelihood experiments treat each class count as a one-vs-rest Bernoulli count likelihood.
-The MNIST histogram experiments use batch size 192 for large-bag configurations.
+\begin{table}[t]
+\centering
+\small
+\caption{Representative forward+backward GPU runtime for exact aggregate likelihood backends.}
+\label{tab:runtime-fwd-bwd}
+\begin{tabular}{lrr}
+\toprule
+Task & Bag size & Time (s) \\
+\midrule
+Binary DP & $32$ & $0.0132$ \\
+Binary convolution & $32$ & $0.0108$ \\
+Binary DP & $256$ & $0.0963$ \\
+Binary convolution & $256$ & $0.0749$ \\
+Ordinal-10 sum convolution & $32$ & $0.0452$ \\
+Ordinal-10 sum convolution & $256$ & $0.3449$ \\
+Signed grouped convolution & $32$ & $0.00134$ \\
+Signed grouped convolution & $256$ & $0.00416$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+These forward+backward measurements come from \texttt{scripts/bench\_exactness\_runtime.py}.
+They show that GPU DP and convolution are close for simple binary counts, while the largest runtime separation appears when many one-vs-rest PMFs are batched and evaluated by the FFT-tree backend.
+
+\paragraph{Class-count and CIFAR settings.}
+Class-count experiments treat each class count as a one-vs-rest Bernoulli count likelihood and optimize the resulting classwise composite likelihood.
+The MNIST class-count experiments use batch size 192 for large-bag configurations.
 CIFAR-10 experiments use ResNet-18 backbones.
 The pretrained one-vs-rest count settings use ImageNet-pretrained ResNet-18 with random crop and horizontal flip augmentation, SGD with momentum 0.9, weight decay $10^{-4}$, learning rate $5\times 10^{-4}$, and a cosine learning-rate schedule for 500 epochs.
 The pretrained CIFAR-10 analysis is limited to the evaluated $n=16$ and $n=64$ one-vs-rest count settings.
 
 \paragraph{Compute resources.}
-All reported experiments are run on a single \texttt{TBD} GPU.
-MNIST-family runs (LeNet, 50 epochs) take approximately \texttt{TBD} per configuration;
-CIFAR-10 pretrained ResNet-18 runs (500 epochs, cosine schedule) take approximately \texttt{TBD} per configuration.
-Total compute used for the reported results is approximately \texttt{TBD}.
+Reported GPU experiments were run on a single NVIDIA RTX 4090 GPU with 24 GB memory.
+The CPU dynamic-programming benchmark was run on the paired host CPU for that machine; the exact CPU model was not recorded in the experiment artifact.
+MNIST-family LeNet runs take approximately $0.4$--$1.5$ GPU-hours per configuration, with peak memory ranging from about $0.4$ GB for small-bag settings to $6.5$ GB for the largest $n=50$ settings.
+CIFAR-10 pretrained ResNet-18 runs take approximately $8$--$12$ GPU-hours per configuration under the 500-epoch cosine schedule.
+The reported experiments and backend benchmarks use approximately $150$ total GPU-hours; smoke tests and preliminary runs were used for development but are excluded from the reported tables.
 
 \section{Mathematical origin: signed counting in \texorpdfstring{$(q,t)$}{(q,t)}-Littlewood--Richardson coefficients}
 \label{app:qtlr-origin}
 
 The signed-count instance of our framework was originally motivated by a problem in algebraic combinatorics: a conjectural factorization of the $(q,t)$-Littlewood--Richardson coefficients arising in the theory of Macdonald polynomials~\cite{Macdonald1995}.
 This object is central across several areas of mathematics---symmetric function theory, representation theory, Schubert calculus on Grassmannians, and partition combinatorics---and it also surfaces in mathematical physics through connections to the Calogero--Sutherland model and related integrable systems~\cite{LittlewoodRichardson1934,KnutsonTao1999,Vakil2006}.
-We sketch how this problem reduces to signed counting in our framework; complete mathematical exposition and the corresponding empirical study fall outside the scope of this paper.
+We sketch how this problem reduces to signed counting in our framework; complete mathematical exposition and empirical study are left for future work.
 
 \paragraph{Setup.}
 A partition $\lambda=(\lambda_1,\dots,\lambda_k)$ is identified with its Young diagram, a finite collection of unit cells.
@@ -99,8 +154,8 @@ f^\nu_{\lambda,\mu}(q,t)
 \end{equation}
 The conjecture remains open in general; the case where $\mu$ is a single-row partition is known explicitly as the \emph{Pieri rule}~\cite[p.~340]{Macdonald1995}.
 
-\paragraph{Reduction to signed finite-support aggregation.}
-Two observations connect Eq.~\eqref{eq:stanley-factorization} to signed bag-level counting.
+\paragraph{Reduction to signed finite-support aggregate likelihoods.}
+Two observations connect Eq.~\eqref{eq:stanley-factorization} to signed aggregate counting.
 First, the atomic factor $b_\lambda(u;q,t)$ depends on the cell $u$ only through its arm--leg pair $(a_\lambda(u),\ell_\lambda(u))$, so cells from different partitions or different positions but sharing the same value $(a,\ell)$ all contribute the same factor $b(a,\ell)$ to $f^\nu_{\lambda,\mu}(q,t)$, and may therefore be grouped together.
 Second, the conjectural subsets enter Eq.~\eqref{eq:stanley-factorization} with opposite multiplicative roles: cells in $Z^\nu_{\lambda,\mu}\subseteq\nu$ appear in the numerator, while cells in $X^\nu_{\lambda,\mu}\subseteq\lambda$ and $Y^\nu_{\lambda,\mu}\subseteq\mu$ appear in the denominator.
 Letting $+1$ (resp.\ $-1$) signify a numerator (resp.\ denominator) contribution and grouping cells by arm--leg type, the multiplicities collapse into a single signed integer exponent per type, yielding
@@ -121,5 +176,5 @@ Identifying instances with cells, bags with arm--leg equivalence classes, the ag
 Each triple $(\lambda,\mu,\nu)$ produces a family of such bags indexed by $(a,\ell)$, each with a signed integer label, and the convolutional bag-prediction layer of the main paper applies without modification.
 
 \paragraph{Empirical note.}
-In preliminary experiments using the framework of this paper, we observed over $98\%$ bag-level exponent accuracy on out-of-distribution Pieri- and Stanley-type triples, indicating that exact signed-count likelihood can recover latent cell selections consistent with the conjectural factorization.
+This signed-count view suggests a future experiment: learning latent cell selections from aggregate exponents under the conjectural factorization.
 The detailed mathematical formulation, problem-specific architectural choices, and combinatorial diagnostics are outside the scope of the present paper and are left to a separate report.

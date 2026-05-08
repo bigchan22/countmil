@@ -3,12 +3,12 @@
 
 \subsection{Aggregate likelihood}
 
-Following Definition~\ref{def:finite-support-aggregator}, the instance network and contribution map emit the atomic PMFs $d_i$.
+The instance network and contribution map emit the atomic PMFs $d_i$ used in Definition~\ref{def:finite-support-aggregator}.
 For one-dimensional contributions, this is a categorical distribution over a finite integer support:
 \begin{equation}
   d_i(k) = p_\theta(z_i = k \mid x_i), \qquad k \in \{a,\ldots,b\}.
 \end{equation}
-By Proposition~\ref{prop:finite-support-convolution}, the exact bag-label likelihood is the convolutional aggregator applied to these atomic PMFs:
+The exact aggregate-label likelihood is \method{} applied to these atomic PMFs:
 \begin{equation}
   p_\theta(Y=y \mid x_{1:n})
   =
@@ -27,7 +27,7 @@ The support of the aggregate PMF is finite and contiguous:
   \mathrm{supp}(Y) = \{na, na+1,\ldots, nb\}.
 \end{equation}
 Equivalently, if each atom has contiguous support size $S=b-a+1$, then the aggregate PMF has width $T=n(S-1)+1$ after shifting by $na$.
-All experiments use exact likelihoods over this support; approximations enter only through the neural instance model, not through sampling latent assignments.
+For scalar aggregate labels, all experiments evaluate the exact model-implied likelihood over this support; approximation enters through the neural instance model rather than through sampled latent assignments.
 
 \paragraph{Two immediate consequences.}
 First, when the atomic support is Bernoulli, the convolutional likelihood is exactly the coefficient of the polynomial $\prod_i((1-p_i)+p_it)$ and therefore recovers the standard count probability.
@@ -37,10 +37,10 @@ This is the distinction exploited by the digit-sum and signed-count experiments.
 
 \subsection{Training objective}
 
-For each minibatch, the instance model and task-specific contribution map first produce atomic PMFs for every instance in every bag.
-The aggregate layer then deterministically maps these atoms to an exact PMF over the observed bag label.
-This separation makes the aggregate objective backbone-agnostic: an MLP, CNN, transformer, or pretrained image encoder can be used as long as it produces per-instance scores from which $\Phi$ can form the required finite-support PMFs.
-It also makes the weak-supervision family modular: binary counts, signed counts, ordinal sums, and histogram counts use different kernels but the same aggregate likelihood rule.
+For each minibatch, the instance model and task-specific contribution map produce atomic PMFs for every instance in every bag.
+\method{} then maps these atoms deterministically to an exact PMF over the observed aggregate label.
+This separation makes the objective backbone-agnostic: an MLP, CNN, transformer, or pretrained image encoder can be used as long as it produces per-instance scores from which $\Phi$ can form the required finite-support PMFs.
+It also makes the aggregate-supervision family modular: Bernoulli counts, signed counts, integer-valued sums, and one-vs-rest class counts use different kernels but the same likelihood rule.
 The training loss is the negative log probability assigned to the observed aggregate,
 \begin{equation}
   \mathcal{L}(\theta)
@@ -49,41 +49,15 @@ The training loss is the negative log probability assigned to the observed aggre
   \log
   \left(d_{b1} * \cdots * d_{bn_b}\right)(y_b).
 \end{equation}
-Gradients are backpropagated through the convolutional aggregate layer into the instance network.
-Instance labels are never used for training in the weak-supervision experiments; they are used only for evaluation of hidden instance recovery.
-This is different from expected-value regression baselines, which regress the scalar expectation $\sum_i \mathbb{E}[z_i]$ to the aggregate label and therefore discard the higher-order distributional information in the count or sum.
+Gradients are backpropagated through \method{} into the instance network.
+Instance labels are never used for training in the aggregate-supervision experiments; they are used only for evaluation of hidden instance recovery.
+The expected-value baseline regresses only $\sum_i \mathbb{E}[z_i]$ to the observed aggregate, so it discards all information beyond the first moment.
 
-\begin{algorithm}[t]
-\caption{Convolutional bag prediction for one minibatch}
-\label{alg:bag-prediction}
-\begin{algorithmic}[1]
-\Require Bags $\{(x_{b1:n_b}, a_{b1:n_b}, y_b)\}_{b=1}^B$, backbone $f_\theta$, contribution map $\Phi$, backend $\mathsf{Conv}$
-\Ensure Loss $\mathcal{L}$ and bag-label probabilities $\{p_b\}_{b=1}^B$
-\For{$b=1,\ldots,B$}
-  \State $H_b \gets f_\theta(x_{b1:n_b})$ \Comment{instance logits or class scores}
-  \For{$i=1,\ldots,n_b$}
-    \State $d_{bi} \gets \Phi(H_{bi}, a_{bi})$ \Comment{atomic PMF on the task support}
-  \EndFor
-  \If{histogram one-vs-rest objective}
-    \For{$c=1,\ldots,C$}
-      \State $m_{bc} \gets \mathsf{Conv}(\{[1-p_{bic},p_{bic}]\}_{i=1}^{n_b})$
-      \State $p_{bc} \gets m_{bc}(h_{bc})$
-    \EndFor
-    \State $p_b \gets \prod_{c=1}^C p_{bc}^{1/C}$
-    \State $\ell_b \gets -C^{-1}\sum_{c=1}^C \log p_{bc}$
-  \Else
-    \State $m_b \gets \mathsf{Conv}(\{d_{bi}\}_{i=1}^{n_b})$ \Comment{sequential, grouped, or FFT-tree}
-    \State $p_b \gets m_b(y_b)$
-    \State $\ell_b \gets -\log p_b$
-  \EndIf
-\EndFor
-\State \Return $\mathcal{L}=B^{-1}\sum_{b=1}^B \ell_b$, $\{p_b\}_{b=1}^B$
-\end{algorithmic}
-\end{algorithm}
+Appendix~\ref{app:implementation-details} gives implementation details, including the classwise composite score used for one-vs-rest counts.
 
 \subsection{Special cases}
 
-Table~\ref{tab:method-kernels} summarizes the task-specific kernels; the aggregator itself is unchanged.
+Table~\ref{tab:method-kernels} summarizes the task-specific kernels; \method{} itself is unchanged.
 
 \paragraph{Binary counts.}
 A target concept gives hidden Bernoulli indicators $z_i$, and the observed label is $Y=\sum_i z_i$.
@@ -91,20 +65,21 @@ The kernel $[1-p_i,p_i]$ recovers the standard Bernoulli count likelihood, so th
 
 \paragraph{Signed counts.}
 With observed signs $s_i\in\{-1,+1\}$, target instances contribute $s_i$ and non-target instances contribute $0$, giving $Y_{\pm}=\sum_i s_i z_i$.
-The signed kernels in Table~\ref{tab:method-kernels} expose cancellation because many latent assignments can yield the same signed sum.
+The signed kernels in Table~\ref{tab:method-kernels} model cancellation explicitly because many latent assignments can yield the same signed sum.
 
 \paragraph{Integer-valued sums.}
-For ordinal labels $z_i\in\{0,\ldots,K-1\}$, the atomic kernel is the full categorical vector and the observed label is $Y_{\rm sum}=\sum_i z_i$.
+For integer-valued labels $z_i\in\{0,\ldots,K-1\}$, the atomic kernel is the full categorical vector and the observed label is $Y_{\rm sum}=\sum_i z_i$.
 The likelihood therefore compares the observed sum to the full convolved PMF rather than only to the expected sum $\sum_i\mathbb{E}[z_i]$.
 
 \paragraph{Histograms.}
-For multiclass histograms, we use classwise one-vs-rest (OVR) Bernoulli count likelihoods: for each class $c$, the aggregator scores the observed count $h_c=\sum_i z_{ic}$, and the loss averages over classes.
-This is a scalable classwise likelihood, not a full joint multiclass histogram likelihood, and is closely related to the count-likelihood component of LLP-PVC.
+For multiclass count labels, we use a classwise composite likelihood over one-vs-rest Bernoulli counts: for each class $c$, \method{} scores the observed count $h_c=\sum_i z_{ic}$, and the loss averages over classes.
+This is scalable, but it is not a full joint multiclass histogram model; it is closely related to the count-likelihood component of LLP-PVC.
+The corresponding composite score is therefore not a normalized joint histogram probability.
 
 \begin{table}[t]
 \centering
 \scriptsize
-\caption{Task kernels used by the same convolutional aggregator.  The support order is the array order for the atomic PMF.}
+\caption{Task kernels used by \method{}.  The support order is the array order for the atomic PMF.}
 \label{tab:method-kernels}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{p{0.20\linewidth}p{0.24\linewidth}p{0.27\linewidth}p{0.19\linewidth}}
@@ -114,7 +89,7 @@ Task & Aggregate label & Atomic kernel & Support \\
 Binary count & $Y=\sum_i z_i$ & $[1-p_i,\;p_i]$ & $\{0,1\}$ \\
 Signed count & $Y_{\pm}=\sum_i s_i z_i$ & $\kappa_i^{(+)}=[0,1-p_i,p_i]$; $\kappa_i^{(-)}=[p_i,1-p_i,0]$ & $\{-1,0,+1\}$ \\
 Integer sum & $Y_{\rm sum}=\sum_i z_i$ & $[p_{i0},\ldots,p_{i,K-1}]$ & $\{0,\ldots,K-1\}$ \\
-OVR histogram & $h_c=\sum_i z_{ic}$ & $[1-p_{ic},\;p_{ic}]$ for each class $c$ & $\{0,1\}$ per class \\
+Classwise composite count & $h_c=\sum_i z_{ic}$ & $[1-p_{ic},\;p_{ic}]$ for each class $c$ & $\{0,1\}$ per class \\
 \bottomrule
 \end{tabular}
 }
@@ -133,5 +108,5 @@ If $m^{(i)}$ denotes the aggregate PMF after processing the first $i$ atoms, the
 \end{equation}
 This recurrence is the same probability law whether implemented as dynamic programming, shifted dense tensor accumulation, grouped convolution, or FFT polynomial multiplication.
 The choice of backend is therefore computational rather than statistical: the likelihood being optimized is unchanged, but the hardware profile differs.
-We use sequential convolution for moderate binary, signed, and integer-valued sum experiments; Shukla-style dynamic programming as a Bernoulli count baseline; grouped GPU convolution for signed Bernoulli groups; and a balanced FFT-tree backend for large one-vs-rest histogram PMFs.
+We use sequential convolution for moderate binary, signed, and integer-valued sum experiments; Shukla-style dynamic programming as a Bernoulli count baseline; grouped GPU convolution for signed Bernoulli groups; and a balanced FFT-tree backend for large classwise one-vs-rest count PMFs.
 Further implementation details and backend complexity are given in Appendix~\ref{app:implementation-details}.

@@ -1,32 +1,5 @@
 \section*{NeurIPS Paper Checklist}
 
-%%% BEGIN INSTRUCTIONS %%%
-The checklist is designed to encourage best practices for responsible machine learning research, addressing issues of reproducibility, transparency, research ethics, and societal impact. Do not remove the checklist: {\bf The papers not including the checklist will be desk rejected.} The checklist should follow the references and follow the (optional) supplemental material.  The checklist does NOT count towards the page
-limit. 
-
-Please read the checklist guidelines carefully for information on how to answer these questions. For each question in the checklist:
-\begin{itemize}
-    \item You should answer \answerYes{}, \answerNo{}, or \answerNA{}.
-    \item \answerNA{} means either that the question is Not Applicable for that particular paper or the relevant information is Not Available.
-    \item Please provide a short (1--2 sentence) justification right after your answer (even for \answerNA). 
-   % \item {\bf The papers not including the checklist will be desk rejected.}
-\end{itemize}
-
-{\bf The checklist answers are an integral part of your paper submission.} They are visible to the reviewers, area chairs, senior area chairs, and ethics reviewers. You will also be asked to include it (after eventual revisions) with the final version of your paper, and its final version will be published with the paper.
-
-The reviewers of your paper will be asked to use the checklist as one of the factors in their evaluation. While \answerYes{} is generally preferable to \answerNo{}, it is perfectly acceptable to answer \answerNo{} provided a proper justification is given (e.g., error bars are not reported because it would be too computationally expensive'' or ``we were unable to find the license for the dataset we used''). In general, answering \answerNo{} or \answerNA{} is not grounds for rejection. While the questions are phrased in a binary way, we acknowledge that the true answer is often more nuanced, so please just use your best judgment and write a justification to elaborate. All supporting evidence can appear either in the main paper or the supplemental material, provided in appendix. If you answer \answerYes{} to a question, in the justification please point to the section(s) where related material for the question can be found.
-
-IMPORTANT, please:
-\begin{itemize}
-    \item {\bf Delete this instruction block, but keep the section heading ``NeurIPS Paper Checklist"},
-    \item  {\bf Keep the checklist subsection headings, questions/answers and guidelines below.}
-    \item {\bf Do not modify the questions and only use the provided macros for your answers}.
-\end{itemize} 
- 
-
-%%% END INSTRUCTIONS %%%
-
-
 \begin{enumerate}
 
 \item {\bf Claims}
@@ -44,7 +17,7 @@ IMPORTANT, please:
 \item {\bf Limitations}
     \item[] Question: Does the paper discuss the limitations of the work performed by the authors?
     \item[] Answer: \answerYes{}
-    \item[] Justification: Section~\ref{sec:discussion} discusses limitations including large-bag calibration, signed-aggregate ambiguity, and the CIFAR-10 fixed-instance-budget caveat.
+    \item[] Justification: Section~\ref{sec:discussion} discusses limitations including aggregate ambiguity, signed-aggregate cancellation, representation dependence, and the CIFAR-10 fixed-instance-budget caveat.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper has no limitation while the answer \answerNo{} means that the paper has limitations, but those are not discussed in the paper. 
@@ -60,7 +33,7 @@ IMPORTANT, please:
 \item {\bf Theory assumptions and proofs}
     \item[] Question: For each theoretical result, does the paper provide the full set of assumptions and a complete (and correct) proof?
     \item[] Answer: \answerYes{}
-    \item[] Justification: Proposition~\ref{prop:finite-support-convolution} states its assumptions explicitly; it follows from the standard convolution rule for sums of independent integer-valued random variables, as noted in Section~\ref{sec:problem-setup}.
+    \item[] Justification: Definition~\ref{def:finite-support-aggregator} and Eq.~\eqref{eq:finite-support-aggregator} state the conditional-independence assumptions explicitly; the likelihood follows from the standard convolution rule for sums of independent integer-valued random variables.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not include theoretical results. 
@@ -121,8 +94,8 @@ IMPORTANT, please:
 
 \item {\bf Experiment statistical significance}
     \item[] Question: Does the paper report error bars suitably and correctly defined or other appropriate information about the statistical significance of the experiments?
-    \item[] Answer: \answerYes{}
-    \item[] Justification: Section~\ref{sec:experiments} captions specify the seed count for each configuration; reported $\pm$ values denote standard deviations across seeds.
+    \item[] Answer: \answerNo{}
+    \item[] Justification: Section~\ref{sec:experiments} captions specify the seed count for each configuration, but most main tables report point estimates rather than full error bars or confidence intervals.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not include experiments.
@@ -139,7 +112,7 @@ IMPORTANT, please:
 \item {\bf Experiments compute resources}
     \item[] Question: For each experiment, does the paper provide sufficient information on the computer resources (type of compute workers, memory, time of execution) needed to reproduce the experiments?
     \item[] Answer: \answerYes{}
-    \item[] Justification: Appendix~\ref{app:implementation-details} lists the GPU type and approximate wall-clock time per configuration.
+    \item[] Justification: Appendix~\ref{app:implementation-details} reports the GPU type, memory, approximate per-configuration runtime ranges, and total GPU-hour estimate.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not include experiments.
@@ -205,7 +178,7 @@ IMPORTANT, please:
 \item {\bf New assets}
     \item[] Question: Are new assets introduced in the paper well documented and is the documentation provided alongside the assets?
     \item[] Answer: \answerYes{}
-    \item[] Justification: The supplementary code includes a README with setup, training, and evaluation instructions for the reported experiments.
+    \item[] Justification: The supplementary code includes an anonymized README with setup instructions, basic test commands, and pointers to the provided scripts and configurations.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not release new assets.

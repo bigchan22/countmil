@@ -2,14 +2,15 @@
 
 \paragraph{Multiple-instance learning and count loss.}
 Classical multiple-instance learning supervises bags rather than instances~\cite{dietterich1997mil,maron1998mil,andrew2002misvm,carbonneau2018milsurvey}; neural and attention MIL learn bag predictors end-to-end~\cite{wang2018minn,ilse2018attention}.
-Count-based weak supervision gives a stronger bag label by observing the number of positive instances.
-Shukla et al.~\cite{shukla2023count} compute the exact probability that $k$ Bernoulli outputs are true, and related count supervision appears in temporal localization~\cite{schroeter2019occurrence}.
-Our Bernoulli case recovers this count probability; the contribution is the finite-support convolutional formulation that also covers signed, integer-valued, and classwise histogram aggregates.
+These MIL models usually target binary bag-presence labels, such as whether at least one positive instance is present, whereas our aggregate labels are exact integer counts, signed sums, or integer-valued sums.
+Count-based aggregate supervision gives a stronger label by observing the number of positive instances.
+Prior count-loss methods compute exact Bernoulli count probabilities and have achieved state-of-the-art or highly competitive results in count-based weak supervision~\cite{shukla2023count}; related count supervision appears in temporal localization~\cite{schroeter2019occurrence}.
+\method{} contains these objectives as the $\{0,1\}$ special case and lifts the same exact-likelihood mechanism to signed cancellation and integer-valued sums.
 
 \paragraph{Learning from label proportions.}
 Learning from label proportions observes class proportions or histograms over bags~\cite{quadrianto2009llp,yu2014llp}, with probabilistic, deep, pseudo-labeling, consistency, and two-stage variants~\cite{sun2017probabilistic,bortsova2018emphysema,hsu2019multiclass,dulacarnold2019deep,liu2019llpgan,tsai2020consistency,liu2021twostage,yang2021featurelabel,ma2025hil} and recent theoretical analyses~\cite{scott2020mutual,zhang2022labelnoise,busa2023easyllp,wei2023uum,applebaum2025generalupm,busafekete2025sample}.
 LLP-PVC~\cite{ma2026llppvc} reframes label proportions as proportional-value classification and uses efficient count-likelihood computation.
-Our one-vs-rest histogram experiment is included to connect to this count-likelihood component, not to claim a new full joint histogram likelihood; the broader contribution is the same aggregate layer applied to scalar sums and signed counts.
+Our classwise count objective recovers this likelihood component, not the entire LLP-PVC method or a new full joint histogram model.
 
 \paragraph{Efficient aggregate inference.}
 Dynamic programming computes Bernoulli count probabilities exactly but is sequential and can be expensive for large bags and many classes~\cite{ma2026llppvc}.

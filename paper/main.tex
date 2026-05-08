@@ -1,7 +1,7 @@
 \documentclass{article}
 
 % if you need to pass options to natbib, use, e.g.:
-%     \PassOptionsToPackage{numbers, compress}{natbib}
+\PassOptionsToPackage{numbers, compress}{natbib}
 % before loading neurips_2026
 
 % The authors should use one of these tracks.
@@ -63,7 +63,6 @@
 \usepackage{ytableau}
 
 \newcommand{\method}{FS-Conv}
-\newtheorem{proposition}{Proposition}
 \newtheorem{definition}{Definition}
 
 % Note. For the workshop paper template, both \title{} and \workshoptitle{} are required, with the former indicating the paper title shown in the title and the latter indicating the workshop title displayed in the footnote. 
@@ -117,13 +116,11 @@
 \maketitle
 
 \begin{abstract}
-Weakly supervised multiple-instance learning often observes only aggregate labels for a bag, while instance labels remain hidden.
-Existing count-based objectives give exact likelihoods for Bernoulli counts, but many aggregate labels have richer finite structure, such as signed counts, integer-valued sums, and class histograms.
-We formulate aggregate-supervised Count-MIL as a finite-support convolutional aggregator: an architecture-independent layer that maps instance-level atomic probability mass functions to the mathematically implied aggregate distribution.
-The resulting bag likelihood recovers the standard Bernoulli count probability as a special case and extends, without changing the backbone model or the aggregate layer, to signed and integer-valued aggregate labels.
-We implement exact aggregate inference with GPU-parallel convolution, including an FFT-tree backend for large one-vs-rest histogram likelihoods.
-Experiments on digit sums, signed counts, Bernoulli counts, SVHN/UltraMNIST sum benchmarks, and class-count settings show that exact finite-support likelihoods can recover accurate hidden-instance predictors from aggregate labels.
-On CIFAR-10, ImageNet-pretrained ResNet-18 features make the one-vs-rest count likelihood effective, while a fixed-instance-budget comparison shows that the large-bag improvement is explained by greater sampled image exposure.
+Aggregate-supervised multiple-instance learning observes a label for each bag but not the labels of individual instances.
+Exact likelihoods are known for standard Bernoulli count labels, but many aggregate labels involve more general finite supports, including signed counts with cancellation and integer-valued digit sums.
+We introduce FS-Conv, a backbone-agnostic finite-support convolutional likelihood layer that maps per-instance contribution PMFs to the exact model-implied aggregate distribution by discrete convolution.
+FS-Conv strictly generalizes the exact Bernoulli count likelihood underlying recent count-based weak-supervision methods: the $\{0,1\}$ support recovers ordinary count loss, while signed and integer-valued supports yield exact likelihoods for cancellation and digit-sum supervision.
+Across aggregate-supervised prediction tasks, FS-Conv improves hidden-instance recovery most clearly when the observed aggregate is poorly captured by a mean or proportion alone.
 \end{abstract}
 
 
