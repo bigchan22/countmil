@@ -1,0 +1,11 @@
+{
+  "bag_size": 13,
+  "batch_size": 5,
+  "classes": 7,
+  "fsconv_loss": 1.6823765961986838,
+  "max_abs_forward_loss_diff": 4.440892098500626e-16,
+  "max_abs_logit_gradient_diff": 2.1163626406917047e-16,
+  "max_abs_per_class_probability_diff": 2.220446049250313e-16,
+  "pvc_count_component_loss": 1.6823765961986834,
+  "seed": 0
+}

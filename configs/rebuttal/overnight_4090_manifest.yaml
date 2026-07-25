@@ -1,0 +1,56 @@
+{
+  "gpu_index": 0,
+  "note": "CIFAR-10 fixed-bag jobs are intentionally not included because data/cifar-10-python.tar.gz is missing and only data/cifar-10-python.tar.gz.part exists on this server. P3/P4 are also deferred because the instructions require the fixed-bag experiment to be prepared and smoke-tested first.",
+  "jobs": [
+    {
+      "name": "equivalence_pvc_count_component",
+      "phase": "phase0",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/check_pvc_equivalence.py --out results/rebuttal/overnight_4090/pvc_equivalence.json"
+    },
+    {
+      "name": "digit_sum_gaussian_amle_n10_train1000_s0",
+      "phase": "p1",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task digit_sum --bag-size-mean 10 --bag-size-std 2 --train-bags 1000 --seed 0 --epochs 50 --batch-size 192 --device cuda:0"
+    },
+    {
+      "name": "digit_sum_gaussian_amle_n10_train1000_s1",
+      "phase": "p1",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task digit_sum --bag-size-mean 10 --bag-size-std 2 --train-bags 1000 --seed 1 --epochs 50 --batch-size 192 --device cuda:0"
+    },
+    {
+      "name": "digit_sum_gaussian_amle_n10_train1000_s2",
+      "phase": "p1",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task digit_sum --bag-size-mean 10 --bag-size-std 2 --train-bags 1000 --seed 2 --epochs 50 --batch-size 192 --device cuda:0"
+    },
+    {
+      "name": "signed_gaussian_amle_n10_train1000_random_s0",
+      "phase": "p2",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task signed --bag-size-mean 10 --bag-size-std 2 --train-bags 1000 --seed 0 --epochs 50 --batch-size 192 --device cuda:0"
+    },
+    {
+      "name": "signed_gaussian_amle_n10_train1000_random_s1",
+      "phase": "p2",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task signed --bag-size-mean 10 --bag-size-std 2 --train-bags 1000 --seed 1 --epochs 50 --batch-size 192 --device cuda:0"
+    },
+    {
+      "name": "signed_gaussian_amle_n10_train1000_random_s2",
+      "phase": "p2",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task signed --bag-size-mean 10 --bag-size-std 2 --train-bags 1000 --seed 2 --epochs 50 --batch-size 192 --device cuda:0"
+    },
+    {
+      "name": "signed_gaussian_amle_n10_train1000_cancel_s0",
+      "phase": "p2",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task signed --bag-size-mean 10 --bag-size-std 2 --train-bags 1000 --cancellation-heavy --seed 0 --epochs 50 --batch-size 192 --device cuda:0"
+    },
+    {
+      "name": "signed_gaussian_amle_n10_train1000_cancel_s1",
+      "phase": "p2",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task signed --bag-size-mean 10 --bag-size-std 2 --train-bags 1000 --cancellation-heavy --seed 1 --epochs 50 --batch-size 192 --device cuda:0"
+    },
+    {
+      "name": "signed_gaussian_amle_n10_train1000_cancel_s2",
+      "phase": "p2",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task signed --bag-size-mean 10 --bag-size-std 2 --train-bags 1000 --cancellation-heavy --seed 2 --epochs 50 --batch-size 192 --device cuda:0"
+    }
+  ]
+}

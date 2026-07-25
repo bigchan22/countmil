@@ -1,0 +1,66 @@
+{
+  "gpu_index": 0,
+  "requires": "Do not run until CIFAR-10 archive and ResNet-18 weights are available and fixed-bag CIFAR smoke tests pass.",
+  "jobs": [
+    {
+      "name": "digit_sum_gaussian_amle_n50_train1000_s0",
+      "phase": "p3",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task digit_sum --bag-size-mean 50 --bag-size-std 10 --train-bags 1000 --seed 0 --epochs 50 --batch-size 128 --device cuda:0"
+    },
+    {
+      "name": "digit_sum_gaussian_amle_n50_train1000_s1",
+      "phase": "p3",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task digit_sum --bag-size-mean 50 --bag-size-std 10 --train-bags 1000 --seed 1 --epochs 50 --batch-size 128 --device cuda:0"
+    },
+    {
+      "name": "digit_sum_gaussian_amle_n50_train1000_s2",
+      "phase": "p3",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task digit_sum --bag-size-mean 50 --bag-size-std 10 --train-bags 1000 --seed 2 --epochs 50 --batch-size 128 --device cuda:0"
+    },
+    {
+      "name": "signed_gaussian_amle_n50_train1000_random_s0",
+      "phase": "p4",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task signed --bag-size-mean 50 --bag-size-std 10 --train-bags 1000 --seed 0 --epochs 50 --batch-size 128 --device cuda:0"
+    },
+    {
+      "name": "signed_gaussian_amle_n50_train1000_random_s1",
+      "phase": "p4",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task signed --bag-size-mean 50 --bag-size-std 10 --train-bags 1000 --seed 1 --epochs 50 --batch-size 128 --device cuda:0"
+    },
+    {
+      "name": "signed_gaussian_amle_n50_train1000_random_s2",
+      "phase": "p4",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task signed --bag-size-mean 50 --bag-size-std 10 --train-bags 1000 --seed 2 --epochs 50 --batch-size 128 --device cuda:0"
+    },
+    {
+      "name": "signed_gaussian_amle_n50_train1000_cancel_s0",
+      "phase": "p4",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task signed --bag-size-mean 50 --bag-size-std 10 --train-bags 1000 --cancellation-heavy --seed 0 --epochs 50 --batch-size 128 --device cuda:0"
+    },
+    {
+      "name": "signed_gaussian_amle_n50_train1000_cancel_s1",
+      "phase": "p4",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task signed --bag-size-mean 50 --bag-size-std 10 --train-bags 1000 --cancellation-heavy --seed 1 --epochs 50 --batch-size 128 --device cuda:0"
+    },
+    {
+      "name": "signed_gaussian_amle_n50_train1000_cancel_s2",
+      "phase": "p4",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task signed --bag-size-mean 50 --bag-size-std 10 --train-bags 1000 --cancellation-heavy --seed 2 --epochs 50 --batch-size 128 --device cuda:0"
+    },
+    {
+      "name": "fixed_cifar10_ce_n64_train250_s0",
+      "phase": "p5",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_fixed_cifar10_features.py --method ce --seed 0 --device cuda:0"
+    },
+    {
+      "name": "fixed_cifar10_official_component_n64_train250_s0",
+      "phase": "p5",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_fixed_cifar10_features.py --method official_pvc_count_component --seed 0 --device cuda:0"
+    },
+    {
+      "name": "fixed_cifar10_fsconv_count_n64_train250_s0",
+      "phase": "p5",
+      "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_fixed_cifar10_features.py --method fsconv_count --seed 0 --device cuda:0"
+    }
+  ]
+}
