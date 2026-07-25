@@ -1,0 +1,56 @@
+{
+  "best": {
+    "aggregate_ece": 0.043623827397823334,
+    "epoch": 1,
+    "epoch_seconds": 0.060397036373615265,
+    "expected_sum_mae": 9.8760347366333,
+    "instance_label_acc": 0.11249999701976776,
+    "nll": 3.888625741004944,
+    "peak_cuda_mem_mb": 0.0,
+    "sum_acc": 0.0,
+    "sum_mae": 10.0,
+    "train_nll": 3.8734796047210693
+  },
+  "config": {
+    "augment": false,
+    "bag_size_max": 15,
+    "bag_size_mean": 10.0,
+    "bag_size_min": 5,
+    "bag_size_std": 2.0,
+    "dataset": "MNIST",
+    "dataset_root": "data",
+    "download": false,
+    "experiment": "mnist_sum",
+    "lr": 0.001,
+    "model": "mnist_cnn",
+    "noise_sigma": 0.0,
+    "num_classes": 10,
+    "per_class_cap": 100,
+    "pretrained": false,
+    "seed": 0,
+    "test_bags": 8,
+    "train_bags": 8,
+    "weight_decay": 0.0
+  },
+  "final": {
+    "aggregate_ece": 0.043623827397823334,
+    "epoch": 1,
+    "epoch_seconds": 0.060397036373615265,
+    "expected_sum_mae": 9.8760347366333,
+    "instance_label_acc": 0.11249999701976776,
+    "nll": 3.888625741004944,
+    "peak_cuda_mem_mb": 0.0,
+    "sum_acc": 0.0,
+    "sum_mae": 10.0,
+    "train_nll": 3.8734796047210693
+  },
+  "run_dir": "runs/atomic_sum_smoke/atomic_sum/pca/mnist_sum/20260506T164515Z_gpusystem_s0",
+  "selection_metric": "test_nll",
+  "tail5": {
+    "tail5_aggregate_ece": 0.043623827397823334,
+    "tail5_expected_sum_mae": 9.8760347366333,
+    "tail5_instance_label_acc": 0.11249999701976776,
+    "tail5_nll": 3.888625741004944,
+    "tail5_sum_acc": 0.0
+  }
+}

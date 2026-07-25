@@ -1,0 +1,3 @@
+job	command
+mnist_sum_pca_s0	PYTHONPATH=src .venv/bin/python scripts/train_atomic_sum.py --experiment mnist_sum --seed 0 --epochs 1 --dataset-root data --results-dir results/atomic_sum_smoke --run-root runs/atomic_sum_smoke --train-bags 10 --test-bags 10 --batch-size 4
+ultramnist_pca_s0	PYTHONPATH=src .venv/bin/python scripts/train_atomic_sum.py --experiment ultramnist --seed 0 --epochs 1 --dataset-root data --results-dir results/atomic_sum_smoke --run-root runs/atomic_sum_smoke --train-bags 10 --test-bags 10 --batch-size 4

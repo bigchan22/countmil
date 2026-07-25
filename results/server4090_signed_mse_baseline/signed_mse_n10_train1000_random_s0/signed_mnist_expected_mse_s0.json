@@ -1,0 +1,30 @@
+{
+  "best": {
+    "epoch": 50,
+    "epoch_seconds": 4.293957479298115,
+    "expected_signed_count_mae": 0.6275297999382019,
+    "expected_signed_count_mse": 0.6425666213035583,
+    "instance_acc": 0.8987939953804016,
+    "instance_auc": 0.9347496074942694,
+    "peak_cuda_mem_mb": 1237.44140625,
+    "rounded_signed_count_acc": 0.4790000021457672,
+    "rounded_signed_count_mae": 0.5839999914169312,
+    "rounded_signed_count_mse": 0.7139999866485596,
+    "train_mse": 0.784983724117279,
+    "zero_expected_abs_error": 0.2609856426715851,
+    "zero_fraction": 0.45100000500679016,
+    "zero_rounded_signed_count_acc": 0.8625277280807495
+  },
+  "config": {
+    "bag_size_mean": 10,
+    "bag_size_std": 2.0,
+    "cancellation_heavy": false,
+    "dataset": "MNIST",
+    "dataset_root": "data",
+    "objective": "mse",
+    "seed": 0,
+    "target_digit": 9,
+    "train_bags": 1000
+  },
+  "run_dir": "runs/server4090_signed_mse_baseline/signed_mse_n10_train1000_random_s0/signed_mnist_baseline/mse/MNIST/20260507T020935Z_gpusystem_s0"
+}

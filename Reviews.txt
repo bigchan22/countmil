@@ -1,0 +1,127 @@
+Meta Review of Submission32923 by Area Chair pq2g
+Meta Reviewby Area Chair pq2g22 Jul 2026, 16:04 (modified: 24 Jul 2026, 03:35)Senior Area Chairs, Area Chairs, Authors, Reviewers Submitted, Program Chairs, Area Chair pq2gRevisions
+Metareview:
+This paper presents a novel likelihood function for aggregate-supervised multiple-instance learning, where only one aggregate label is observed per bag while the individual instance labels remain unobserved. The proposed likelihood, FS-Conv, generalizes existing count-based likelihoods to a broader class of finite-support aggregate labels.
+
+The reviewers are not particularly enthusiastic about the novelty of the main contribution. Reviewer DeMh points out that the core mathematical mechanism has limited originality, while Reviewer 7auU views the contribution mainly as a conceptual generalization and appreciates that the authors do not overstate its novelty. While limited novelty alone may not be sufficient reason to reject a paper, I believe it is still an important issue for this work to address. The more critical concerns are related to the empirical evaluation. Reviewer 7auU points out that the experiments are limited to relatively standard and simple vision benchmarks, while Reviewers sSU7 and DeMh note the lack of sufficiently strong and relevant baselines. During the rebuttal period, I recommend that the authors prioritize adding stronger baselines and, if feasible, provide results on more realistic and challenging aggregate-supervised MIL problems.
+
+In addition, the authors should respond thoroughly to the reviewer-specific concerns and clarify any points of ambiguity identified in the individual reviews.
+
+Add:
+Official Review of Submission32923 by Reviewer 7auU
+Official Reviewby Reviewer 7auU26 Jun 2026, 19:00 (modified: 24 Jul 2026, 01:56)Program Chairs, Senior Area Chairs, Area Chairs, Reviewers Submitted, Authors, Reviewer 7auURevisions
+Summary:
+The paper proposes FS-Conv, a finite-support convolutional likelihood layer for aggregate-supervised multiple-instance learning. The method generalizes existing count-based likelihoods to broader finite-support aggregate labels and can be used with different backbone models. The approach is evaluated on several aggregate-supervision tasks, including experiments on MNIST, SVHN, and CIFAR-10.
+
+Contribution Type: General: Most submissions will fall into this type.
+Strengths And Weaknesses:
+The paper is technically sound. The mathematical formulation is clean and easy to follow. I also like that the paper clearly positions its contributions with respect to prior work instead of overstating the novelty. The main limitation is that the contribution is mostly a conceptual generalization rather than a new algorithm or architecture. Moreover, the method relies on the conditional independence assumption, which could be discussed in more detail, particularly regarding how sensitive the framework is when this assumption is not entirely satisfied. The empirical evaluation is also conducted on relatively simple vision benchmarks.
+
+Quality: 3: good
+Clarity: 4: excellent
+Significance: 3: good
+Originality: 3: good
+Questions:
+The method relies on the conditional independence assumption. Could the authors discuss how sensitive FS-Conv is when this assumption is only approximately satisfied?
+The experiments are primarily conducted on standard vision benchmarks. Could the authors comment on how the framework would apply to more realistic aggregate-supervision settings, or discuss the main challenges that may arise in such applications?
+Limitations:
+Yes The authors discuss the main limitations of the proposed framework. Additional discussion of the impact of the conditional independence assumption, particularly when it is only approximately satisfied, would make the paper stronger.
+
+Rating: 4: Borderline accept: Technically solid paper where reasons to accept outweigh reasons to reject, e.g., limited evaluation. Please use sparingly.
+Confidence: 4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.
+Ethical Concerns: NO or VERY MINOR ethics concerns only
+Paper Formatting Concerns:
+None
+
+Code Of Conduct Acknowledgement: Yes
+Responsible Reviewing Acknowledgement: Yes
+Add:
+Official Review of Submission32923 by Reviewer sSU7
+Official Reviewby Reviewer sSU722 Jun 2026, 17:54 (modified: 24 Jul 2026, 01:56)Program Chairs, Senior Area Chairs, Area Chairs, Reviewers Submitted, Authors, Reviewer sSU7Revisions
+Summary:
+The paper proposes FS-Conv, a convolutional likelihood layer for Multiple-Instance Learning (MIL) specific for finite-support aggregate-supervision tasks. The main contribution of the paper is a unification with previosly known results for Bernouilli contributions and an extension to a broader family of count-related tasks.
+
+Contribution Type: General: Most submissions will fall into this type.
+Strengths And Weaknesses:
+Strengths:
+
+The paper is interesting and well written.
+The proposed layer is interesting, subsumes previously known cases and represents a unified framework for other related cases.
+The paper proposes different implementations.
+Weaknesses:
+
+Limited baselines (see below)
+The method is not demonstrated on realistic scenarios typical of MIL, where the amount of labelled bags is often limited.
+The paper seems to rely too strongly on the quality of the instance-level representations.
+Quality: 3: good
+Clarity: 2: not good
+Significance: 3: good
+Originality: 2: not good
+Questions:
+Something I have lacked is a justification why the baselines systems are so limited (e.g., MSE over expected counts). Is there not any method from the literature on MIL that could have been added to the experimental setting? Why is LLP-PVC missing from the experiments?
+The experiments reported in Table 2 seem to indicate that the model strongly relies on the quality of the instance-level representations. Is this correct? If so, I would suggest stressing this earlier in the paper.
+What is the intended data-generating assumptions for the bags? In the current experiments, bags appear to be randomly sampled with replacement from fixed dataset splits, which may cause aggregate proportions to concentrate around the underlying dataset prevalence, especially for large bags. It is not clear whether the method is intended for naturally occurring aggregate-labeled bags, LLP-style settings with informative variation in proportions, or other forms of distributional shift. I mention this because one scenario in which, IMO, it is interesting to predict class-specific counts aggregations is under suspected label shift (aka prior probability shift), i.e., the dataset shift scenario in which the prior distribution of the classes of interest are assumed to vary, while the class-conditional distribution of the covariates are assumed stationary. However, under the random sampling with replacement used in the paper, the counts would likely concentrate around a central value (scaled by bag size). Besides, under label shift, the one-vs-rest (aka one-vs-all) approach is known to be problematic, for reasons discussed in [5]. My interpretation could be wrong, and the target scenarios for this approach my have nothing to do with label shift, but I would recommend the authors to more clearly state the distributional assumptions in target scenarios where the proposed method is interesting.
+The paper discusses the possibility of includding additional information in the embedding (denoted by 
+), but its role in the experiments could be made clearer. Is this information being used as the observed signs in the signed-count experiments? Please, clarify.
+Limitations:
+Major:
+
+Limited number of baselines. At least LLP-PVC should be included.
+An important experimental problem I found in the paper regards the sampling generation process. The authors state that "bags are sampled on the fly with replacement from the corresponding train or test splits". While this allows the autors to effectively generate training and test bags at will, the truth is that the experimental protocol relies on synthetically generated aggregate labels from fully labeled datasets. Even though theses labels are never taken into account during the training process, it makes me wonder how would such a method behave under realistic conditions, where the number of bags with provided aggregated supervision is typically limited. (Having said that, I think that the very explanation of the sampling generation protocol provided at the end of Section 3 actually belongs to the experimental setup.)
+Minor:
+
+Although FS-Conv is not properly a pooling layer, in the sense that it does not generate a pooling representation of the bag, I think there is some interesting connection with previous work on set processing. It is my impression that the paper would benefit from briefly discussing connections with previous work including the Neural Statistician [1], DeepSets [2], and other aggregation layers proposed for quantification (or class prevalenc estimation) including DQN [3], or HistNetQ [4]. This is only a suggestion.
+I believe the introduction should not explicitly mention dataset-specific results, since the datasets themselves have not been introduced and belong to the experimental section.
+References:
+
+[1] Edwards, H., & Storkey, A. (2016). Towards a neural statistician. arXiv preprint arXiv:1606.02185.
+[2] Manzil Zaheer, Satwik Kottur, Siamak Ravanbakhsh, Barnabas Poczos, Russ R Salakhutdinov, and Alexander J Smola. Deep sets. Advances in neural information processing systems, 30, 2017.
+[3] Qi, Lei, et al. "A framework for deep quantification learning." Joint European Conference on Machine Learning and Knowledge Discovery in Databases. Cham: Springer International Publishing, 2020.
+[4] Pérez-Mon, Olaya, et al. "Quantification using permutation-invariant networks based on histograms." Neural Computing and Applications 37.5 (2025): 3505-3520.
+[5] Donyavi, Z., Serapio, A., & Batista, G. (2023). MC-SQ: A highly accurate ensemble for multi-class quantification. In: Proceedings of the 2023 SIAM International Conference on Data Mining (SDM), SIAM, pp. 622–630
+Rating: 3: Borderline reject: Technically solid paper where reasons to reject, e.g., limited evaluation, outweigh reasons to accept, e.g., good evaluation. Please use sparingly.
+Confidence: 4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.
+Ethical Concerns: NO or VERY MINOR ethics concerns only
+Paper Formatting Concerns:
+N/A
+
+Code Of Conduct Acknowledgement: Yes
+Responsible Reviewing Acknowledgement: Yes
+Add:
+Official Review of Submission32923 by Reviewer DeMh
+Official Reviewby Reviewer DeMh16 Jun 2026, 23:13 (modified: 24 Jul 2026, 01:56)Program Chairs, Senior Area Chairs, Area Chairs, Reviewers Submitted, Authors, Reviewer DeMhRevisions
+Summary:
+The manuscript studies aggregate-supervised multiple-instance learning, where training examples provide only bag-level aggregate labels while the instance-level latent labels are unobserved during training. The proposed FS-Conv layer represents each instance as a probability mass function over a finite integer support and computes the induced bag-level distribution exactly by discrete convolution, with training performed by negative log-likelihood of the observed aggregate. The main contribution is to present Bernoulli count likelihood, signed counts, integer-valued digit sums, and one-vs-rest class-count objectives under a common finite-support likelihood interface, together with several convolutional backends and empirical evaluations on MNIST-family, SVHN, and CIFAR-10 data sets.
+
+Contribution Type: General: Most submissions will fall into this type.
+Strengths And Weaknesses:
+Strengths:
+
+The separation between the instance model, the contribution map, and the convolutional aggregate likelihood makes the method easy to understand and reuse.
+The manuscript is careful about the boundary between new and existing components.
+Weaknesses:
+
+The main weakness is limited originality at the level of the core mathematical mechanism. Computing the distribution of a sum of independent finite-support discrete variables by convolution is standard; Bernoulli count likelihood is known; and the classwise count setting is close to existing LLP/count-likelihood formulations.
+The baselines are not sufficient to establish competitiveness against stronger aggregate-supervision methods.
+Some MNIST-family FS-Conv rows report mean and standard deviation over three seeds, but several SVHN and CIFAR-10 results are single-seed diagnostics.
+The empirical evaluation is based on synthetic or semi-synthetic benchmark constructions rather than real aggregate-supervision data.
+The manuscript does not provide much theoretical analysis beyond the standard convolution identity for sums of independent finite-support random variables.
+The writing and presentation quality are weaker than expected for a top-tier submission.
+Quality: 2: not good
+Clarity: 2: not good
+Significance: 2: not good
+Originality: 2: not good
+Questions:
+Can the authors add at least one stronger non-MSE baseline on the digit-sum and signed-count tasks?
+Can the authors better characterize the classwise composite likelihood?
+Limitations:
+yes
+
+Rating: 2: Reject: For instance, a paper with technical flaws, weak evaluation, inadequate reproducibility and incompletely addressed ethical considerations.
+Confidence: 4: You are confident in your assessment, but not absolutely certain. It is unlikely, but not impossible, that you did not understand some parts of the submission or that you are unfamiliar with some pieces of related work.
+Ethical Concerns: NO or VERY MINOR ethics concerns only
+Paper Formatting Concerns:
+N/A
+
+Code Of Conduct Acknowledgement: Yes
+Responsible Reviewing Acknowledgement: Yes

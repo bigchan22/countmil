@@ -1,0 +1,24 @@
+{
+  "best": {
+    "diagnostic_nll": 3.893765411376953,
+    "epoch": 29,
+    "epoch_seconds": 0.6918074935674667,
+    "expected_sum_mae": 8.54065990447998,
+    "instance_digit_acc": 0.16314879059791565,
+    "loss": 114.28190734863281,
+    "peak_cuda_mem_mb": 3013.1845703125,
+    "rounded_sum_acc": 0.03799999877810478,
+    "rounded_sum_mae": 8.534000396728516,
+    "train_loss": 119.96955212402344
+  },
+  "config": {
+    "bag_size_mean": 50,
+    "bag_size_std": 10.0,
+    "dataset": "FashionMNIST",
+    "dataset_root": "data",
+    "objective": "mse",
+    "seed": 0,
+    "train_bags": 1000
+  },
+  "run_dir": "runs/server4090_fashion_mse2/fashion_sum_mse_n50_s0/mnist_digit_sum_baseline/mse/FashionMNIST/20260506T220300Z_gpusystem_s0"
+}
