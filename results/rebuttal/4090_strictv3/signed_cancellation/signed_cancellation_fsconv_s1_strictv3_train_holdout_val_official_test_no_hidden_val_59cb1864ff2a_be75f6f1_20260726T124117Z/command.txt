@@ -1,0 +1,1 @@
+scripts/rebuttal/4090_train_strict_mnist_scalar.py --task signed_cancellation --method fsconv --seed 1 --device cuda:2

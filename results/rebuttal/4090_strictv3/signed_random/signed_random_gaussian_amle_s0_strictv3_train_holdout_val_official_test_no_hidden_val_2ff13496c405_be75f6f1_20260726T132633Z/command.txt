@@ -1,0 +1,1 @@
+scripts/rebuttal/4090_train_strict_mnist_scalar.py --task signed_random --method gaussian_amle --seed 0 --device cuda:1

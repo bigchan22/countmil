@@ -1,0 +1,119 @@
+{
+  "best": {
+    "epoch": 27,
+    "epoch_seconds": 26.086593376472592,
+    "train_loss": -0.7314382967948914,
+    "val_expected_signed_sum_mae": 0.256674200296402,
+    "val_pmf_mode_signed_sum_acc": 0.8330000042915344,
+    "val_posthoc_discrete_aggregate_nll": 0.4765918552875519,
+    "val_posthoc_gaussian_integer_bin_nll": 0.5577611923217773,
+    "val_rounded_signed_sum_acc": 0.8220000267028809,
+    "val_rounded_signed_sum_mae": 0.1860000044107437,
+    "validation_loss": 0.5577611923217773
+  },
+  "config": {
+    "bag_size_mean": 10,
+    "bag_size_std": 2.0,
+    "batch_size": 192,
+    "cancellation_heavy": false,
+    "checkpoint_selection": "aggregate validation training-objective loss",
+    "config_hash": "0c4ce5a5c6aefbcd2f2021a33902b56751c1497544ef21c19fc515beb38e156e",
+    "dataset_root": "data",
+    "device": "cuda:1",
+    "epochs": 50,
+    "gaussian_eps": 0.0001,
+    "git_commit": "be75f6f1e9a68411e9014c665ba0201e830c70ee",
+    "lr": 0.0005,
+    "manifest_root": "results/rebuttal/4090_strictv3/manifests/mnist",
+    "method": "gaussian_amle",
+    "protocol_tag": "strictv3_train_holdout_val_official_test_no_hidden_val",
+    "run_root": "results/rebuttal/4090_strictv3",
+    "seed": 1,
+    "split_hash": "bc6887351ce9a38c9f6482d107083b5bff015029976f96ec572a20cfc35fb06b",
+    "split_seed": 314159,
+    "task": "signed_random",
+    "test_bags": 1000,
+    "test_manifest_hash": "b697d9eb5b619bd68763d89807eca68877085f203b52644a2862f024fce428c6",
+    "train_bags": 1000,
+    "train_manifest_hash": "6dadb85a6235aa6e3fd8a0972f0b1d4c91e1e73462415338d03368a3d344a4d1",
+    "val_bags": 1000,
+    "val_manifest_hash": "8436a602b5dc171b690a2c2a52287a370215c79b837e13faf9a9462e4f647c64",
+    "validation_hidden_metrics_logged": false,
+    "weight_decay": 0.0001
+  },
+  "manifest_hashes": {
+    "test": "b697d9eb5b619bd68763d89807eca68877085f203b52644a2862f024fce428c6",
+    "train": "6dadb85a6235aa6e3fd8a0972f0b1d4c91e1e73462415338d03368a3d344a4d1",
+    "val": "8436a602b5dc171b690a2c2a52287a370215c79b837e13faf9a9462e4f647c64"
+  },
+  "run_dir": "results/rebuttal/4090_strictv3/signed_random/signed_random_gaussian_amle_s1_strictv3_train_holdout_val_official_test_no_hidden_val_0c4ce5a5c6ae_be75f6f1_20260726T134743Z",
+  "selection_metric": "aggregate validation metric only; no hidden validation metrics computed",
+  "split_stats": {
+    "train": {
+      "class_counts": [
+        5035,
+        5731,
+        5064,
+        5211,
+        4966,
+        4608,
+        5030,
+        5325,
+        4973,
+        5057
+      ],
+      "class_proportions": [
+        0.09872549027204514,
+        0.11237254738807678,
+        0.09929411858320236,
+        0.1021764725446701,
+        0.09737254679203033,
+        0.09035293757915497,
+        0.09862744808197021,
+        0.1044117659330368,
+        0.09750980138778687,
+        0.09915686398744583
+      ],
+      "indices_hash": "eee6f67a224f552e22a02e0a45eadd0a9ae3d3fb6942ad122ec6fcc0de9026f7",
+      "num_images": 51000
+    },
+    "val": {
+      "class_counts": [
+        888,
+        1011,
+        894,
+        920,
+        876,
+        813,
+        888,
+        940,
+        878,
+        892
+      ],
+      "class_proportions": [
+        0.09866666793823242,
+        0.11233333498239517,
+        0.09933333098888397,
+        0.10222221910953522,
+        0.09733333438634872,
+        0.09033333510160446,
+        0.09866666793823242,
+        0.10444444417953491,
+        0.09755555540323257,
+        0.09911110997200012
+      ],
+      "indices_hash": "f1f547adb8c132f11e859b2e012506732100ce4415a53a79ac10b8de60263170",
+      "num_images": 9000
+    }
+  },
+  "test": {
+    "expected_signed_sum_mae": 0.24992483854293823,
+    "instance_acc": 0.9793214201927185,
+    "instance_auc": 0.9869535529192149,
+    "pmf_mode_signed_sum_acc": 0.8299999833106995,
+    "posthoc_discrete_aggregate_nll": 0.503724992275238,
+    "posthoc_gaussian_integer_bin_nll": 0.5906534194946289,
+    "rounded_signed_sum_acc": 0.8320000171661377,
+    "rounded_signed_sum_mae": 0.1720000058412552
+  }
+}

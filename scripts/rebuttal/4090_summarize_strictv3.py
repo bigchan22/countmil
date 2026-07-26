@@ -164,9 +164,104 @@ def _paired_stats() -> None:
         lines.append("Paired bootstrap not run because at least one CIFAR method lacks three completed seeds.")
         (ROOT / "paired_statistics.md").write_text("\n".join(lines) + "\n")
         return
-    # Placeholder conservative implementation: raw paired JSONL is preserved;
-    # bootstrap is only run when all three method rows and raw files are present.
-    lines.append("All three methods have summaries; use raw per-bag JSONL files for hierarchical paired bootstrap.")
+
+    def raw_rows(row: dict[str, Any]) -> dict[str, torch.Tensor]:
+        path = Path(row["run_dir"]) / "raw_per_bag_test_metrics.jsonl"
+        vals = {"count_mae": [], "composite_nll": []}
+        with path.open() as f:
+            for line in f:
+                js = json.loads(line)
+                vals["count_mae"].append(float(js["count_mae"]))
+                vals["composite_nll"].append(float(js["composite_nll"]))
+        return {k: torch.tensor(v, dtype=torch.float64) for k, v in vals.items()}
+
+    rows_by_method_seed = {
+        method: {int(row["config"]["seed"]): row for row in rows}
+        for method, rows in by_method.items()
+    }
+    seeds = [0, 1, 2]
+    raw = {
+        method: {seed: raw_rows(rows_by_method_seed[method][seed]) for seed in seeds}
+        for method in methods
+    }
+    errors = []
+    for seed in seeds:
+        hashes = {
+            method: rows_by_method_seed[method][seed]["manifest_hashes"]["test"]
+            for method in methods
+        }
+        if len(set(hashes.values())) != 1:
+            errors.append(f"seed {seed} test manifest mismatch: {hashes}")
+        lengths = {
+            method: int(raw[method][seed]["count_mae"].numel())
+            for method in methods
+        }
+        if len(set(lengths.values())) != 1:
+            errors.append(f"seed {seed} raw bag-count mismatch: {lengths}")
+    if errors:
+        lines += ["Bootstrap not run because paired inputs failed validation:"] + [f"- {e}" for e in errors]
+        (ROOT / "paired_statistics.md").write_text("\n".join(lines) + "\n")
+        (out_dir / "paired_statistics.json").write_text(json.dumps({"errors": errors}, indent=2, sort_keys=True))
+        return
+
+    def interval(vals: torch.Tensor) -> dict[str, float]:
+        sorted_vals = vals.sort().values
+        lo = sorted_vals[int(0.025 * (len(sorted_vals) - 1))].item()
+        hi = sorted_vals[int(0.975 * (len(sorted_vals) - 1))].item()
+        return {"mean": vals.mean().item(), "ci95_low": lo, "ci95_high": hi}
+
+    def hierarchical(a: str, b: str, metric: str, reps: int = 10_000) -> dict[str, Any]:
+        gen = torch.Generator().manual_seed(8675309 + sum(ord(c) for c in a + b + metric))
+        per_seed = []
+        for seed in seeds:
+            per_seed.append(raw[a][seed][metric] - raw[b][seed][metric])
+        boot = torch.empty(reps, dtype=torch.float64)
+        for r in range(reps):
+            seed_pick = torch.randint(0, len(seeds), (len(seeds),), generator=gen)
+            pieces = []
+            for idx in seed_pick.tolist():
+                arr = per_seed[idx]
+                bag_pick = torch.randint(0, arr.numel(), (arr.numel(),), generator=gen)
+                pieces.append(arr[bag_pick].mean())
+            boot[r] = torch.stack(pieces).mean()
+        seed_diag = {}
+        for seed, arr in zip(seeds, per_seed):
+            vals = torch.empty(reps, dtype=torch.float64)
+            for r in range(reps):
+                bag_pick = torch.randint(0, arr.numel(), (arr.numel(),), generator=gen)
+                vals[r] = arr[bag_pick].mean()
+            seed_diag[str(seed)] = interval(vals)
+        return {"hierarchical": interval(boot), "per_seed": seed_diag}
+
+    comparisons = [
+        ("fsconv_count", "ce_kl"),
+        ("official_llp_pvc", "ce_kl"),
+        ("fsconv_count", "official_llp_pvc"),
+    ]
+    metrics = ["count_mae", "composite_nll"]
+    stats: dict[str, Any] = {
+        "description": "Paired differences are method_a - method_b. Bootstrap resamples seeds, then paired test bags within seed.",
+        "seeds": seeds,
+        "bootstrap_replicates": 10_000,
+        "comparisons": {},
+    }
+    for a, b in comparisons:
+        key = f"{a}_minus_{b}"
+        stats["comparisons"][key] = {metric: hierarchical(a, b, metric) for metric in metrics}
+
+    (out_dir / "paired_statistics.json").write_text(json.dumps(stats, indent=2, sort_keys=True))
+    lines += [
+        "Paired differences are method A - method B; negative is better for Count MAE and Composite NLL.",
+        "Bootstrap uses 10,000 replicates, resampling seeds and then paired test bags within each sampled seed.",
+        "",
+        "| Comparison | Metric | Mean diff. | 95% CI |",
+        "|---|---|---:|---:|",
+    ]
+    for key, by_metric in stats["comparisons"].items():
+        label = key.replace("_", " ")
+        for metric, result in by_metric.items():
+            h = result["hierarchical"]
+            lines.append(f"| {label} | {metric} | {h['mean']:.4f} | [{h['ci95_low']:.4f}, {h['ci95_high']:.4f}] |")
     (ROOT / "paired_statistics.md").write_text("\n".join(lines) + "\n")
 
 

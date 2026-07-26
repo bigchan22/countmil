@@ -1,0 +1,11 @@
+{
+  "cuda_version": "12.8",
+  "git_commit": "be75f6f1e9a68411e9014c665ba0201e830c70ee",
+  "gpu_index": 1,
+  "gpu_name": "NVIDIA GeForce RTX 4090",
+  "hostname": "gpusystem",
+  "platform": "Linux-5.15.0-176-generic-x86_64-with-glibc2.35",
+  "protocol_tag": "strictv3_train_holdout_val_official_test_no_hidden_val",
+  "python_version": "3.9.16 (main, Mar  8 2023, 14:00:05) \n[GCC 11.2.0]",
+  "torch_version": "2.8.0+cu128"
+}
