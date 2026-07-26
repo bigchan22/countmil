@@ -51,7 +51,7 @@ def main() -> None:
     args = p.parse_args()
     expected = args.expected_sha or _out(["git", "rev-parse", "HEAD"])
     _check_clean(expected)
-    log_root = Path("results/rebuttal/4090_strictv3/logs")
+    log_root = Path.home() / "fsconv_strictv3_queues"
     log_root.mkdir(parents=True, exist_ok=True)
     for gpu, commands in _job_commands(expected).items():
         script = log_root / f"gpu{gpu}_queue.sh"
