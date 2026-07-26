@@ -1,0 +1,1 @@
+scripts/rebuttal/4090_train_strict_cifar_fixed.py --method official_llp_pvc --seed 99 --epochs 1 --train-bags 4 --val-bags 4 --test-bags 4 --batch-size 2 --device cpu --run-root results/rebuttal/4090_strictv3/smoke/cifar_runs --summary-root results/rebuttal/4090_strictv3/smoke/cifar_fixed --manifest-root results/rebuttal/4090_strictv3/smoke/cifar_manifests

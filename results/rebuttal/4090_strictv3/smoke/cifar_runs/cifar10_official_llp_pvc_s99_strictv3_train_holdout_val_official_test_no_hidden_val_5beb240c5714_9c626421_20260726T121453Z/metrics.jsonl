@@ -1,0 +1,1 @@
+{"epoch": 1, "epoch_seconds": 0.02139636967331171, "lr": 0.001, "train_loss": 109.81343460083008, "val_composite_count_nll": 12.819215774536133, "val_hist_count_mae": 8.625, "val_hist_proportion_mae": 0.134765625, "validation_composite_count_nll": 12.819215774536133, "validation_hist_count_mae": 8.625}

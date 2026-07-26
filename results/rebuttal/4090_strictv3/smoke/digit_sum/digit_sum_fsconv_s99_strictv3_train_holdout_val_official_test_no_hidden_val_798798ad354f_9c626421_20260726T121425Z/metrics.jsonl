@@ -1,0 +1,1 @@
+{"epoch": 1, "epoch_seconds": 0.3481200151145458, "train_loss": 3.216092348098755, "val_expected_sum_mae": 8.892448425292969, "val_pmf_mode_sum_acc": 0.0, "val_posthoc_discrete_aggregate_nll": 3.668686866760254, "val_posthoc_gaussian_integer_bin_nll": 3.6787989139556885, "val_rounded_expected_sum_acc": 0.0, "validation_loss": 3.668686866760254}

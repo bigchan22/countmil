@@ -1,0 +1,90 @@
+[
+  {
+    "artifact_type": "checkpoint",
+    "git_sha": "9c626421f2c591c8cd88e0ec487a06d94482e075",
+    "path": "results/rebuttal/4090_strictv3/smoke/cifar_runs/cifar10_official_llp_pvc_s99_strictv3_train_holdout_val_official_test_no_hidden_val_5beb240c5714_9c626421_20260726T121453Z/checkpoint_best.pt",
+    "producing_command": "strict-v3 smoke or previously cached frozen feature extraction",
+    "required_for_evaluation": false,
+    "required_for_resuming": true,
+    "run_id": "cifar10_official_llp_pvc_s99_strictv3_train_holdout_val_official_test_no_hidden_val_5beb240c5714_9c626421_20260726T121453Z",
+    "sha256": "559945235990afa9a4a935c84f1bcfd997baaffa8583a455ea4ade99371c610f",
+    "size_bytes": 24549
+  },
+  {
+    "artifact_type": "checkpoint",
+    "git_sha": "9c626421f2c591c8cd88e0ec487a06d94482e075",
+    "path": "results/rebuttal/4090_strictv3/smoke/cifar_runs/cifar10_official_llp_pvc_s99_strictv3_train_holdout_val_official_test_no_hidden_val_5beb240c5714_9c626421_20260726T121453Z/checkpoint_final.pt",
+    "producing_command": "strict-v3 smoke or previously cached frozen feature extraction",
+    "required_for_evaluation": false,
+    "required_for_resuming": true,
+    "run_id": "cifar10_official_llp_pvc_s99_strictv3_train_holdout_val_official_test_no_hidden_val_5beb240c5714_9c626421_20260726T121453Z",
+    "sha256": "7347867f23a556376f3f985ba08c0bdaec7f16bacba401c555059ffb3ee83f5b",
+    "size_bytes": 24237
+  },
+  {
+    "artifact_type": "checkpoint",
+    "git_sha": "9c626421f2c591c8cd88e0ec487a06d94482e075",
+    "path": "results/rebuttal/4090_strictv3/smoke/digit_sum/digit_sum_fsconv_s99_strictv3_train_holdout_val_official_test_no_hidden_val_798798ad354f_9c626421_20260726T121425Z/checkpoint_best.pt",
+    "producing_command": "strict-v3 smoke or previously cached frozen feature extraction",
+    "required_for_evaluation": false,
+    "required_for_resuming": true,
+    "run_id": "digit_sum_fsconv_s99_strictv3_train_holdout_val_official_test_no_hidden_val_798798ad354f_9c626421_20260726T121425Z",
+    "sha256": "618731ae35a3867805461bffd6c9fa21bd237537dc5f03b90ed06f911832d8d2",
+    "size_bytes": 1729661
+  },
+  {
+    "artifact_type": "checkpoint",
+    "git_sha": "9c626421f2c591c8cd88e0ec487a06d94482e075",
+    "path": "results/rebuttal/4090_strictv3/smoke/digit_sum/digit_sum_fsconv_s99_strictv3_train_holdout_val_official_test_no_hidden_val_798798ad354f_9c626421_20260726T121425Z/checkpoint_final.pt",
+    "producing_command": "strict-v3 smoke or previously cached frozen feature extraction",
+    "required_for_evaluation": false,
+    "required_for_resuming": true,
+    "run_id": "digit_sum_fsconv_s99_strictv3_train_holdout_val_official_test_no_hidden_val_798798ad354f_9c626421_20260726T121425Z",
+    "sha256": "80c264d4d7d227e882335b6eb78b7bd161b2311302a20967a97d50725abccdb9",
+    "size_bytes": 1729355
+  },
+  {
+    "artifact_type": "checkpoint",
+    "git_sha": "9c626421f2c591c8cd88e0ec487a06d94482e075",
+    "path": "results/rebuttal/4090_strictv3/smoke/signed_random/signed_random_gaussian_amle_s99_strictv3_train_holdout_val_official_test_no_hidden_val_41c919fdf5d6_9c626421_20260726T121425Z/checkpoint_best.pt",
+    "producing_command": "strict-v3 smoke or previously cached frozen feature extraction",
+    "required_for_evaluation": false,
+    "required_for_resuming": true,
+    "run_id": "signed_random_gaussian_amle_s99_strictv3_train_holdout_val_official_test_no_hidden_val_41c919fdf5d6_9c626421_20260726T121425Z",
+    "sha256": "4b725d9e189b9fd7a58975ae1f2432fc34c9f9f03c9c3be71a25048411e500c2",
+    "size_bytes": 1711741
+  },
+  {
+    "artifact_type": "checkpoint",
+    "git_sha": "9c626421f2c591c8cd88e0ec487a06d94482e075",
+    "path": "results/rebuttal/4090_strictv3/smoke/signed_random/signed_random_gaussian_amle_s99_strictv3_train_holdout_val_official_test_no_hidden_val_41c919fdf5d6_9c626421_20260726T121425Z/checkpoint_final.pt",
+    "producing_command": "strict-v3 smoke or previously cached frozen feature extraction",
+    "required_for_evaluation": false,
+    "required_for_resuming": true,
+    "run_id": "signed_random_gaussian_amle_s99_strictv3_train_holdout_val_official_test_no_hidden_val_41c919fdf5d6_9c626421_20260726T121425Z",
+    "sha256": "0628ee15c242013a945651989fb077fd637e620612ea523d0a42b71d89c9e26f",
+    "size_bytes": 1711371
+  },
+  {
+    "artifact_type": "frozen_feature_tensor",
+    "git_sha": "cfdf9520/previous fixed-feature cache",
+    "path": "results/rebuttal/fixed_bag_cifar10/features/cifar10_resnet18_imagenet_test_features.pt",
+    "producing_command": "strict-v3 smoke or previously cached frozen feature extraction",
+    "required_for_evaluation": true,
+    "required_for_resuming": true,
+    "run_id": "features",
+    "sha256": "b826dc4ac14bcdf9c7cb05c0dd8c29512532f31f2bbb81075535a76edc576175",
+    "size_bytes": 20562725
+  },
+  {
+    "artifact_type": "frozen_feature_tensor",
+    "git_sha": "cfdf9520/previous fixed-feature cache",
+    "path": "results/rebuttal/fixed_bag_cifar10/features/cifar10_resnet18_imagenet_train_features.pt",
+    "producing_command": "strict-v3 smoke or previously cached frozen feature extraction",
+    "required_for_evaluation": true,
+    "required_for_resuming": true,
+    "run_id": "features",
+    "sha256": "fafe06b0f9b9d9c6b8f1369a4cadf71f6bb4bc1ca6aa5750bcf063fbeed56c9d",
+    "size_bytes": 102802733
+  }
+]

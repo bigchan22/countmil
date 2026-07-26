@@ -1,0 +1,1 @@
+scripts/rebuttal/4090_train_strict_mnist_scalar.py --task digit_sum --method fsconv --seed 99 --epochs 1 --train-bags 8 --val-bags 8 --test-bags 8 --batch-size 4 --device cpu --run-root results/rebuttal/4090_strictv3/smoke --manifest-root results/rebuttal/4090_strictv3/smoke/manifests

@@ -1,0 +1,8 @@
+{"batch": 0, "expected": 36.24647903442383, "mode": 36, "nll": 4.198459148406982, "rounded": 36, "row": 0, "target": 49}
+{"batch": 0, "expected": 36.14259719848633, "mode": 36, "nll": 3.058187484741211, "rounded": 36, "row": 1, "target": 37}
+{"batch": 0, "expected": 48.184730529785156, "mode": 48, "nll": 3.3731331825256348, "rounded": 48, "row": 2, "target": 42}
+{"batch": 0, "expected": 32.016395568847656, "mode": 32, "nll": 2.99212646484375, "rounded": 32, "row": 3, "target": 32}
+{"batch": 1, "expected": 39.724605560302734, "mode": 39, "nll": 3.2205538749694824, "rounded": 40, "row": 0, "target": 35}
+{"batch": 1, "expected": 43.857757568359375, "mode": 44, "nll": 3.377673864364624, "rounded": 44, "row": 1, "target": 50}
+{"batch": 1, "expected": 40.12525939941406, "mode": 40, "nll": 4.009492874145508, "rounded": 40, "row": 2, "target": 28}
+{"batch": 1, "expected": 47.765052795410156, "mode": 47, "nll": 4.277936935424805, "rounded": 48, "row": 3, "target": 62}

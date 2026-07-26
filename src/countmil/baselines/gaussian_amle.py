@@ -115,3 +115,49 @@ def signed_bernoulli_gaussian_amle_loss(
 ) -> torch.Tensor:
     moments = signed_bernoulli_sum_moments(probs, signs, mask)
     return gaussian_amle_loss_from_moments(moments.mean, moments.variance, targets, eps)
+
+
+def _log_sub_exp(log_hi: torch.Tensor, log_lo: torch.Tensor) -> torch.Tensor:
+    """Stable ``log(exp(log_hi) - exp(log_lo))`` for ``log_hi >= log_lo``."""
+
+    return log_hi + torch.log1p(-torch.exp(log_lo - log_hi).clamp_max(1.0))
+
+
+def gaussian_integer_bin_nll(
+    mean: torch.Tensor,
+    variance: torch.Tensor,
+    targets: torch.Tensor,
+    eps: float = DEFAULT_GAUSSIAN_AMLE_EPS,
+) -> torch.Tensor:
+    """Discrete integer-bin Gaussian NLL using stable log CDF differences.
+
+    The event for integer target ``y`` is ``[y-0.5, y+0.5]`` under the
+    Gaussian approximation. This is an evaluation metric, not the AMLE training
+    objective.
+    """
+
+    if eps <= 0:
+        raise ValueError("eps must be positive")
+    work_dtype = torch.float64 if mean.dtype == torch.float64 or variance.dtype == torch.float64 else mean.dtype
+    mu = mean.to(dtype=work_dtype)
+    var = variance.to(device=mean.device, dtype=work_dtype).clamp_min(0.0) + float(eps)
+    y = targets.to(device=mean.device, dtype=work_dtype)
+    sigma = torch.sqrt(var)
+    inv_sqrt2 = torch.tensor(2.0, device=mean.device, dtype=work_dtype).sqrt().reciprocal()
+    upper = (y + 0.5 - mu) / sigma
+    lower = (y - 0.5 - mu) / sigma
+    log_phi_upper = torch.special.log_ndtr(upper)
+    log_phi_lower = torch.special.log_ndtr(lower)
+    log_mass = _log_sub_exp(log_phi_upper, log_phi_lower)
+    # For extreme right-tail intervals, use symmetry to avoid subtracting two
+    # CDF values both numerically equal to one.
+    right_tail = lower > 0
+    if right_tail.any():
+        log_sf_lower = torch.special.log_ndtr(-lower[right_tail])
+        log_sf_upper = torch.special.log_ndtr(-upper[right_tail])
+        log_mass = log_mass.clone()
+        log_mass[right_tail] = _log_sub_exp(log_sf_lower, log_sf_upper)
+    nll = -log_mass
+    if not torch.isfinite(nll).all():
+        raise FloatingPointError("Gaussian integer-bin NLL produced non-finite values")
+    return nll

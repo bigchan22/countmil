@@ -1,0 +1,8 @@
+{"batch": 0, "expected": 2.699007749557495, "mode": 3, "nll": 2.8961753845214844, "rounded": 3, "row": 0, "target": 0}
+{"batch": 0, "expected": -0.5149714350700378, "mode": -1, "nll": 1.3998756408691406, "rounded": -1, "row": 1, "target": 0}
+{"batch": 0, "expected": -2.8599653244018555, "mode": -3, "nll": 2.877568244934082, "rounded": -3, "row": 2, "target": 0}
+{"batch": 0, "expected": -3.3390114307403564, "mode": -3, "nll": 4.231454849243164, "rounded": -3, "row": 3, "target": 1}
+{"batch": 1, "expected": -0.030393339693546295, "mode": 0, "nll": 1.3939119577407837, "rounded": 0, "row": 0, "target": 0}
+{"batch": 1, "expected": -1.088491439819336, "mode": -1, "nll": 1.4842959642410278, "rounded": -1, "row": 1, "target": -1}
+{"batch": 1, "expected": 3.888096332550049, "mode": 4, "nll": 4.686838626861572, "rounded": 4, "row": 2, "target": 0}
+{"batch": 1, "expected": 3.925565481185913, "mode": 4, "nll": 4.7639617919921875, "rounded": 4, "row": 3, "target": 0}

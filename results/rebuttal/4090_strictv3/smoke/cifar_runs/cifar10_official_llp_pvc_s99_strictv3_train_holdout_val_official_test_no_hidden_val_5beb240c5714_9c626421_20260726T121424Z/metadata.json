@@ -1,0 +1,9 @@
+{
+  "cuda_version": "12.8",
+  "git_commit": "9c626421f2c591c8cd88e0ec487a06d94482e075",
+  "gpu_name": "cpu",
+  "hostname": "gpusystem",
+  "platform": "Linux-5.15.0-176-generic-x86_64-with-glibc2.35",
+  "python_version": "3.9.16 (main, Mar  8 2023, 14:00:05) \n[GCC 11.2.0]",
+  "torch_version": "2.8.0+cu128"
+}
