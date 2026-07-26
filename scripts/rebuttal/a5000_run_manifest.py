@@ -81,14 +81,21 @@ def summary_path(output_root: Path, job: dict[str, Any]) -> Path | None:
 def completed(output_root: Path, status_dir: Path, job: dict[str, Any], key: str) -> bool:
     status_path = status_dir / f"{key}.json"
     summary = summary_path(output_root, job)
-    if not status_path.exists() or summary is None or not summary.exists():
+    if summary is None or not summary.exists():
         return False
     try:
-        status = json.loads(status_path.read_text())
         payload = json.loads(summary.read_text())
     except json.JSONDecodeError:
         return False
-    return status.get("status") == "COMPLETED" and payload.get("status") == "COMPLETED"
+    if payload.get("status") != "COMPLETED":
+        return False
+    if not status_path.exists():
+        return True
+    try:
+        status = json.loads(status_path.read_text())
+    except json.JSONDecodeError:
+        return False
+    return status.get("status") == "COMPLETED"
 
 
 def run_job(
