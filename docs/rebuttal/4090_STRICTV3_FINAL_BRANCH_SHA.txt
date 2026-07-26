@@ -1,0 +1,6 @@
+Strict-v3 4090 result package commit:
+adaeb386bd5c763f7f9b344fff2ab28b9045ff8c
+
+This commit contains the completed strict-v3 source updates, result summaries,
+raw small JSON/JSONL evidence, manifest JSON files, and artifact index for the
+4090 protocol-repair experiments.
