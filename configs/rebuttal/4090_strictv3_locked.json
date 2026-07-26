@@ -1,0 +1,44 @@
+{
+  "protocol_tag": "strictv3_train_holdout_val_official_test_no_hidden_val",
+  "mnist": {
+    "dataset": "MNIST",
+    "split_seed": 314159,
+    "train_val_split": "85/15 stratified split of official MNIST train archive",
+    "test_split": "official MNIST test archive",
+    "bag_size_mean": 10,
+    "bag_size_std": 2.0,
+    "train_bags": 1000,
+    "val_bags": 1000,
+    "test_bags": 1000,
+    "epochs": 50,
+    "optimizer": "Adam",
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "methods": ["fsconv", "gaussian_amle", "mse"],
+    "seeds": [0, 1, 2]
+  },
+  "cifar10": {
+    "split_seed": 271828,
+    "train_val_split": "45000/5000 stratified split of official CIFAR-10 train archive",
+    "test_split": "official CIFAR-10 test archive",
+    "feature_backbone": "ImageNet-pretrained ResNet-18 frozen penultimate features",
+    "bag_size": 64,
+    "train_bags": 250,
+    "val_bags": 250,
+    "test_bags": 1000,
+    "alpha": 0.3,
+    "epochs": 200,
+    "batch_size": 32,
+    "methods": ["ce_kl", "fsconv_count", "official_llp_pvc"],
+    "seeds": [0, 1, 2],
+    "official_llp_pvc": {
+      "optimizer": "SGD",
+      "momentum": 0.9,
+      "weight_decay": 0.0001,
+      "warmup_frac": 0.08,
+      "warmup_lr": 0.00005,
+      "eps": 1e-30,
+      "lr": 0.001
+    }
+  }
+}
