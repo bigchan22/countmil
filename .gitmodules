@@ -1,0 +1,3 @@
+[submodule "third_party/ICLR2026_LLP-PVC"]
+	path = third_party/ICLR2026_LLP-PVC
+	url = https://github.com/TianhaoMa5/ICLR2026_LLP-PVC
