@@ -1,0 +1,1 @@
+scripts/rebuttal/4090_train_official_llppvc_fixed_cifar.py --seed 999 --epochs 200 --batch-size 32 --lr 0.0025 --device cuda:2 --run-label dev_lr --run-root results/rebuttal/4090_official_llppvc/dev_runs --summary-root results/rebuttal/4090_official_llppvc/dev_summaries
