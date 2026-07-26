@@ -1,0 +1,48 @@
+{
+  "best": {
+    "epoch": 41,
+    "epoch_seconds": 26.020108772441745,
+    "hist_count_mae": 0.9993000626564026,
+    "hist_exact_acc": 0.0,
+    "hist_proportion_mae": 0.01561406347900629,
+    "instance_acc": 0.8091250061988831,
+    "loss": 1.6944250650405883,
+    "lr": 0.0004968277762519488,
+    "peak_cuda_mem_mb": 11107.822265625,
+    "train_loss": 0.8620133032798767
+  },
+  "config": {
+    "augment": true,
+    "backbone": "resnet18",
+    "bag_size_mean": 64,
+    "bag_size_std": 0,
+    "dataset": "CIFAR10",
+    "dataset_root": "data",
+    "experiment": "cifar_histogram",
+    "label_level": "coarse",
+    "lr": 0.0005,
+    "momentum": 0.9,
+    "num_classes": 10,
+    "objective": "pvc",
+    "optimizer": "sgd",
+    "pretrained": true,
+    "scheduler": "ma_cosine",
+    "seed": 0,
+    "train_bags": 250,
+    "weight_decay": 0.0001
+  },
+  "final": {
+    "epoch": 500,
+    "epoch_seconds": 26.034188478253782,
+    "hist_count_mae": 1.125499963760376,
+    "hist_exact_acc": 0.0,
+    "hist_proportion_mae": 0.017585936933755875,
+    "instance_acc": 0.8032968640327454,
+    "loss": 2.882749270439148,
+    "lr": 9.754516100806417e-05,
+    "peak_cuda_mem_mb": 11107.822265625,
+    "train_loss": 0.0062157189240679145
+  },
+  "run_dir": "runs/serverA5000_cifar10_ma_pvc_n64_train250/cifar10_coarse_hist_pvc_n64_train250_s0/cifar_histogram/pvc/CIFAR10_coarse/20260506T043047Z_gpusystem_s0",
+  "selection_metric": "hist_count_mae"
+}

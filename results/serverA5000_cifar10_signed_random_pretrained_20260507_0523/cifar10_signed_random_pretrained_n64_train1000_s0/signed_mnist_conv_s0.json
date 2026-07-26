@@ -1,0 +1,34 @@
+{
+  "best": {
+    "epoch": 27,
+    "epoch_seconds": 67.08225555811077,
+    "expected_signed_count_mae": 0.7537266612052917,
+    "instance_acc": 0.9810781478881836,
+    "instance_auc": 0.9929418944737338,
+    "nll": 2.279783341884613,
+    "peak_cuda_mem_mb": 11150.9091796875,
+    "signed_count_acc": 0.4020000100135803,
+    "signed_count_mae": 0.7590000033378601,
+    "train_loss": 0.2992282132282853,
+    "train_nll": 0.2992282132282853,
+    "zero_expected_abs_error": 0.6939210295677185,
+    "zero_fraction": 0.15800000727176666,
+    "zero_signed_count_acc": 0.39240506291389465
+  },
+  "config": {
+    "augment": true,
+    "bag_size_mean": 64,
+    "bag_size_std": 0.0,
+    "cancellation_heavy": true,
+    "dataset": "CIFAR10",
+    "dataset_root": "data",
+    "label_level": "coarse",
+    "model": "resnet18",
+    "objective": "nll",
+    "pretrained": true,
+    "seed": 0,
+    "target_digit": 9,
+    "train_bags": 1000
+  },
+  "run_dir": "runs/serverA5000_cifar10_signed_random_pretrained_20260507_0523/cifar10_signed_random_pretrained_n64_train1000_s0/signed_mnist/conv_nll/CIFAR10/20260507T053604Z_gpusystem_s0"
+}

@@ -1,0 +1,9 @@
+experiment: cifar_histogram
+objective: pvc
+dataset_root: data
+dataset: CIFAR100
+label_level: coarse
+bag_size_mean: 50
+bag_size_std: 10
+train_bags: 1000
+seed: 1

@@ -1,0 +1,8 @@
+experiment: fashionmnist_histogram_llp
+loss: kl
+dataset_root: data
+dataset: FashionMNIST
+bag_size_mean: 10
+bag_size_std: 2
+train_bags: 1000
+seed: 0

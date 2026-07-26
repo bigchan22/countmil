@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Optional, Sequence
 
 import torch
 import torch.nn.functional as F
@@ -228,6 +228,113 @@ def _svhn_train_transform(images: torch.Tensor, gen: torch.Generator) -> torch.T
 
 class SVHNOrdinalSumBags(TensorOrdinalSumBags):
     """SVHN ordinal-sum bags for A1-style cross-domain checks."""
+
+    def __init__(
+        self,
+        root: str | Path = "data",
+        split: str = "train",
+        download: bool = False,
+        train_split_fallback: bool = False,
+        augment: bool = True,
+        **kwargs,
+    ) -> None:
+        images, labels = load_svhn_family(
+            root=root,
+            split=split,
+            download=download,
+            train_split_fallback=train_split_fallback,
+        )
+        transform = _svhn_train_transform if augment and split == "train" else None
+        super().__init__(images, labels, transform=transform, **kwargs)
+
+
+class TensorSignedBags(Dataset):
+    """Signed binary target-class bags sampled from in-memory image tensors."""
+
+    def __init__(
+        self,
+        images: torch.Tensor,
+        labels: torch.Tensor,
+        *,
+        num_bags: int = 1000,
+        bag_size: int = 16,
+        bag_size_std: Optional[float] = None,
+        target_label: int | Sequence[int] = 9,
+        cancellation_heavy: bool = False,
+        seed: int = 0,
+        transform: TensorTransform | None = None,
+    ) -> None:
+        if images.shape[0] != labels.shape[0]:
+            raise ValueError("images and labels must have the same first dimension")
+        if bag_size < 1:
+            raise ValueError("bag_size must be positive")
+        self.images = images
+        self.labels = labels.long()
+        self.num_bags = int(num_bags)
+        self.bag_size = int(bag_size)
+        self.bag_size_std = bag_size_std
+        if isinstance(target_label, int):
+            target_labels = [target_label]
+        else:
+            target_labels = [int(x) for x in target_label]
+        if not target_labels:
+            raise ValueError("target_label must contain at least one class")
+        self.target_labels = torch.tensor(sorted(set(target_labels)), dtype=torch.long)
+        self.target_label = int(self.target_labels[0].item()) if self.target_labels.numel() == 1 else self.target_labels.tolist()
+        self.cancellation_heavy = bool(cancellation_heavy)
+        self.seed = int(seed)
+        self.transform = transform
+        self.num_classes = int(self.labels.max().item()) + 1
+        if bool(((self.target_labels < 0) | (self.target_labels >= self.num_classes)).any()):
+            raise ValueError(f"target_label values must be in [0,{self.num_classes})")
+
+    def __len__(self) -> int:
+        return self.num_bags
+
+    def _generator(self, idx: int) -> torch.Generator:
+        gen = torch.Generator()
+        gen.manual_seed(self.seed + int(idx))
+        return gen
+
+    def _sample_bag_size(self, gen: torch.Generator) -> int:
+        if self.bag_size_std is None or self.bag_size_std <= 0:
+            return self.bag_size
+        sample = torch.normal(
+            mean=torch.tensor(float(self.bag_size)),
+            std=torch.tensor(float(self.bag_size_std)),
+            generator=gen,
+        )
+        return max(1, int(round(float(sample.item()))))
+
+    def __getitem__(self, idx: int) -> dict[str, torch.Tensor]:
+        gen = self._generator(idx)
+        bag_size = self._sample_bag_size(gen)
+        indices = torch.randint(0, self.images.shape[0], (bag_size,), generator=gen)
+        labels = self.labels[indices]
+        is_target = torch.isin(labels, self.target_labels).long()
+        if self.cancellation_heavy:
+            signs = torch.ones(bag_size, dtype=torch.long)
+            signs[1::2] = -1
+            signs = signs[torch.randperm(bag_size, generator=gen)]
+        else:
+            signs = torch.randint(0, 2, (bag_size,), generator=gen).mul(2).sub(1).long()
+        signed_labels = signs * is_target
+        instances = self.images[indices]
+        if self.transform is not None:
+            instances = self.transform(instances, gen)
+        return {
+            "instances": instances,
+            "labels": labels,
+            "digits": labels,
+            "instance_labels": is_target,
+            "signs": signs,
+            "signed_instance_labels": signed_labels,
+            "signed_count": signed_labels.sum().long(),
+        }
+
+
+class SVHNSignedBags(TensorSignedBags):
+    """SVHN signed binary target-digit bags."""
 
     def __init__(
         self,

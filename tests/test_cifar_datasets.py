@@ -78,6 +78,20 @@ class CIFARDatasetTests(unittest.TestCase):
             self.assertEqual(tuple(signed_batch["instances"].shape), (1, 4, 3, 32, 32))
             self.assertTrue(signed_batch["mask"].all())
 
+            multi_signed = CIFARSignedBags(
+                root=root,
+                dataset="CIFAR100",
+                split="train",
+                num_bags=1,
+                bag_size=4,
+                bag_size_std=0,
+                target_label=[1, 2],
+                seed=1,
+            )
+            multi_item = multi_signed[0]
+            expected = torch.isin(multi_item["labels"], torch.tensor([1, 2])).long()
+            self.assertTrue(torch.equal(multi_item["instance_labels"], expected))
+
 
 if __name__ == "__main__":
     unittest.main()

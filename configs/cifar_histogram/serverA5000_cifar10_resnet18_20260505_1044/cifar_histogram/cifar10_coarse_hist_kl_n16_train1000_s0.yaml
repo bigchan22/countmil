@@ -1,0 +1,11 @@
+experiment: cifar_histogram
+objective: kl
+dataset_root: data
+dataset: CIFAR10
+label_level: coarse
+bag_size_mean: 16
+bag_size_std: 0
+train_bags: 1000
+seed: 0
+backbone: resnet18
+pretrained: false

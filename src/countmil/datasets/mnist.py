@@ -5,7 +5,7 @@ from __future__ import annotations
 import gzip
 import struct
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal, Optional, Sequence
 
 import torch
 from torch.utils.data import Dataset
@@ -202,18 +202,25 @@ class SignedMNISTBags(_BaseMNISTBags):
     def __init__(
         self,
         *args,
-        target_digit: int = 9,
+        target_digit: int | Sequence[int] = 9,
         cancellation_heavy: bool = False,
         **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
-        self.target_digit = int(target_digit)
+        if isinstance(target_digit, int):
+            target_digits = [target_digit]
+        else:
+            target_digits = [int(x) for x in target_digit]
+        if not target_digits:
+            raise ValueError("target_digit must contain at least one digit")
+        self.target_digits = torch.tensor(sorted(set(target_digits)), dtype=torch.long)
+        self.target_digit = int(self.target_digits[0].item()) if self.target_digits.numel() == 1 else self.target_digits.tolist()
         self.cancellation_heavy = bool(cancellation_heavy)
 
     def __getitem__(self, idx: int) -> dict[str, torch.Tensor]:
         gen = self._generator(idx)
         indices = self._sample_indices(idx)
-        is_target = (self.labels[indices] == self.target_digit).long()
+        is_target = torch.isin(self.labels[indices], self.target_digits).long()
         if self.cancellation_heavy:
             signs = torch.ones(indices.numel(), dtype=torch.long)
             signs[1::2] = -1

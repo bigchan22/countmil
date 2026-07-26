@@ -1,0 +1,31 @@
+{
+  "best": {
+    "epoch": 30,
+    "epoch_seconds": 1.2429314637556672,
+    "expected_signed_count_mae": 0.4829111397266388,
+    "instance_acc": 0.9880995750427246,
+    "instance_auc": 0.9977661091895155,
+    "nll": 0.8965953979492187,
+    "peak_cuda_mem_mb": 2065.0078125,
+    "signed_count_acc": 0.6259999871253967,
+    "signed_count_mae": 0.41200000047683716,
+    "train_loss": 0.30547936022281647,
+    "zero_expected_abs_error": 0.4743058681488037,
+    "zero_fraction": 0.17399999499320984,
+    "zero_signed_count_acc": 0.6264367699623108
+  },
+  "config": {
+    "bag_size_mean": 50,
+    "bag_size_std": 10,
+    "cancellation_heavy": false,
+    "dataset": "FashionMNIST",
+    "dataset_root": "data",
+    "experiment": "fashionmnist_signed",
+    "method": "signed_conv_countmil",
+    "objective": "mse",
+    "seed": 0,
+    "target_digit": 9,
+    "train_bags": 1000
+  },
+  "run_dir": "runs/serverA5000_fashion_signed_random_mse_20260507_0511/fashion_signed_random_mse_n50_train1000_s0/signed_mnist/conv_mse/FashionMNIST/20260507T051238Z_gpusystem_s0"
+}

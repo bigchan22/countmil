@@ -1,0 +1,39 @@
+{
+  "best": {
+    "epoch": 38,
+    "epoch_seconds": 65.8460772531107,
+    "expected_signed_count_mae": 1.65818190574646,
+    "instance_acc": 0.9152187705039978,
+    "instance_auc": 0.9721762960555859,
+    "nll": 2.174446502685547,
+    "peak_cuda_mem_mb": 22129.53857421875,
+    "signed_count_acc": 0.1979999989271164,
+    "signed_count_mae": 1.6399999856948853,
+    "train_loss": 0.2444916507601738,
+    "zero_expected_abs_error": 1.3587895631790161,
+    "zero_fraction": 0.1080000028014183,
+    "zero_signed_count_acc": 0.25
+  },
+  "config": {
+    "augment": true,
+    "bag_size_mean": 64,
+    "bag_size_std": 0.0,
+    "cancellation_heavy": true,
+    "dataset": "SVHN",
+    "dataset_root": "data",
+    "label_level": "coarse",
+    "model": "resnet18",
+    "objective": "mse",
+    "pretrained": true,
+    "seed": 0,
+    "target_digit": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "train_bags": 1000
+  },
+  "run_dir": "runs/serverA5000_svhn_signed_5to9_pretrained_20260507_0743/svhn_signed_5to9_mse_pretrained_n64_train1000_s0/signed_mnist/conv_mse/SVHN/20260507T074409Z_gpusystem_s0"
+}

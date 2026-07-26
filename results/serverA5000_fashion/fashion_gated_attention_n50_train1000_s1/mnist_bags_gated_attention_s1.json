@@ -1,0 +1,26 @@
+{
+  "best": {
+    "bag_acc": 0.9819999933242798,
+    "bag_auc": 0.997708,
+    "bag_bce": 0.06559534531831741,
+    "epoch": 30,
+    "epoch_seconds": 35.41020803526044,
+    "instance_auc": 0.7884122655019509,
+    "peak_cuda_mem_mb": 2066.58447265625,
+    "train_bce": 0.024012232357636096
+  },
+  "config": {
+    "bag_size_mean": 50,
+    "bag_size_std": 10,
+    "balanced_binary": true,
+    "dataset": "FashionMNIST",
+    "dataset_root": "data",
+    "experiment": "fashionmnist_attention",
+    "gated": true,
+    "method": "gated_attention",
+    "seed": 1,
+    "target_digit": 9,
+    "train_bags": 1000
+  },
+  "run_dir": "runs/serverA5000_fashion/fashion_gated_attention_n50_train1000_s1/mnist_bags/gated_attention/FashionMNIST/20260505T070116Z_gpusystem_s1"
+}

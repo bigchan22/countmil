@@ -20,11 +20,23 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 from countmil.aggregators import AggregatePMF, aggregate_nll, finite_support_convolution
-from countmil.datasets import CIFARSignedBags, SignedMNISTBags, collate_mnist_bags
+from countmil.datasets import CIFARSignedBags, SVHNSignedBags, SignedMNISTBags, collate_mnist_bags
 from countmil.metrics import binary_auc
 from countmil.models import ShuklaMNISTSelector, make_cifar_classifier
 from countmil.training.run import make_run_dir, write_run_metadata
 from countmil.training.seed import set_seed
+
+
+def _parse_targets(value: Any) -> int | list[int]:
+    if isinstance(value, int):
+        return value
+    if isinstance(value, (list, tuple)):
+        parsed = [int(x) for x in value]
+    else:
+        parsed = [int(x.strip()) for x in str(value).split(",") if x.strip()]
+    if not parsed:
+        raise ValueError("target digits must contain at least one class")
+    return parsed[0] if len(parsed) == 1 else parsed
 
 
 def _parse_simple_yaml(path: str | None) -> dict[str, Any]:
@@ -169,7 +181,7 @@ def main() -> None:
     parser.add_argument("--model", choices=["mnist_cnn", "small_cnn", "resnet18"], default=None)
     parser.add_argument("--pretrained", action="store_true")
     parser.add_argument("--augment", action="store_true")
-    parser.add_argument("--target-digit", type=int, default=None)
+    parser.add_argument("--target-digit", default=None)
     parser.add_argument("--bag-size-mean", type=int, default=None)
     parser.add_argument("--bag-size-std", type=float, default=None)
     parser.add_argument("--train-bags", type=int, default=None)
@@ -225,7 +237,8 @@ def main() -> None:
         cfg["pretrained"] = True
     if args.augment:
         cfg["augment"] = True
-    if str(cfg["dataset"]).upper().replace("-", "") in {"CIFAR10", "CIFAR100"} and args.model is None:
+    cfg["target_digit"] = _parse_targets(cfg["target_digit"])
+    if str(cfg["dataset"]).upper().replace("-", "") in {"CIFAR10", "CIFAR100", "SVHN"} and args.model is None:
         cfg["model"] = "resnet18"
 
     seed = int(cfg["seed"])
@@ -249,7 +262,7 @@ def main() -> None:
             num_bags=int(cfg["train_bags"]),
             bag_size=int(cfg["bag_size_mean"]),
             bag_size_std=float(cfg["bag_size_std"]),
-            target_label=int(cfg["target_digit"]),
+            target_label=cfg["target_digit"],
             cancellation_heavy=bool(cfg["cancellation_heavy"]),
             seed=seed,
             augment=bool(cfg["augment"]),
@@ -262,7 +275,30 @@ def main() -> None:
             num_bags=int(args.test_bags),
             bag_size=int(cfg["bag_size_mean"]),
             bag_size_std=float(cfg["bag_size_std"]),
-            target_label=int(cfg["target_digit"]),
+            target_label=cfg["target_digit"],
+            cancellation_heavy=bool(cfg["cancellation_heavy"]),
+            seed=seed + 10_000,
+            augment=False,
+        )
+    elif dataset_name == "SVHN":
+        train_ds = SVHNSignedBags(
+            root=cfg["dataset_root"],
+            split="train",
+            num_bags=int(cfg["train_bags"]),
+            bag_size=int(cfg["bag_size_mean"]),
+            bag_size_std=float(cfg["bag_size_std"]),
+            target_label=cfg["target_digit"],
+            cancellation_heavy=bool(cfg["cancellation_heavy"]),
+            seed=seed,
+            augment=bool(cfg["augment"]),
+        )
+        test_ds = SVHNSignedBags(
+            root=cfg["dataset_root"],
+            split="test",
+            num_bags=int(args.test_bags),
+            bag_size=int(cfg["bag_size_mean"]),
+            bag_size_std=float(cfg["bag_size_std"]),
+            target_label=cfg["target_digit"],
             cancellation_heavy=bool(cfg["cancellation_heavy"]),
             seed=seed + 10_000,
             augment=False,
@@ -275,7 +311,7 @@ def main() -> None:
             num_bags=int(cfg["train_bags"]),
             bag_size=int(cfg["bag_size_mean"]),
             bag_size_std=float(cfg["bag_size_std"]),
-            target_digit=int(cfg["target_digit"]),
+            target_digit=cfg["target_digit"],
             cancellation_heavy=bool(cfg["cancellation_heavy"]),
             seed=seed,
         )
@@ -286,14 +322,14 @@ def main() -> None:
             num_bags=int(args.test_bags),
             bag_size=int(cfg["bag_size_mean"]),
             bag_size_std=float(cfg["bag_size_std"]),
-            target_digit=int(cfg["target_digit"]),
+            target_digit=cfg["target_digit"],
             cancellation_heavy=bool(cfg["cancellation_heavy"]),
             seed=seed + 10_000,
         )
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, collate_fn=collate_mnist_bags)
     test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, collate_fn=collate_mnist_bags)
 
-    if dataset_name in {"CIFAR10", "CIFAR100"}:
+    if dataset_name in {"CIFAR10", "CIFAR100", "SVHN"}:
         model = make_cifar_classifier(str(cfg["model"]), num_classes=2, pretrained=bool(cfg["pretrained"])).to(device)
     else:
         model = ShuklaMNISTSelector().to(device)

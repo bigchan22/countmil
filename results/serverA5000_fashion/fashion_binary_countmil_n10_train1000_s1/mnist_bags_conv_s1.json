@@ -1,0 +1,31 @@
+{
+  "best": {
+    "bag_acc": 0.9629999995231628,
+    "bag_auc": 0.998328,
+    "count_acc": 0.8019999861717224,
+    "count_mae": 0.22499999403953552,
+    "epoch": 29,
+    "epoch_seconds": 2.48014578782022,
+    "instance_acc": 0.9782892465591431,
+    "instance_auc": 0.9972223840839091,
+    "nll": 0.5781773223876953,
+    "peak_cuda_mem_mb": 385.6826171875,
+    "train_nll": 0.3274459401369095
+  },
+  "config": {
+    "bag_size_mean": 10,
+    "bag_size_std": 2,
+    "balanced_binary": true,
+    "dataset": "FashionMNIST",
+    "dataset_root": "data",
+    "em_temperature": 0.5,
+    "entropy_weight": 0.01,
+    "experiment": "fashionmnist_bags",
+    "method": "conv",
+    "objective": "nll",
+    "seed": 1,
+    "target_digit": 9,
+    "train_bags": 1000
+  },
+  "run_dir": "runs/serverA5000_fashion/fashion_binary_countmil_n10_train1000_s1/mnist_bags/conv_nll/FashionMNIST/20260505T061206Z_gpusystem_s1"
+}

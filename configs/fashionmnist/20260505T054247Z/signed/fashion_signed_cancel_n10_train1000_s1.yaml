@@ -1,0 +1,10 @@
+experiment: fashionmnist_signed
+method: signed_conv_countmil
+target_digit: 9
+cancellation_heavy: true
+dataset_root: data
+dataset: FashionMNIST
+bag_size_mean: 10
+bag_size_std: 2
+train_bags: 1000
+seed: 1

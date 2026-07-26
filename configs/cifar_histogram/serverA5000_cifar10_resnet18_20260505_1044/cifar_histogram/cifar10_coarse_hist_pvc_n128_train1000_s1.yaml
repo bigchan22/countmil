@@ -1,0 +1,11 @@
+experiment: cifar_histogram
+objective: pvc
+dataset_root: data
+dataset: CIFAR10
+label_level: coarse
+bag_size_mean: 128
+bag_size_std: 0
+train_bags: 1000
+seed: 1
+backbone: resnet18
+pretrained: false

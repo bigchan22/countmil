@@ -1,0 +1,57 @@
+{
+  "best": {
+    "aggregate_ece": 0.0028962944634258747,
+    "epoch": 2,
+    "epoch_seconds": 67.89477455895394,
+    "expected_sum_mae": 6.46589994430542,
+    "instance_label_acc": 0.12200033664703369,
+    "nll": 3.5107627296447754,
+    "peak_cuda_mem_mb": 314.2041015625,
+    "sum_acc": 0.05166666582226753,
+    "sum_mae": 6.4666666984558105,
+    "train_nll": 3.5031101341247557
+  },
+  "config": {
+    "augment": true,
+    "bag_size_max": 15,
+    "bag_size_mean": 10.0,
+    "bag_size_min": 5,
+    "bag_size_std": 2.0,
+    "dataset": "MNIST",
+    "dataset_root": "data",
+    "download": false,
+    "experiment": "svhn_sum",
+    "lr": 0.0001,
+    "model": "resnet18",
+    "noise_sigma": 0.0,
+    "num_classes": 10,
+    "per_class_cap": null,
+    "pretrained": false,
+    "seed": 0,
+    "svhn_train_split_fallback": false,
+    "test_bags": 600,
+    "train_bags": 1500,
+    "weight_decay": 0.0005
+  },
+  "final": {
+    "aggregate_ece": 0.4188440442085266,
+    "epoch": 80,
+    "epoch_seconds": 7.623081360012293,
+    "expected_sum_mae": 6.954693794250488,
+    "instance_label_acc": 0.11897969245910645,
+    "nll": 8.904401582082112,
+    "peak_cuda_mem_mb": 312.45068359375,
+    "sum_acc": 0.03999999910593033,
+    "sum_mae": 7.179999828338623,
+    "train_nll": 0.11206143997112909
+  },
+  "run_dir": "runs/serverA5000_svhn_a1_20260506_1851/atomic_sum/pca/svhn_sum/20260506T185152Z_gpusystem_s0",
+  "selection_metric": "test_nll",
+  "tail5": {
+    "tail5_aggregate_ece": 0.43487995862960815,
+    "tail5_expected_sum_mae": 6.99269962310791,
+    "tail5_instance_label_acc": 0.11780499964952469,
+    "tail5_nll": 9.299455308278402,
+    "tail5_sum_acc": 0.037333333119750026
+  }
+}

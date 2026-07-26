@@ -3,7 +3,7 @@ import unittest
 import torch
 from torch.utils.data import DataLoader
 
-from countmil.datasets import TensorOrdinalSumBags, collate_ordinal_sum_bags
+from countmil.datasets import TensorOrdinalSumBags, TensorSignedBags, collate_mnist_bags, collate_ordinal_sum_bags
 from countmil.metrics import multiclass_ece_from_pmf
 from scripts.train_atomic_sum import _evaluate, expected_sum_from_instance_probs, ordinal_sum_pmf
 
@@ -74,6 +74,41 @@ class AtomicSumTrainingTests(unittest.TestCase):
         self.assertEqual(tuple(batch["labels"].shape), (2, 3))
         self.assertTrue(batch["mask"].all())
         self.assertTrue(torch.equal(batch["sum"], batch["labels"].sum(dim=1)))
+
+    def test_tensor_signed_bags_match_signed_count_contract(self):
+        images = torch.arange(10 * 3 * 4 * 4, dtype=torch.float32).reshape(10, 3, 4, 4)
+        labels = torch.arange(10)
+        ds = TensorSignedBags(
+            images,
+            labels,
+            num_bags=2,
+            bag_size=5,
+            bag_size_std=0,
+            target_label=9,
+            seed=11,
+        )
+        item = ds[0]
+        self.assertTrue(torch.equal(item["signed_instance_labels"], item["signs"] * item["instance_labels"]))
+        self.assertEqual(item["signed_count"].item(), item["signed_instance_labels"].sum().item())
+        batch = collate_mnist_bags([item, ds[1]])
+        self.assertEqual(tuple(batch["instances"].shape), (2, 5, 3, 4, 4))
+        self.assertTrue(batch["mask"].all())
+
+    def test_tensor_signed_bags_accept_multiple_target_labels(self):
+        images = torch.arange(10 * 1 * 2 * 2, dtype=torch.float32).reshape(10, 1, 2, 2)
+        labels = torch.arange(10)
+        ds = TensorSignedBags(
+            images,
+            labels,
+            num_bags=1,
+            bag_size=10,
+            bag_size_std=0,
+            target_label=[5, 6, 7, 8, 9],
+            seed=5,
+        )
+        item = ds[0]
+        expected = torch.isin(item["labels"], torch.tensor([5, 6, 7, 8, 9])).long()
+        self.assertTrue(torch.equal(item["instance_labels"], expected))
 
     def test_multiclass_ece_perfect_predictions(self):
         probs = torch.tensor([[0.0, 1.0], [1.0, 0.0]])

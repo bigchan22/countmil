@@ -1,0 +1,28 @@
+{
+  "best": {
+    "epoch": 3,
+    "epoch_seconds": 60.72214223910123,
+    "hist_count_mae": 2.061800003051758,
+    "hist_exact_acc": 0.0,
+    "hist_proportion_mae": 0.03242366760969162,
+    "instance_acc": 0.2692187428474426,
+    "loss": 0.0016747295185923577,
+    "peak_cuda_mem_mb": 430.98828125,
+    "train_loss": 0.0013896154584363103
+  },
+  "config": {
+    "backbone": "resnet18",
+    "bag_size_mean": 64,
+    "bag_size_std": 0,
+    "dataset": "CIFAR10",
+    "dataset_root": "data",
+    "experiment": "cifar_histogram",
+    "label_level": "coarse",
+    "num_classes": 10,
+    "objective": "mse",
+    "pretrained": false,
+    "seed": 1,
+    "train_bags": 1000
+  },
+  "run_dir": "runs/serverA5000_cifar10_resnet18/cifar10_coarse_hist_mse_n64_train1000_s1/cifar_histogram/mse/CIFAR10_coarse/20260505T112450Z_gpusystem_s1"
+}

@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 import pickle
 import tarfile
-from typing import Literal, Optional
+from typing import Literal, Optional, Sequence
 
 import torch
 from torch.utils.data import Dataset
@@ -175,7 +175,7 @@ class CIFARSignedBags(Dataset):
         num_bags: int = 1000,
         bag_size: int = 16,
         bag_size_std: Optional[float] = None,
-        target_label: int = 9,
+        target_label: int | Sequence[int] = 9,
         cancellation_heavy: bool = False,
         seed: int = 0,
         augment: bool = False,
@@ -183,12 +183,19 @@ class CIFARSignedBags(Dataset):
         if bag_size < 1:
             raise ValueError("bag_size must be positive")
         self.images, self.labels, self.num_classes = load_cifar_family(root, dataset, split, label_level)
-        if not 0 <= int(target_label) < self.num_classes:
-            raise ValueError(f"target_label must be in [0,{self.num_classes})")
+        if isinstance(target_label, int):
+            target_labels = [target_label]
+        else:
+            target_labels = [int(x) for x in target_label]
+        if not target_labels:
+            raise ValueError("target_label must contain at least one class")
+        self.target_labels = torch.tensor(sorted(set(target_labels)), dtype=torch.long)
+        if bool(((self.target_labels < 0) | (self.target_labels >= self.num_classes)).any()):
+            raise ValueError(f"target_label values must be in [0,{self.num_classes})")
         self.num_bags = int(num_bags)
         self.bag_size = int(bag_size)
         self.bag_size_std = bag_size_std
-        self.target_label = int(target_label)
+        self.target_label = int(self.target_labels[0].item()) if self.target_labels.numel() == 1 else self.target_labels.tolist()
         self.cancellation_heavy = bool(cancellation_heavy)
         self.seed = int(seed)
         self.augment = bool(augment)
@@ -219,7 +226,7 @@ class CIFARSignedBags(Dataset):
         bag_size = self._sample_bag_size(gen)
         indices = torch.randint(0, self.images.shape[0], (bag_size,), generator=gen)
         labels = self.labels[indices]
-        is_target = (labels == self.target_label).long()
+        is_target = torch.isin(labels, self.target_labels).long()
         if self.cancellation_heavy:
             signs = torch.ones(bag_size, dtype=torch.long)
             signs[1::2] = -1
