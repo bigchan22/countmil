@@ -1,0 +1,4 @@
+checked_out_head=1872e6c1fa7c3defdc894053fe5eb9f599270703
+recorded_4090_baseline=5f7cc250a398df7df38668e58a4b36861293dea4
+executable_code_baseline=5f7cc250a398df7df38668e58a4b36861293dea4
+note=checked_out_head differs from recorded_4090_baseline only by docs/rebuttal/BASELINE_SHA_4090.txt
