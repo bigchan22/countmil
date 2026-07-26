@@ -42,7 +42,7 @@ def _collect_new_rows() -> list[dict[str, Any]]:
         key = p.name.removesuffix(".json")
         is_completed = any(key in marker for marker in completed)
         if not completed or is_completed:
-            rows.append({"source": str(p), "task": cfg["task"], "method": "Gaussian-AMLE", **cfg, **test})
+            rows.append({"source": str(p), **cfg, "task": cfg["task"], "method": "Gaussian-AMLE", **test})
     for p in sorted((ROOT / "fixed_cifar10").glob("*.json")):
         obj = json.loads(p.read_text())
         cfg = obj["config"]
@@ -190,8 +190,9 @@ def main() -> None:
 
     def compact(rows: list[dict[str, Any]], metrics: list[str]) -> list[dict[str, Any]]:
         out = []
+        metric_fields = {f"{m}_mean" for m in metrics} | {f"{m}_sd" for m in metrics}
         for r in rows:
-            row = {k: r[k] for k in r if not k.endswith("_mean") and not k.endswith("_sd")}
+            row = {k: r[k] for k in r if k not in metric_fields}
             n = int(r["seeds"])
             for m in metrics:
                 row[m] = _fmt(r[f"{m}_mean"], r[f"{m}_sd"], n)

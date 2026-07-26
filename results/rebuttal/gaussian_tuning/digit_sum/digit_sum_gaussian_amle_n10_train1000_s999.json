@@ -1,0 +1,40 @@
+{
+  "best": {
+    "epoch": 48,
+    "epoch_seconds": 0.845319096930325,
+    "peak_cuda_mem_mb": 1237.3466796875,
+    "train_gaussian_nll": 1.1344793214797975,
+    "val_expected_sum_mae": 1.8464542627334595,
+    "val_gaussian_nll": 1.366990327835083,
+    "val_instance_digit_acc": 0.7677820324897766,
+    "val_rounded_sum_acc": 0.19900000095367432,
+    "val_rounded_sum_mae": 1.8300000429153442,
+    "validation_loss": 1.366990327835083
+  },
+  "config": {
+    "bag_size_mean": 10,
+    "bag_size_std": 2.0,
+    "batch_size": 192,
+    "cancellation_heavy": false,
+    "dataset": "MNIST",
+    "dataset_root": "data",
+    "epochs": 50,
+    "eps": 0.01,
+    "method": "gaussian_amle",
+    "seed": 999,
+    "target_digit": 9,
+    "task": "digit_sum",
+    "test_bags": 1000,
+    "train_bags": 1000,
+    "val_bags": 1000
+  },
+  "run_dir": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_cfdf9520_20260725T233535Z",
+  "selection_metric": "validation Gaussian-AMLE loss",
+  "test": {
+    "expected_sum_mae": 1.955762505531311,
+    "gaussian_nll": 1.4044939279556274,
+    "instance_digit_acc": 0.7676587104797363,
+    "rounded_sum_acc": 0.20600000023841858,
+    "rounded_sum_mae": 1.9320000410079956
+  }
+}

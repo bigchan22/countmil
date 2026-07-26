@@ -1,0 +1,24 @@
+{
+  "best": {
+    "diagnostic_nll": 3.199887878417969,
+    "epoch": 50,
+    "epoch_seconds": 1.1580570302903652,
+    "expected_sum_mae": 2.740835189819336,
+    "instance_digit_acc": 0.19797004759311676,
+    "loss": 11.88594310760498,
+    "peak_cuda_mem_mb": 1238.44921875,
+    "rounded_sum_acc": 0.10199999809265137,
+    "rounded_sum_mae": 2.7300000190734863,
+    "train_loss": 7.111839477539062
+  },
+  "config": {
+    "bag_size_mean": 10,
+    "bag_size_std": 2.0,
+    "dataset": "MNIST",
+    "dataset_root": "data",
+    "objective": "mse",
+    "seed": 2,
+    "train_bags": 1000
+  },
+  "run_dir": "runs/rebuttal_mse_digit_sum_n10_train1000/mnist_digit_sum_baseline/mse/MNIST/20260725T233535Z_gpusystem_s2"
+}

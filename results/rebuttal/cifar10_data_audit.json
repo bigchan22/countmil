@@ -1,0 +1,11 @@
+{
+  "archive": "data/cifar-10-python.tar.gz",
+  "archive_sha256": "6d958be074577803d12ecdefd02955f39262c83c16fe9348329d7fe0b5c001ce",
+  "archive_size_bytes": 170498071,
+  "quarantined_incomplete_part": "data/quarantine/cifar-10-python.tar.gz.part.incomplete_20260726",
+  "quarantined_part_sha256": "a01e1b26664a64d18f87a5597e4cc27dd3ecdcf74ba9a4631dc6de0164bbae0f",
+  "source": "torchvision.datasets.CIFAR10(download=True)",
+  "test_count": 10000,
+  "torchvision_integrity_check": "passed",
+  "train_count": 50000
+}

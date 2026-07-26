@@ -40,13 +40,19 @@ def _json_default(obj: Any) -> Any:
     raise TypeError(type(obj).__name__)
 
 
-def _extract_features(root: Path, split: str, device: torch.device, batch_size: int) -> dict[str, Any]:
-    root.mkdir(parents=True, exist_ok=True)
-    path = root / f"cifar10_resnet18_imagenet_{split}_features.pt"
+def _extract_features(
+    dataset_root: Path,
+    feature_root: Path,
+    split: str,
+    device: torch.device,
+    batch_size: int,
+) -> dict[str, Any]:
+    feature_root.mkdir(parents=True, exist_ok=True)
+    path = feature_root / f"cifar10_resnet18_imagenet_{split}_features.pt"
     if path.exists():
         return torch.load(path, map_location="cpu")
 
-    images, labels, num_classes = load_cifar_family("data", "CIFAR10", split, "coarse")
+    images, labels, num_classes = load_cifar_family(str(dataset_root), "CIFAR10", split, "coarse")
     try:
         from torchvision.models import ResNet18_Weights, resnet18
     except Exception as exc:  # pragma: no cover
@@ -79,6 +85,8 @@ def _extract_features(root: Path, split: str, device: torch.device, batch_size: 
         "weights": "torchvision ResNet18_Weights.IMAGENET1K_V1",
         "torchvision_transform_mean": list(weights.transforms().mean),
         "torchvision_transform_std": list(weights.transforms().std),
+        "preprocessing": "resize 224x224 bilinear after ImageNet normalization; no random augmentation",
+        "split": split,
     }
     torch.save(payload, path)
     return payload
@@ -162,6 +170,10 @@ def _load_or_create_manifest(root: Path, split: str, labels: torch.Tensor, cfg: 
     payload["stats"] = stats
     payload["path"] = str(path)
     return payload
+
+
+def _manifest_hash(bags: dict[str, torch.Tensor]) -> str:
+    return _sha256_tensor(bags["indices"]) + ":" + _sha256_tensor(bags["counts"].long())
 
 
 def _iter_batches(features: torch.Tensor, labels: torch.Tensor, bags: dict[str, torch.Tensor], batch_size: int, shuffle: bool, seed: int):
@@ -262,9 +274,11 @@ def main() -> None:
     parser.add_argument("--method", choices=["ce", "kl", "fsconv_count", "official_pvc_count_component"], required=True)
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--feature-root", default="results/rebuttal/overnight_4090/cifar10_features")
-    parser.add_argument("--manifest-root", default="results/rebuttal/overnight_4090/fixed_cifar10_manifests")
-    parser.add_argument("--run-root", default="results/rebuttal/overnight_4090/runs")
+    parser.add_argument("--dataset-root", default="data")
+    parser.add_argument("--feature-root", default="results/rebuttal/fixed_bag_cifar10/features")
+    parser.add_argument("--manifest-root", default="results/rebuttal/fixed_bag_cifar10/manifests")
+    parser.add_argument("--run-root", default="results/rebuttal/fixed_bag_cifar10/runs")
+    parser.add_argument("--summary-root", default="results/rebuttal/fixed_bag_cifar10/summaries")
     parser.add_argument("--epochs", type=int, default=200)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=1e-3)
@@ -290,12 +304,25 @@ def main() -> None:
         "batch_size": args.batch_size,
         "lr": args.lr,
         "weight_decay": args.weight_decay,
+        "dataset_root": args.dataset_root,
+        "feature_root": args.feature_root,
+        "manifest_root": args.manifest_root,
+        "method_note": (
+            "official_pvc_count_component follows the official LLP-PVC classwise "
+            "count-likelihood parameterization on frozen features; it is not labeled "
+            "as a full competitive LLP-PVC baseline unless the separate audit verifies equivalence."
+            if args.method == "official_pvc_count_component"
+            else ""
+        ),
     }
     set_seed(args.seed)
     device = torch.device(args.device if args.device == "cpu" or torch.cuda.is_available() else "cpu")
+    dataset_root = Path(args.dataset_root)
     feature_root = Path(args.feature_root)
-    train_feat = _extract_features(feature_root, "train", device, args.batch_size)
-    test_feat = _extract_features(feature_root, "test", device, args.batch_size)
+    train_feat = _extract_features(dataset_root, feature_root, "train", device, args.batch_size)
+    test_feat = _extract_features(dataset_root, feature_root, "test", device, args.batch_size)
+    if train_feat["feature_hash"] == test_feat["feature_hash"] or train_feat["label_hash"] == test_feat["label_hash"]:
+        raise RuntimeError("train/test CIFAR feature or label hashes unexpectedly match")
 
     manifest_root = Path(args.manifest_root) / f"seed{args.seed}_n{args.bag_size}_train{args.train_bags}_alpha{args.alpha}"
     train_bags = _load_or_create_manifest(manifest_root, "train", train_feat["labels"], cfg, 0)
@@ -306,6 +333,8 @@ def main() -> None:
     cfg["test_manifest_hash"] = test_bags["stats"]["manifest_sha256"]
     cfg["feature_hash_train"] = train_feat["feature_hash"]
     cfg["feature_hash_test"] = test_feat["feature_hash"]
+    cfg["feature_weights"] = train_feat["weights"]
+    cfg["feature_preprocessing"] = train_feat["preprocessing"]
 
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     run_dir = Path(args.run_root) / f"fixed_cifar10_{args.method}_n{args.bag_size}_train{args.train_bags}_s{args.seed}_{git_commit()[:8]}_{stamp}"
@@ -337,7 +366,13 @@ def main() -> None:
     train_labels = train_feat["labels"]
     test_features = test_feat["features"]
     test_labels = test_feat["labels"]
+    expected_train_manifest_hash = _manifest_hash(train_bags)
+    if expected_train_manifest_hash != cfg["train_manifest_hash"]:
+        raise RuntimeError("saved train manifest hash does not match config hash")
     for epoch in range(1, args.epochs + 1):
+        epoch_train_manifest_hash = _manifest_hash(train_bags)
+        if epoch_train_manifest_hash != expected_train_manifest_hash:
+            raise RuntimeError("fixed training bag manifest changed across epochs")
         head.train()
         total = 0.0
         seen = 0
@@ -370,6 +405,7 @@ def main() -> None:
             "epoch": epoch,
             "train_loss": total / max(seen, 1),
             "validation_metric": val["hist_count_mae"],
+            "train_manifest_hash_epoch_check": epoch_train_manifest_hash,
             "epoch_seconds": time.perf_counter() - start,
             **{f"val_{k}": v for k, v in val.items()},
         }
@@ -388,13 +424,16 @@ def main() -> None:
         "test": test,
         "selection_metric": "validation hist_count_mae",
         "config": cfg,
+        "train_bag_stats": train_bags["stats"],
+        "val_bag_stats": val_bags["stats"],
+        "test_bag_stats": test_bags["stats"],
         "run_dir": str(run_dir),
     }
-    (run_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
-    out_dir = Path("results/rebuttal/overnight_4090/fixed_cifar10")
+    (run_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True, default=_json_default))
+    out_dir = Path(args.summary_root)
     out_dir.mkdir(parents=True, exist_ok=True)
     out = out_dir / f"fixed_cifar10_{args.method}_n{args.bag_size}_train{args.train_bags}_s{args.seed}.json"
-    out.write_text(json.dumps(summary, indent=2, sort_keys=True))
+    out.write_text(json.dumps(summary, indent=2, sort_keys=True, default=_json_default))
     print(f"wrote {out}")
 
 

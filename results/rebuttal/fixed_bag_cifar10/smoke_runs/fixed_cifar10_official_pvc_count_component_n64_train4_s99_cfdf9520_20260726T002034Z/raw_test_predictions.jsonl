@@ -1,0 +1,4 @@
+{"batch": 0, "composite_nll": 8.769972801208496, "count_mae": 9.0, "row": 0}
+{"batch": 0, "composite_nll": 9.050509452819824, "count_mae": 8.40000057220459, "row": 1}
+{"batch": 1, "composite_nll": 6.906288146972656, "count_mae": 6.5, "row": 0}
+{"batch": 1, "composite_nll": 11.642199516296387, "count_mae": 10.100000381469727, "row": 1}

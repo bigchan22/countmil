@@ -1,0 +1,12 @@
+{
+  "finished": 1784997237.556545,
+  "job": {
+    "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task signed --bag-size-mean 10 --bag-size-std 2 --train-bags 1000 --seed 2 --epochs 50 --batch-size 192 --device cuda:0",
+    "name": "signed_gaussian_amle_n10_train1000_random_s2",
+    "phase": "p2"
+  },
+  "returncode": 0,
+  "run_id": "signed_gaussian_amle_n10_train1000_random_s2_cfdf9520_20260725T163336Z",
+  "stderr": "results/rebuttal/overnight_4090/logs/signed_gaussian_amle_n10_train1000_random_s2_cfdf9520_20260725T163336Z.stderr.log",
+  "stdout": "results/rebuttal/overnight_4090/logs/signed_gaussian_amle_n10_train1000_random_s2_cfdf9520_20260725T163336Z.stdout.log"
+}

@@ -1,0 +1,1 @@
+scripts/rebuttal/train_fixed_cifar10_features.py --method kl --seed 0 --epochs 1 --batch-size 32 --device cuda:1 --dataset-root data --run-root results/rebuttal/fixed_bag_cifar10/debug_runs --summary-root results/rebuttal/fixed_bag_cifar10/debug_summaries

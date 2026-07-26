@@ -1,0 +1,50 @@
+{
+  "best": {
+    "epoch": 25,
+    "epoch_seconds": 0.3178107673302293,
+    "peak_cuda_mem_mb": 1237.4404296875,
+    "train_gaussian_nll": -1.2097054471969604,
+    "val_expected_signed_count_mae": 0.19486311078071594,
+    "val_expected_signed_count_mse": 0.13490818440914154,
+    "val_gaussian_nll": -0.8815354108810425,
+    "val_instance_acc": 0.9839317798614502,
+    "val_instance_auc": 0.9936483769501467,
+    "val_rounded_signed_count_acc": 0.8389999866485596,
+    "val_rounded_signed_count_mae": 0.16500000655651093,
+    "val_zero_fraction": 0.46799999475479126,
+    "val_zero_rounded_signed_count_acc": 0.8696581125259399,
+    "validation_loss": -0.8815354108810425
+  },
+  "config": {
+    "bag_size_mean": 10,
+    "bag_size_std": 2.0,
+    "batch_size": 192,
+    "cancellation_heavy": true,
+    "dataset": "MNIST",
+    "dataset_root": "data",
+    "epochs": 50,
+    "eps": 0.0001,
+    "lr": 0.001,
+    "method": "gaussian_amle",
+    "seed": 0,
+    "target_digit": 9,
+    "task": "signed",
+    "test_bags": 1000,
+    "train_bags": 1000,
+    "val_bags": 1000,
+    "weight_decay": 0.0001
+  },
+  "run_dir": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_cancel_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234858Z",
+  "selection_metric": "validation Gaussian-AMLE loss",
+  "test": {
+    "expected_signed_count_mae": 0.1836061030626297,
+    "expected_signed_count_mse": 0.11852703243494034,
+    "gaussian_nll": -0.8359677195549011,
+    "instance_acc": 0.9855276346206665,
+    "instance_auc": 0.9933411440280332,
+    "rounded_signed_count_acc": 0.8700000047683716,
+    "rounded_signed_count_mae": 0.13199999928474426,
+    "zero_fraction": 0.453000009059906,
+    "zero_rounded_signed_count_acc": 0.8940397500991821
+  }
+}

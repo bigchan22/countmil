@@ -1,0 +1,12 @@
+{
+  "finished": 1784997126.920045,
+  "job": {
+    "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/check_pvc_equivalence.py --out results/rebuttal/overnight_4090/pvc_equivalence.json",
+    "name": "equivalence_pvc_count_component",
+    "phase": "phase0"
+  },
+  "returncode": 0,
+  "run_id": "equivalence_pvc_count_component_cfdf9520_20260725T163205Z",
+  "stderr": "results/rebuttal/overnight_4090/logs/equivalence_pvc_count_component_cfdf9520_20260725T163205Z.stderr.log",
+  "stdout": "results/rebuttal/overnight_4090/logs/equivalence_pvc_count_component_cfdf9520_20260725T163205Z.stdout.log"
+}

@@ -1,0 +1,1026 @@
+{
+  "artifacts": [
+    {
+      "artifact_role": "required_for_feature_reconstruction",
+      "associated_run_ids": [],
+      "path": "/home/chanhomin/.cache/torch/hub/checkpoints/resnet18-f37072fd.pth",
+      "producing_command": "torchvision ResNet18_Weights.IMAGENET1K_V1 download",
+      "sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec",
+      "size_bytes": 46830571
+    },
+    {
+      "artifact_role": "required_for_feature_reconstruction",
+      "associated_run_ids": [],
+      "path": "data/cifar-10-python.tar.gz",
+      "producing_command": "torchvision.datasets.CIFAR10(root=\"data\", download=True)",
+      "sha256": "6d958be074577803d12ecdefd02955f39262c83c16fe9348329d7fe0b5c001ce",
+      "size_bytes": 170498071
+    },
+    {
+      "artifact_role": "not_required",
+      "associated_run_ids": [],
+      "path": "data/quarantine/cifar-10-python.tar.gz.part.incomplete_20260726",
+      "producing_command": "stale incomplete download quarantined from data/",
+      "sha256": "a01e1b26664a64d18f87a5597e4cc27dd3ecdcf74ba9a4631dc6de0164bbae0f",
+      "size_bytes": 75116239
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/debug_runs/fixed_cifar10_kl_n64_train250_s0_cfdf9520_20260726T002155Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "91e52576a20048ea38a9ae3e63a8519c948d9e85094d89485ad14ffdb23cadb2",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/debug_runs/fixed_cifar10_kl_n64_train250_s0_cfdf9520_20260726T002155Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "f76c0a9f99ef5c994aa5a141db0b5a21a9f3e2a974ec790fb04e6089231b7468",
+      "size_bytes": 23853
+    },
+    {
+      "artifact_role": "required_for_fast_evaluation_and_resuming; reproducible from CIFAR-10 and weights",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/features/cifar10_resnet18_imagenet_test_features.pt",
+      "producing_command": "scripts/rebuttal/train_fixed_cifar10_features.py feature cache via torchvision ResNet18_Weights.IMAGENET1K_V1",
+      "sha256": "b826dc4ac14bcdf9c7cb05c0dd8c29512532f31f2bbb81075535a76edc576175",
+      "size_bytes": 20562725
+    },
+    {
+      "artifact_role": "required_for_fast_evaluation_and_resuming; reproducible from CIFAR-10 and weights",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/features/cifar10_resnet18_imagenet_train_features.pt",
+      "producing_command": "scripts/rebuttal/train_fixed_cifar10_features.py feature cache via torchvision ResNet18_Weights.IMAGENET1K_V1",
+      "sha256": "fafe06b0f9b9d9c6b8f1369a4cadf71f6bb4bc1ca6aa5750bcf063fbeed56c9d",
+      "size_bytes": 102802733
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_ce_n64_train250_s0_cfdf9520_20260726T002118Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_ce_n64_train250_s0_cfdf9520_20260726T002118Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "fe9308f8ca650963601c8164145b1c3b09f547694909acb4813817b421a33b99",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_ce_n64_train250_s0_cfdf9520_20260726T002118Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_ce_n64_train250_s0_cfdf9520_20260726T002118Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "953cb4b3a1b041ce08c1aa17be6567f41afb8dbfece5acb486aee2af0ad5e42f",
+      "size_bytes": 23853
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_ce_n64_train250_s1_cfdf9520_20260726T002132Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_ce_n64_train250_s1_cfdf9520_20260726T002132Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "bf52d6303e8f057cb9273b4b91e340e0c27402e0c7ef17ac298ecc729e0e6874",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_ce_n64_train250_s1_cfdf9520_20260726T002132Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_ce_n64_train250_s1_cfdf9520_20260726T002132Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "59b3e8e5ab19c5ca4c5bce00fd57dda456fbc6b7c55d7902c39542d9b44cbc7c",
+      "size_bytes": 23853
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_ce_n64_train250_s2_cfdf9520_20260726T002146Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_ce_n64_train250_s2_cfdf9520_20260726T002146Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "e77d68291bd650aac769715d3343228ddc00a086a3cc4b01bf5573222ee86aa1",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_ce_n64_train250_s2_cfdf9520_20260726T002146Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_ce_n64_train250_s2_cfdf9520_20260726T002146Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "5eb9e0a9b2c75649a227453d8d7a66aa1a60e6a812ba35ea5817457234b8699d",
+      "size_bytes": 23853
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_fsconv_count_n64_train250_s0_cfdf9520_20260726T002118Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_fsconv_count_n64_train250_s0_cfdf9520_20260726T002118Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "c45f971eafc600a73ee02b08f3524eb0f776b03c1abfc17cc1246f9faf682ff4",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_fsconv_count_n64_train250_s0_cfdf9520_20260726T002118Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_fsconv_count_n64_train250_s0_cfdf9520_20260726T002118Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "6a2f5f70fecd17f1513877ceb628cc97ac60d6e6e6bf3debc7ef653d76b3ca45",
+      "size_bytes": 23853
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_fsconv_count_n64_train250_s1_cfdf9520_20260726T002141Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_fsconv_count_n64_train250_s1_cfdf9520_20260726T002141Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "b0b76208b0167f8a9d6613cd55091874f32e91c971521dcc8b9f54c2cd8b34e3",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_fsconv_count_n64_train250_s1_cfdf9520_20260726T002141Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_fsconv_count_n64_train250_s1_cfdf9520_20260726T002141Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "81bea5cb97f46ade037e0f086ce846e6f73b0c2111c48d5df2e85e2ed1c93b56",
+      "size_bytes": 23853
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_fsconv_count_n64_train250_s2_cfdf9520_20260726T002202Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_fsconv_count_n64_train250_s2_cfdf9520_20260726T002202Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "3e00717960aa15598ad8a128c1adf9f1f91a73b8fdd63fda17b6c31df7b22550",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_fsconv_count_n64_train250_s2_cfdf9520_20260726T002202Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_fsconv_count_n64_train250_s2_cfdf9520_20260726T002202Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "ad4c2dad7a55f3bdb685bcedbc9f753d7d96691262823fe8a28379022618c1b0",
+      "size_bytes": 23853
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_kl_n64_train250_s0_cfdf9520_20260726T002212Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_kl_n64_train250_s0_cfdf9520_20260726T002212Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "1767758049e486443aa9661c1d2c47d7699e61b2888f324a10657c5bbc1eddd1",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_kl_n64_train250_s0_cfdf9520_20260726T002212Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_kl_n64_train250_s0_cfdf9520_20260726T002212Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "1bb7a4d4f3ca6566c581411a314f02946cc359ff4bbc362469e817c0df402c82",
+      "size_bytes": 23853
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_kl_n64_train250_s1_cfdf9520_20260726T002225Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_kl_n64_train250_s1_cfdf9520_20260726T002225Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "fa2e7c1b3eb4c170fdef576150da5b7de38faa2aa84ac292fc6234dd82a9d43a",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_kl_n64_train250_s1_cfdf9520_20260726T002225Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_kl_n64_train250_s1_cfdf9520_20260726T002225Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "83434d0dfece182e075cd9473af73690af757b9be1dcc461f0db1f63f2710e57",
+      "size_bytes": 23853
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_kl_n64_train250_s2_cfdf9520_20260726T002237Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_kl_n64_train250_s2_cfdf9520_20260726T002237Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "0bc893587f38d467c41006c0cdbf5b4b7560ea29d06d4babde48f679ef0f2d75",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_kl_n64_train250_s2_cfdf9520_20260726T002237Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_kl_n64_train250_s2_cfdf9520_20260726T002237Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "97b204fc5a77ed30544304788b1bcff5418834fabd0e1c747e37aaed420b581b",
+      "size_bytes": 23853
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_official_pvc_count_component_n64_train250_s0_cfdf9520_20260726T002118Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_official_pvc_count_component_n64_train250_s0_cfdf9520_20260726T002118Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "7ff59eeb9156dd92705bae4ab5bfc2a79abc4214d03670291e6f074de585d88a",
+      "size_bytes": 24549
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_official_pvc_count_component_n64_train250_s0_cfdf9520_20260726T002118Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_official_pvc_count_component_n64_train250_s0_cfdf9520_20260726T002118Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "bf566d46efa7c103080eb7ee36f85f26b61ebf325b1fc14193384371663a5433",
+      "size_bytes": 24109
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_official_pvc_count_component_n64_train250_s1_cfdf9520_20260726T002141Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_official_pvc_count_component_n64_train250_s1_cfdf9520_20260726T002141Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "402baf4815731a68e745de956b87ebc7d6ec1982c82db92990b813eb4bb71e13",
+      "size_bytes": 24549
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_official_pvc_count_component_n64_train250_s1_cfdf9520_20260726T002141Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_official_pvc_count_component_n64_train250_s1_cfdf9520_20260726T002141Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "657e18e577023a728d1135148ca9704eff8d17e5f40670697deca0fc62bef375",
+      "size_bytes": 24109
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_official_pvc_count_component_n64_train250_s2_cfdf9520_20260726T002201Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_official_pvc_count_component_n64_train250_s2_cfdf9520_20260726T002201Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "1b212175087e8f9cc05270498687ff4dbfd3737db625ecfd620c87d56e94bde5",
+      "size_bytes": 24549
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "fixed_cifar10_official_pvc_count_component_n64_train250_s2_cfdf9520_20260726T002201Z"
+      ],
+      "path": "results/rebuttal/fixed_bag_cifar10/runs/fixed_cifar10_official_pvc_count_component_n64_train250_s2_cfdf9520_20260726T002201Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "0278433e0f716005c78fa4da4fb72dec27c6ec95f299f24252b27e04c3a50620",
+      "size_bytes": 24109
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_ce_n64_train4_s99_cfdf9520_20260726T002014Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "4962ae7bc2cf7b9cc7564b190a877895f546ea4e6d4926421db3b6f3c556f0a3",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_ce_n64_train4_s99_cfdf9520_20260726T002014Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "b00fc995619d4a8126827b60f13e3a8566cf8b7883688aed381c6c16007e773b",
+      "size_bytes": 23789
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_ce_n64_train4_s99_cfdf9520_20260726T002035Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "354cc73dafb7b0b455f37cb9ce649ccc00c208e728184fc90b7b6e1eeb69a86c",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_ce_n64_train4_s99_cfdf9520_20260726T002035Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "3b4d1d5b7df950ab2fd5892332e3ba322abcda9958028de569baeb9e2f7e8651",
+      "size_bytes": 23789
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_ce_n64_train4_s99_cfdf9520_20260726T002054Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "339bb0a84baa60cc16f70bafaffcc1e9db1e7cb8646698e207798048ea31c09e",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_ce_n64_train4_s99_cfdf9520_20260726T002054Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "3b4d1d5b7df950ab2fd5892332e3ba322abcda9958028de569baeb9e2f7e8651",
+      "size_bytes": 23789
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_fsconv_count_n64_train4_s99_cfdf9520_20260726T002034Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "c6fcf1d92bf0b73af20b2d72a44d4b32e3307fd94d0c03b80db6b45a8946d7a9",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_fsconv_count_n64_train4_s99_cfdf9520_20260726T002034Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "e36f0088f9b75a68cc10b629a34160d7e066b9e5f8ecdfd0b718dcb9bcf18e1b",
+      "size_bytes": 23853
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_fsconv_count_n64_train4_s99_cfdf9520_20260726T002054Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "74572c639af5bd9107e2db25cb8b9219b5801de50c00b1d4671c4a15924e81c2",
+      "size_bytes": 24293
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_fsconv_count_n64_train4_s99_cfdf9520_20260726T002054Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "e36f0088f9b75a68cc10b629a34160d7e066b9e5f8ecdfd0b718dcb9bcf18e1b",
+      "size_bytes": 23853
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_official_pvc_count_component_n64_train4_s99_cfdf9520_20260726T002034Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "d99314a5871189567fdb418b88ef2a8b82e29a4066daae951b7b39c226d4468e",
+      "size_bytes": 24549
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_official_pvc_count_component_n64_train4_s99_cfdf9520_20260726T002034Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "da960058d31780b18bdbe2075fc7504f779ae3d87db596890a03f2d9c5f2c917",
+      "size_bytes": 24109
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_official_pvc_count_component_n64_train4_s99_cfdf9520_20260726T002054Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "7bea4f23e6c346bef01278bb3b3dfc49a31eb8f96c3a536a65f6d2655463e189",
+      "size_bytes": 24549
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [],
+      "path": "results/rebuttal/fixed_bag_cifar10/smoke_runs/fixed_cifar10_official_pvc_count_component_n64_train4_s99_cfdf9520_20260726T002054Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "da960058d31780b18bdbe2075fc7504f779ae3d87db596890a03f2d9c5f2c917",
+      "size_bytes": 24109
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234506Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/digit_sum_gaussian_amle_n10_train1000_sum_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234506Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "5b53f3b7b7848273ffc286b7416da708afccb1e017f532fd2fd0e12d5d96abdf",
+      "size_bytes": 1728893
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234858Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/digit_sum_gaussian_amle_n10_train1000_sum_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234858Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "31852e7db00b3e9c8e8833f3c63cc19314b8104a9bce3d28538e4bb95998713e",
+      "size_bytes": 1728893
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234858Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/digit_sum_gaussian_amle_n10_train1000_sum_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234858Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "dc6ef151e3062ba3c686800435d7cd32a8abe862450f97b70684c6a94fdc9a5a",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s1_lr1e-03_eps1e-04_cfdf9520_20260725T234911Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/digit_sum_gaussian_amle_n10_train1000_sum_s1_lr1e-03_eps1e-04_cfdf9520_20260725T234911Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "bccc8b4bfd371b3c4085d9ebd6c096a3270fcfed72cb5a6cbd5eeeb0b749f59a",
+      "size_bytes": 1728893
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s1_lr1e-03_eps1e-04_cfdf9520_20260725T234911Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/digit_sum_gaussian_amle_n10_train1000_sum_s1_lr1e-03_eps1e-04_cfdf9520_20260725T234911Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "563745cda6c780b58329bd7ea96ac3d0aead6384c13a248772c759c1973c731d",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s2_lr1e-03_eps1e-04_cfdf9520_20260725T234924Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/digit_sum_gaussian_amle_n10_train1000_sum_s2_lr1e-03_eps1e-04_cfdf9520_20260725T234924Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "e19ec993039b9afbfd916cd8a91c66ca00122c5d5764281308a6112d1571766a",
+      "size_bytes": 1728893
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s2_lr1e-03_eps1e-04_cfdf9520_20260725T234924Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/digit_sum_gaussian_amle_n10_train1000_sum_s2_lr1e-03_eps1e-04_cfdf9520_20260725T234924Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "3b3d4b1cc5173eb1a51cee16807963c2e0bba3d68d195864acbe678b1e3afa6e",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_cancel_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234506Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_cancel_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234506Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "7bdbb8b6e00a6f185ef07ea9f04990fbd78af9d32d7bf210ba43700bd8d477ed",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_cancel_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234858Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_cancel_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234858Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "6f46da609e0ddb88d7fa0a88475a3783054b6bd293fb10c1d38dadb16dbca4a0",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_cancel_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234858Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_cancel_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234858Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "cd05412a8fc75ba690c18caf05ae6417a1ae33692f42244bd69c584d99d05347",
+      "size_bytes": 1710603
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_cancel_s1_lr1e-03_eps1e-04_cfdf9520_20260725T234917Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_cancel_s1_lr1e-03_eps1e-04_cfdf9520_20260725T234917Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "405198e5bca8937bfe73f2d0d53a4363686482bb311fe69e17e9ea6568af594c",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_cancel_s1_lr1e-03_eps1e-04_cfdf9520_20260725T234917Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_cancel_s1_lr1e-03_eps1e-04_cfdf9520_20260725T234917Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "f5e5d5e62317fe2c0fb848230577a99a0dde0435aa1c8ccc077d031fb8927145",
+      "size_bytes": 1710603
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_cancel_s2_lr1e-03_eps1e-04_cfdf9520_20260725T234937Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_cancel_s2_lr1e-03_eps1e-04_cfdf9520_20260725T234937Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "6c93d1ab0d61204964e1ce62a247c0a348150e8ed51401cfd16a282e2096f1ba",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_cancel_s2_lr1e-03_eps1e-04_cfdf9520_20260725T234937Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_cancel_s2_lr1e-03_eps1e-04_cfdf9520_20260725T234937Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "1fe78a4581e2cf99615911bc93b75e4b856b6e6e12dac26bcaafc9a7e1443be6",
+      "size_bytes": 1710603
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_random_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234506Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_random_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234506Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "a3b1a82f9d902253e7ddde00cdfac0ea266ef493ee3579287f52a5708182ec20",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_random_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234858Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_random_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234858Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "aa56483b78d4226cc99e2d79464e118f8f51509357dd1b7974142dd5e24a836a",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_random_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234858Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_random_s0_lr1e-03_eps1e-04_cfdf9520_20260725T234858Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "cc3289d609b61f553d88f3eacd4816f35179d63af5fbf5a5c3192671b951e04c",
+      "size_bytes": 1710603
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_random_s1_lr1e-03_eps1e-04_cfdf9520_20260725T234917Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_random_s1_lr1e-03_eps1e-04_cfdf9520_20260725T234917Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "59fc6cabc38ee7edfaafecd84f177c912793f4d17aa9a5cf82401c1789d25469",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_random_s1_lr1e-03_eps1e-04_cfdf9520_20260725T234917Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_random_s1_lr1e-03_eps1e-04_cfdf9520_20260725T234917Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "3c97bc9957eb532c8fdb281b82df29b70c2c41fa7f3b876ba1e70734fa702b0e",
+      "size_bytes": 1710603
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_random_s2_lr1e-03_eps1e-04_cfdf9520_20260725T234936Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_random_s2_lr1e-03_eps1e-04_cfdf9520_20260725T234936Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "614926a54912a22ddd4e2ccf62ab13112cc873d3e6ea6dc89ff3079e401ba6cd",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_random_s2_lr1e-03_eps1e-04_cfdf9520_20260725T234936Z"
+      ],
+      "path": "results/rebuttal/gaussian_selected/runs/signed_gaussian_amle_n10_train1000_random_s2_lr1e-03_eps1e-04_cfdf9520_20260725T234936Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "b3d271b0c8d78f0ddfb81b75451f3f9d27b1f040f9123acc2d93378ecc741f29",
+      "size_bytes": 1710603
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_cfdf9520_20260725T233330Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_cfdf9520_20260725T233330Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "68f32e0573cd0925391c712eaea0ae3b48df3f99da92e2768ebe3402f9450015",
+      "size_bytes": 1728893
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_cfdf9520_20260725T233330Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_cfdf9520_20260725T233330Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "1d0ceba90617e1d4d842f0e42ab76fffd2d61c440d6633705199dc744ca0cbff",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_cfdf9520_20260725T233434Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_cfdf9520_20260725T233434Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "5f296fe942e9644892dfd463590a197b3036a4508327804ea8a5780bfa62ebcf",
+      "size_bytes": 1728893
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_cfdf9520_20260725T233434Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_cfdf9520_20260725T233434Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "dee6a30672ab8ed4a57ee75c78aeb1e558fd53bdad95d6be30f5d28aeec4da76",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_cfdf9520_20260725T233535Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_cfdf9520_20260725T233535Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "0d47127e5cf3d2069fcabbbb3a3c195decbd24680a95fe317ab4cff2dfa9340f",
+      "size_bytes": 1728893
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_cfdf9520_20260725T233535Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_cfdf9520_20260725T233535Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "3370218655462a97741e168efce3b760e71989a0523e64c69beb2d1ac0cc6563",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_lr1e-03_eps1e-02_cfdf9520_20260725T234157Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_lr1e-03_eps1e-02_cfdf9520_20260725T234157Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "1175e2b34c899e41e04bff262b66ff81899ce6b5f9fbb21efc05f5b55a968f8f",
+      "size_bytes": 1728957
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_lr1e-03_eps1e-02_cfdf9520_20260725T234157Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_lr1e-03_eps1e-02_cfdf9520_20260725T234157Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "c2a2970b01ce2efa35e554e9884bcda90b2a9e9ed42ba4627f0e30bc14e7f30e",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_lr1e-03_eps1e-03_cfdf9520_20260725T234054Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_lr1e-03_eps1e-03_cfdf9520_20260725T234054Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "1226f598c616b079c33b2ce1724cb5d785b78b047e136eb73788e1a11a6618f8",
+      "size_bytes": 1728957
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_lr1e-03_eps1e-03_cfdf9520_20260725T234054Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_lr1e-03_eps1e-03_cfdf9520_20260725T234054Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "20e874a1561f11237375a1c62121856c35528e0ad7fb06a43d57c8037acc57f7",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_lr1e-03_eps1e-04_cfdf9520_20260725T233812Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_lr1e-03_eps1e-04_cfdf9520_20260725T233812Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "cc51bdc6f5ed1df03670402ab768d9e70df431b7f0158dd3cc33b46b26d21808",
+      "size_bytes": 1728957
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_lr1e-03_eps1e-04_cfdf9520_20260725T233812Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_lr1e-03_eps1e-04_cfdf9520_20260725T233812Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "0c2688bd794bd74194fcc8aa8129e209b08d66edbb46ed34aa3f653e6436cdab",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_lr2e-04_eps1e-02_cfdf9520_20260725T234157Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_lr2e-04_eps1e-02_cfdf9520_20260725T234157Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "7b81e4af9dc0fcca7e7ab16d2a02264e12404ac8c814b77544fbfdeec205a7ac",
+      "size_bytes": 1728957
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_lr2e-04_eps1e-02_cfdf9520_20260725T234157Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_lr2e-04_eps1e-02_cfdf9520_20260725T234157Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "837967123f1383c9980b681f1c51ca785fc4c78f2b7befac52b91b8f4a6a777b",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_lr2e-04_eps1e-03_cfdf9520_20260725T234054Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_lr2e-04_eps1e-03_cfdf9520_20260725T234054Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "515354bcdfb98366c5dd02081e66ce6dc2f5bd98f364565ba57f12a22f2c4d70",
+      "size_bytes": 1728957
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_lr2e-04_eps1e-03_cfdf9520_20260725T234054Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_lr2e-04_eps1e-03_cfdf9520_20260725T234054Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "03158128794a68e24522468d7e442b94283d89f6f59b657b5c5ff82c90513107",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_lr2e-04_eps1e-04_cfdf9520_20260725T233812Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_lr2e-04_eps1e-04_cfdf9520_20260725T233812Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "91dc24f1674e44fb4d0a5c8fe4054426047a146ce7c417337b9e04859c82a98d",
+      "size_bytes": 1728957
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s999_lr2e-04_eps1e-04_cfdf9520_20260725T233812Z"
+      ],
+      "path": "results/rebuttal/gaussian_tuning/runs/digit_sum_gaussian_amle_n10_train1000_sum_s999_lr2e-04_eps1e-04_cfdf9520_20260725T233812Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "b692138326f79372fb45fd83d83f5f0d9fbbe5145b9badef235629609c56b642",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s0_cfdf9520_20260725T163208Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/digit_sum_gaussian_amle_n10_train1000_sum_s0_cfdf9520_20260725T163208Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "763ffb1e6c57a8a3c65d5abcc57b96d6faa5edbdfbaf39d7828729f3b415788d",
+      "size_bytes": 1728893
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s0_cfdf9520_20260725T163208Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/digit_sum_gaussian_amle_n10_train1000_sum_s0_cfdf9520_20260725T163208Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "0855a7ec4130fcdec6f4e48f6c52d23228efbd8973effb23f90bdefa8cf44c07",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s1_cfdf9520_20260725T163223Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/digit_sum_gaussian_amle_n10_train1000_sum_s1_cfdf9520_20260725T163223Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "b9038169583b6f10796c3211941fa96c2e9dafe8fe3239bdef5e5723990182e8",
+      "size_bytes": 1728893
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s1_cfdf9520_20260725T163223Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/digit_sum_gaussian_amle_n10_train1000_sum_s1_cfdf9520_20260725T163223Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "867786e32f044fc35da7f9ea5574e17b85d0ae4eae74be128787a391d2fa5765",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s2_cfdf9520_20260725T163239Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/digit_sum_gaussian_amle_n10_train1000_sum_s2_cfdf9520_20260725T163239Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "a42105e6aa79f41d4bb665e196a3af7a91b88479789da07d1b0c3c9897fae3bd",
+      "size_bytes": 1728893
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train1000_sum_s2_cfdf9520_20260725T163239Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/digit_sum_gaussian_amle_n10_train1000_sum_s2_cfdf9520_20260725T163239Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "eb13a114b15fb6b3ad326aaba89dcf08e2ba579716d7e9cb6ca9cccd952e06fb",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train16_sum_s99_cb9a49e6_20260725T162913Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/digit_sum_gaussian_amle_n10_train16_sum_s99_cb9a49e6_20260725T162913Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "f229836c19dd275021ee1dc2389c0003f171ecb3bcf91cb92dafb337acd08e15",
+      "size_bytes": 1728893
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "digit_sum_gaussian_amle_n10_train16_sum_s99_cb9a49e6_20260725T162913Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/digit_sum_gaussian_amle_n10_train16_sum_s99_cb9a49e6_20260725T162913Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "137374ac678357f551de95b62698aa42c2c54f87e6146dca470d8d45b72ec051",
+      "size_bytes": 1728587
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_cancel_s0_cfdf9520_20260725T163358Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train1000_cancel_s0_cfdf9520_20260725T163358Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "727248f56b7cbb2e589fbdca863737dd0bd569ec1cd3f957966e61cd0d41f558",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_cancel_s0_cfdf9520_20260725T163358Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train1000_cancel_s0_cfdf9520_20260725T163358Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "8785161abe208ad5e2f161f4ce3344a254af1c8dfc07002f5c9b7abdced9dfa0",
+      "size_bytes": 1710603
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_cancel_s1_cfdf9520_20260725T163420Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train1000_cancel_s1_cfdf9520_20260725T163420Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "15eb2a9a3f7fbcb91e414546291711928c48f8cd9e716c29e41fe2ca559953c7",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_cancel_s1_cfdf9520_20260725T163420Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train1000_cancel_s1_cfdf9520_20260725T163420Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "1aaa448ad6bcbf78741748f9be8c3d4bad51dafc5535f612dadb3cbbc855effd",
+      "size_bytes": 1710603
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_cancel_s2_cfdf9520_20260725T163444Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train1000_cancel_s2_cfdf9520_20260725T163444Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "c0912460adeff4adc5b6e4d5c59ec1b825fb86c05833af78b3f41ab89d4e926e",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_cancel_s2_cfdf9520_20260725T163444Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train1000_cancel_s2_cfdf9520_20260725T163444Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "67cd28191bae0c63300de17e95670a49ff2e4f9441a7ac830db667341db78f75",
+      "size_bytes": 1710603
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_random_s0_cfdf9520_20260725T163253Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train1000_random_s0_cfdf9520_20260725T163253Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "2121a6981a4449b30f0eea23c738a2d3f0b478edbfc52be84bd132f94e4ecc70",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_random_s0_cfdf9520_20260725T163253Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train1000_random_s0_cfdf9520_20260725T163253Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "efd5cd1357abfa0d4c9fa06e4e0ea8cc634136b7e81537884dc1713690de564b",
+      "size_bytes": 1710603
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_random_s1_cfdf9520_20260725T163314Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train1000_random_s1_cfdf9520_20260725T163314Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "58220e0cb3d56e0c78e83a7b7eb30b5d6c30e16fc2479cbae6a74eace9728396",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_random_s1_cfdf9520_20260725T163314Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train1000_random_s1_cfdf9520_20260725T163314Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "0b15135f766decb0bd38ca3dc73d431923fa4b73d2473a966dbc046f2e76f114",
+      "size_bytes": 1710603
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_random_s2_cfdf9520_20260725T163337Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train1000_random_s2_cfdf9520_20260725T163337Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "b84aa6258254a0d62e795d24fc663fdacc821bbddfd21ad1742a0279422b49cd",
+      "size_bytes": 1711101
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train1000_random_s2_cfdf9520_20260725T163337Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train1000_random_s2_cfdf9520_20260725T163337Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "4ce8a48da08809cd10e26e4e7083b3a3fedc50f636f8118c56592ff0d26ca91e",
+      "size_bytes": 1710603
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train16_random_s99_cb9a49e6_20260725T162913Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train16_random_s99_cb9a49e6_20260725T162913Z/checkpoint_best.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "35bc45a606568b9f58172d320befe0f79cebf7c3e63ab1868e1a6e7076e8278d",
+      "size_bytes": 1711037
+    },
+    {
+      "artifact_role": "only_for_resuming_or_checkpoint_reevaluation",
+      "associated_run_ids": [
+        "signed_gaussian_amle_n10_train16_random_s99_cb9a49e6_20260725T162913Z"
+      ],
+      "path": "results/rebuttal/overnight_4090/runs/signed_gaussian_amle_n10_train16_random_s99_cb9a49e6_20260725T162913Z/checkpoint_final.pt",
+      "producing_command": "training run checkpoint output; see sibling command.txt/config.json",
+      "sha256": "ac8b91d183db409f220419b365199d81b3e0a5ebc3f63dd08587fb215300b591",
+      "size_bytes": 1710539
+    }
+  ],
+  "created_utc": "2026-07-26",
+  "host": "4090",
+  "policy": "Not committed to Git: datasets, pretrained weights, frozen feature tensors, checkpoints, incomplete downloads, and files >20MB.",
+  "repo": "/home/chanhomin/countmil"
+}

@@ -87,6 +87,8 @@ def _make_run_dir(root: str | Path, cfg: dict[str, Any]) -> Path:
         f"train{cfg['train_bags']}",
         signs if cfg["task"] == "signed" else "sum",
         f"s{cfg['seed']}",
+        f"lr{float(cfg['lr']):.0e}",
+        f"eps{float(cfg['eps']):.0e}",
         commit,
         stamp,
     ]
@@ -280,6 +282,8 @@ def main() -> None:
         "test_bags": args.test_bags,
         "cancellation_heavy": False,
         "seed": 0,
+        "lr": args.lr,
+        "weight_decay": args.weight_decay,
         "eps": args.eps,
     }
     cfg.update(_parse_simple_yaml(args.config))
@@ -299,6 +303,8 @@ def main() -> None:
         cfg["cancellation_heavy"] = True
     cfg["val_bags"] = args.val_bags
     cfg["test_bags"] = args.test_bags
+    cfg["lr"] = args.lr
+    cfg["weight_decay"] = args.weight_decay
     cfg["eps"] = args.eps
 
     seed = int(cfg["seed"])
@@ -318,7 +324,7 @@ def main() -> None:
     else:
         model = ShuklaMNISTSelector().to(device)
         support = None
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay, betas=(0.9, 0.999))
+    optimizer = torch.optim.Adam(model.parameters(), lr=float(cfg["lr"]), weight_decay=float(cfg["weight_decay"]), betas=(0.9, 0.999))
     metrics_path = run_dir / "metrics.jsonl"
     best: dict[str, Any] = {"validation_loss": math.inf}
 
@@ -336,12 +342,12 @@ def main() -> None:
             if cfg["task"] == "digit_sum":
                 targets = batch["sum"].to(device)
                 probs = model.predict_proba(x)
-                loss = categorical_gaussian_amle_loss(probs, support, targets, mask, eps=args.eps).mean()
+                loss = categorical_gaussian_amle_loss(probs, support, targets, mask, eps=float(cfg["eps"])).mean()
             else:
                 targets = batch["signed_count"].to(device)
                 signs = batch["signs"].to(device)
                 probs = model.predict_proba(x)
-                loss = signed_bernoulli_gaussian_amle_loss(probs, signs, targets, mask, eps=args.eps).mean()
+                loss = signed_bernoulli_gaussian_amle_loss(probs, signs, targets, mask, eps=float(cfg["eps"])).mean()
             if not torch.isfinite(loss):
                 raise FloatingPointError("non-finite training loss")
             optimizer.zero_grad()
@@ -352,9 +358,9 @@ def main() -> None:
             seen += x.shape[0]
 
         if cfg["task"] == "digit_sum":
-            val_metrics = _evaluate_digit(model, val_loader, device, args.eps, None)
+            val_metrics = _evaluate_digit(model, val_loader, device, float(cfg["eps"]), None)
         else:
-            val_metrics = _evaluate_signed(model, val_loader, device, args.eps, None)
+            val_metrics = _evaluate_signed(model, val_loader, device, float(cfg["eps"]), None)
         if device.type == "cuda":
             torch.cuda.synchronize(device)
             peak_mb = torch.cuda.max_memory_allocated(device) / (1024**2)
@@ -379,9 +385,9 @@ def main() -> None:
     state = torch.load(run_dir / "checkpoint_best.pt", map_location=device)
     model.load_state_dict(state["model"])
     if cfg["task"] == "digit_sum":
-        test_metrics = _evaluate_digit(model, test_loader, device, args.eps, run_dir / "raw_test_predictions.jsonl")
+        test_metrics = _evaluate_digit(model, test_loader, device, float(cfg["eps"]), run_dir / "raw_test_predictions.jsonl")
     else:
-        test_metrics = _evaluate_signed(model, test_loader, device, args.eps, run_dir / "raw_test_predictions.jsonl")
+        test_metrics = _evaluate_signed(model, test_loader, device, float(cfg["eps"]), run_dir / "raw_test_predictions.jsonl")
     summary = {
         "best": best,
         "test": test_metrics,
@@ -393,6 +399,8 @@ def main() -> None:
     name_bits = [str(cfg["task"]), "gaussian_amle", f"n{cfg['bag_size_mean']}", f"train{cfg['train_bags']}"]
     if cfg["task"] == "signed":
         name_bits.append("cancel" if cfg["cancellation_heavy"] else "random")
+    name_bits.append(f"lr{float(cfg['lr']):.0e}")
+    name_bits.append(f"eps{float(cfg['eps']):.0e}")
     name_bits.append(f"s{seed}.json")
     out = result_dir / "_".join(name_bits)
     out.write_text(json.dumps(summary, indent=2, sort_keys=True))

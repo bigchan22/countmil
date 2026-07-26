@@ -1,0 +1,12 @@
+{
+  "finished": 1784997158.0246818,
+  "job": {
+    "command": "PYTHONPATH=src .venv/bin/python scripts/rebuttal/train_gaussian_amle_scalar.py --task digit_sum --bag-size-mean 10 --bag-size-std 2 --train-bags 1000 --seed 1 --epochs 50 --batch-size 192 --device cuda:0",
+    "name": "digit_sum_gaussian_amle_n10_train1000_s1",
+    "phase": "p1"
+  },
+  "returncode": 0,
+  "run_id": "digit_sum_gaussian_amle_n10_train1000_s1_cfdf9520_20260725T163222Z",
+  "stderr": "results/rebuttal/overnight_4090/logs/digit_sum_gaussian_amle_n10_train1000_s1_cfdf9520_20260725T163222Z.stderr.log",
+  "stdout": "results/rebuttal/overnight_4090/logs/digit_sum_gaussian_amle_n10_train1000_s1_cfdf9520_20260725T163222Z.stdout.log"
+}

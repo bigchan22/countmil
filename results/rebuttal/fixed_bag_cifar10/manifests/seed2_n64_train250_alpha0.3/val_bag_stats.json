@@ -1,0 +1,36 @@
+{
+  "bag_composition_entropy_mean": 1.3500933647155762,
+  "bag_composition_entropy_sample_std": 0.31331607699394226,
+  "l1_distance_to_global_prior_mean": 1.1039438247680664,
+  "l1_distance_to_global_prior_sample_std": 0.19161567091941833,
+  "manifest_sha256": "2b0e961d5dfd1bbc75fc8d09cb549173ce5fa93feb1087516a68c3f9936eb073:534d09205302a36ee587b8ad0c8050dc35824c5a10d15ac72f205b4633eef329",
+  "max_class_proportion": 0.9375,
+  "min_class_proportion": 0.0,
+  "num_unique_bags": 250,
+  "num_unique_underlying_images": 7959,
+  "per_class_count_mean": [
+    6.8520002365112305,
+    6.015999794006348,
+    6.5960001945495605,
+    6.144000053405762,
+    6.300000190734863,
+    7.447999954223633,
+    6.631999969482422,
+    4.863999843597412,
+    7.015999794006348,
+    6.131999969482422
+  ],
+  "per_class_count_sample_std": [
+    10.371710777282715,
+    9.120332717895508,
+    10.239343643188477,
+    10.18598461151123,
+    10.189470291137695,
+    11.148833274841309,
+    9.511384963989258,
+    7.304445266723633,
+    10.388813972473145,
+    10.40478801727295
+  ],
+  "total_instance_slots": 16000
+}

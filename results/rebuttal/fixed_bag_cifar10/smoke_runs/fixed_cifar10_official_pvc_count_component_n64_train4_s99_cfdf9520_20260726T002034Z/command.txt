@@ -1,0 +1,1 @@
+scripts/rebuttal/train_fixed_cifar10_features.py --method official_pvc_count_component --seed 99 --epochs 1 --train-bags 4 --val-bags 4 --test-bags 4 --batch-size 2 --device cuda:1 --dataset-root data --run-root results/rebuttal/fixed_bag_cifar10/smoke_runs --summary-root results/rebuttal/fixed_bag_cifar10/smoke_summaries
