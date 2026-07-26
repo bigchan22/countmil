@@ -1,0 +1,69 @@
+{
+  "name": "a5000_svhn_dependence_rebuttal",
+  "output_root": "results/rebuttal/a5000_svhn_dependence",
+  "jobs": [
+    {
+      "task": "svhn_sum",
+      "method": "fsconv",
+      "seed": 0,
+      "script": "scripts/rebuttal/a5000_train_svhn_scalar.py",
+      "args": ["--method", "fsconv", "--seed", "0", "--train-bags", "5000", "--val-bags", "600", "--test-bags", "600", "--epochs", "40", "--batch-size", "16"]
+    },
+    {
+      "task": "svhn_sum",
+      "method": "fsconv",
+      "seed": 1,
+      "script": "scripts/rebuttal/a5000_train_svhn_scalar.py",
+      "args": ["--method", "fsconv", "--seed", "1", "--train-bags", "5000", "--val-bags", "600", "--test-bags", "600", "--epochs", "40", "--batch-size", "16"]
+    },
+    {
+      "task": "svhn_sum",
+      "method": "fsconv",
+      "seed": 2,
+      "script": "scripts/rebuttal/a5000_train_svhn_scalar.py",
+      "args": ["--method", "fsconv", "--seed", "2", "--train-bags", "5000", "--val-bags", "600", "--test-bags", "600", "--epochs", "40", "--batch-size", "16"]
+    },
+    {
+      "task": "svhn_sum",
+      "method": "mse",
+      "seed": 0,
+      "script": "scripts/rebuttal/a5000_train_svhn_scalar.py",
+      "args": ["--method", "mse", "--seed", "0", "--train-bags", "5000", "--val-bags", "600", "--test-bags", "600", "--epochs", "40", "--batch-size", "16"]
+    },
+    {
+      "task": "svhn_sum",
+      "method": "mse",
+      "seed": 1,
+      "script": "scripts/rebuttal/a5000_train_svhn_scalar.py",
+      "args": ["--method", "mse", "--seed", "1", "--train-bags", "5000", "--val-bags", "600", "--test-bags", "600", "--epochs", "40", "--batch-size", "16"]
+    },
+    {
+      "task": "svhn_sum",
+      "method": "mse",
+      "seed": 2,
+      "script": "scripts/rebuttal/a5000_train_svhn_scalar.py",
+      "args": ["--method", "mse", "--seed", "2", "--train-bags", "5000", "--val-bags", "600", "--test-bags", "600", "--epochs", "40", "--batch-size", "16"]
+    },
+    {
+      "task": "svhn_sum",
+      "method": "gaussian_amle",
+      "seed": 0,
+      "script": "scripts/rebuttal/a5000_train_svhn_scalar.py",
+      "args": ["--method", "gaussian_amle", "--seed", "0", "--train-bags", "5000", "--val-bags", "600", "--test-bags", "600", "--epochs", "40", "--batch-size", "16"]
+    },
+    {
+      "task": "svhn_sum",
+      "method": "gaussian_amle",
+      "seed": 1,
+      "script": "scripts/rebuttal/a5000_train_svhn_scalar.py",
+      "args": ["--method", "gaussian_amle", "--seed", "1", "--train-bags", "5000", "--val-bags", "600", "--test-bags", "600", "--epochs", "40", "--batch-size", "16"]
+    },
+    {
+      "task": "svhn_sum",
+      "method": "gaussian_amle",
+      "seed": 2,
+      "script": "scripts/rebuttal/a5000_train_svhn_scalar.py",
+      "args": ["--method", "gaussian_amle", "--seed", "2", "--train-bags", "5000", "--val-bags", "600", "--test-bags", "600", "--epochs", "40", "--batch-size", "16"]
+    }
+  ]
+}
