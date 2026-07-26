@@ -1,0 +1,2 @@
+run_id,method,seed,status,reason,path
+criteo_llpbench_protocol_probe,NA,NA,NOT_LAUNCHED,required Criteo raw/preprocessed LLP-Bench files absent and official trainer uses instance-labeled val_auc for early stopping,docs/rebuttal/CRITEO_PROTOCOL_AUDIT.md
