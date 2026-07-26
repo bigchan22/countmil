@@ -71,7 +71,7 @@ def summary_path(output_root: Path, job: dict[str, Any]) -> Path | None:
     method = job["method"]
     seed = int(job["seed"])
     if task == "svhn_sum":
-        return output_root / "svhn_summaries" / f"svhn_sum_{method}_n10_train5000_s{seed}.json"
+        return output_root / "svhn_summaries" / f"svhn_sum_{method}_strictv2_n10_train5000_s{seed}.json"
     if task == "dependence":
         tau = str(job["tau"]).replace(".", "p")
         return output_root / "dependence_summaries" / f"dependence_tau{tau}_{method}_s{seed}.json"

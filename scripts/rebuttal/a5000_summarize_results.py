@@ -51,6 +51,11 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 
 
 def svhn_outputs(summaries: list[dict[str, Any]]) -> None:
+    summaries = [
+        s
+        for s in summaries
+        if s.get("config", {}).get("protocol_version") == "strictv2_train_holdout_val_no_hidden_val_metrics"
+    ]
     rows = []
     for s in summaries:
         cfg = s["config"]

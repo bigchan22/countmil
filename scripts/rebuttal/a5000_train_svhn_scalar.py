@@ -31,7 +31,7 @@ if str(ROOT) not in sys.path:
 
 from countmil.aggregators import AggregatePMF, aggregate_nll, finite_support_convolution
 from countmil.baselines.gaussian_amle import categorical_gaussian_amle_loss, categorical_sum_moments
-from countmil.datasets import SVHNOrdinalSumBags, collate_ordinal_sum_bags
+from countmil.datasets import SVHNOrdinalSumBags, TensorOrdinalSumBags, collate_ordinal_sum_bags, load_svhn_family
 from countmil.models import make_cifar_classifier
 from countmil.training.seed import set_seed
 
@@ -89,11 +89,69 @@ def gaussian_density_nll(mean: torch.Tensor, variance: torch.Tensor, target: tor
     return 0.5 * (((target_f - mean).square() / var) + var.log() + math.log(2.0 * math.pi))
 
 
-def make_dataset(cfg: dict[str, Any], split_name: str) -> SVHNOrdinalSumBags:
+def svhn_train_transform(images: torch.Tensor, gen: torch.Generator) -> torch.Tensor:
+    padded = F.pad(images, (4, 4, 4, 4), mode="reflect")
+    out = torch.empty_like(images)
+    for i in range(images.shape[0]):
+        top = int(torch.randint(0, 9, (1,), generator=gen).item())
+        left = int(torch.randint(0, 9, (1,), generator=gen).item())
+        crop = padded[i, :, top : top + 32, left : left + 32]
+        brightness = 0.8 + 0.4 * torch.rand((), generator=gen).item()
+        contrast = 0.8 + 0.4 * torch.rand((), generator=gen).item()
+        mean = crop.mean(dim=(-2, -1), keepdim=True)
+        crop = ((crop - mean) * contrast + mean) * brightness
+        out[i] = crop.clamp(0.0, 1.0)
+    return out
+
+
+def split_svhn_train_holdout(root: str | Path, val_fraction: float, split_seed: int) -> tuple[tuple[torch.Tensor, torch.Tensor], tuple[torch.Tensor, torch.Tensor]]:
+    images, labels = load_svhn_family(root=root, split="train", download=False, train_split_fallback=False)
+    gen = torch.Generator()
+    gen.manual_seed(int(split_seed))
+    order = torch.randperm(images.shape[0], generator=gen)
+    val_count = max(1, int(round(images.shape[0] * float(val_fraction))))
+    val_idx = order[:val_count]
+    train_idx = order[val_count:]
+    return (images[train_idx], labels[train_idx]), (images[val_idx], labels[val_idx])
+
+
+def make_dataset(cfg: dict[str, Any], split_name: str) -> TensorOrdinalSumBags:
     if split_name == "train":
-        split, seed, bags, augment = "train", int(cfg["seed"]), int(cfg["train_bags"]), bool(cfg["augment"])
+        (images, labels), _ = split_svhn_train_holdout(
+            cfg["dataset_root"], float(cfg["val_image_fraction"]), int(cfg["val_image_split_seed"])
+        )
+        seed, bags, transform = int(cfg["seed"]), int(cfg["train_bags"]), svhn_train_transform if bool(cfg["augment"]) else None
+        return TensorOrdinalSumBags(
+            images,
+            labels,
+            num_bags=bags,
+            bag_size_mean=float(cfg["bag_size_mean"]),
+            bag_size_std=float(cfg["bag_size_std"]),
+            bag_size_min=int(cfg["bag_size_min"]),
+            bag_size_max=int(cfg["bag_size_max"]),
+            per_class_cap=None,
+            noise_sigma=0.0,
+            seed=seed,
+            transform=transform,
+        )
     elif split_name == "val":
-        split, seed, bags, augment = "test", int(cfg["seed"]) + 20_000, int(cfg["val_bags"]), False
+        _, (images, labels) = split_svhn_train_holdout(
+            cfg["dataset_root"], float(cfg["val_image_fraction"]), int(cfg["val_image_split_seed"])
+        )
+        seed, bags = int(cfg["seed"]) + 20_000, int(cfg["val_bags"])
+        return TensorOrdinalSumBags(
+            images,
+            labels,
+            num_bags=bags,
+            bag_size_mean=float(cfg["bag_size_mean"]),
+            bag_size_std=float(cfg["bag_size_std"]),
+            bag_size_min=int(cfg["bag_size_min"]),
+            bag_size_max=int(cfg["bag_size_max"]),
+            per_class_cap=None,
+            noise_sigma=0.0,
+            seed=seed,
+            transform=None,
+        )
     elif split_name == "test":
         split, seed, bags, augment = "test", int(cfg["seed"]) + 10_000, int(cfg["test_bags"]), False
     else:
@@ -175,6 +233,7 @@ def evaluate(
     method: str,
     eps: float,
     raw_path: Path | None = None,
+    include_instance_metrics: bool = True,
 ) -> dict[str, float]:
     model.eval()
     support = torch.arange(10, device=device, dtype=torch.float32)
@@ -194,7 +253,7 @@ def evaluate(
             x = batch["instances"].to(device)
             mask = batch["mask"].to(device)
             targets = batch["sum"].to(device)
-            labels = batch["labels"].to(device)
+            labels = batch["labels"].to(device) if include_instance_metrics else None
             probs = model.predict_proba(x)
             expected = expected_sum_from_probs(probs, mask)
             pmf = atomic_sum_pmf(probs, mask)
@@ -220,8 +279,9 @@ def evaluate(
             target_chunks.append(targets.cpu())
             rounded_chunks.append(rounded.cpu())
             mode_chunks.append(mode.cpu())
-            pred_digit_chunks.append(probs.argmax(dim=-1)[mask].cpu())
-            true_digit_chunks.append(labels[mask].cpu())
+            if include_instance_metrics:
+                pred_digit_chunks.append(probs.argmax(dim=-1)[mask].cpu())
+                true_digit_chunks.append(labels[mask].cpu())
             if raw_path is not None:
                 for j in range(x.shape[0]):
                     raw_rows.append(
@@ -247,20 +307,22 @@ def evaluate(
     target_t = torch.cat(target_chunks)
     rounded_t = torch.cat(rounded_chunks)
     mode_t = torch.cat(mode_chunks)
-    pred_digit_t = torch.cat(pred_digit_chunks)
-    true_digit_t = torch.cat(true_digit_chunks)
-    return {
+    out = {
         "selection_loss": torch.cat(total_train_loss).mean().item(),
         "expected_sum_mae": (expected_t - target_t.float()).abs().mean().item(),
         "rounded_expected_sum_acc": (rounded_t == target_t).float().mean().item(),
         "rounded_expected_sum_mae": (rounded_t.float() - target_t.float()).abs().mean().item(),
         "pmf_mode_sum_acc": (mode_t == target_t).float().mean().item(),
         "pmf_mode_sum_mae": (mode_t.float() - target_t.float()).abs().mean().item(),
-        "instance_digit_acc": (pred_digit_t == true_digit_t).float().mean().item(),
         "fsconv_discrete_nll": torch.cat(total_fs_nll).mean().item(),
         "gaussian_bin_nll": torch.cat(total_gauss_bin).mean().item(),
         "gaussian_density_nll": torch.cat(total_gauss_density).mean().item(),
     }
+    if include_instance_metrics:
+        pred_digit_t = torch.cat(pred_digit_chunks)
+        true_digit_t = torch.cat(true_digit_chunks)
+        out["instance_digit_acc"] = (pred_digit_t == true_digit_t).float().mean().item()
+    return out
 
 
 def unique_manifest_indices(ds: SVHNOrdinalSumBags) -> list[int]:
@@ -299,7 +361,7 @@ def write_unique_instance_predictions(model: torch.nn.Module, ds: SVHNOrdinalSum
 def build_run_dir(root: Path, cfg: dict[str, Any]) -> Path:
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     short = git_commit()[:8]
-    run_id = f"svhn_sum_{cfg['method']}_n{cfg['bag_size_mean']}_train{cfg['train_bags']}_s{cfg['seed']}_{short}_{stamp}"
+    run_id = f"svhn_sum_{cfg['method']}_strictv2_n{cfg['bag_size_mean']}_train{cfg['train_bags']}_s{cfg['seed']}_{short}_{stamp}"
     run_dir = root / "runs" / run_id
     run_dir.mkdir(parents=True, exist_ok=False)
     return run_dir
@@ -325,6 +387,8 @@ def main() -> None:
     parser.add_argument("--weight-decay", type=float, default=5e-4)
     parser.add_argument("--gaussian-eps", type=float, default=1e-4)
     parser.add_argument("--augment", action="store_true", default=True)
+    parser.add_argument("--val-image-fraction", type=float, default=0.15)
+    parser.add_argument("--val-image-split-seed", type=int, default=1729)
     args = parser.parse_args()
 
     cfg: dict[str, Any] = {
@@ -345,6 +409,11 @@ def main() -> None:
         "weight_decay": args.weight_decay,
         "gaussian_eps": args.gaussian_eps,
         "augment": bool(args.augment),
+        "protocol_version": "strictv2_train_holdout_val_no_hidden_val_metrics",
+        "val_image_fraction": args.val_image_fraction,
+        "val_image_split_seed": args.val_image_split_seed,
+        "validation_split": "deterministic 15% holdout from official SVHN train archive",
+        "test_split": "official SVHN test archive",
         "model": "resnet18",
         "pretrained": True,
         "num_classes": 10,
@@ -411,7 +480,7 @@ def main() -> None:
             opt.step()
             total += float(loss.item()) * x.shape[0]
             seen += x.shape[0]
-        val_metrics = evaluate(model, val_loader, device, args.method, args.gaussian_eps)
+        val_metrics = evaluate(model, val_loader, device, args.method, args.gaussian_eps, include_instance_metrics=False)
         if device.type == "cuda":
             torch.cuda.synchronize(device)
             peak_mb = torch.cuda.max_memory_allocated(device) / (1024**2)
@@ -451,7 +520,7 @@ def main() -> None:
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
     summaries = output_root / "svhn_summaries"
     summaries.mkdir(parents=True, exist_ok=True)
-    out = summaries / f"svhn_sum_{args.method}_n{int(args.bag_size_mean)}_train{args.train_bags}_s{args.seed}.json"
+    out = summaries / f"svhn_sum_{args.method}_strictv2_n{int(args.bag_size_mean)}_train{args.train_bags}_s{args.seed}.json"
     out.write_text(json.dumps(summary, indent=2, sort_keys=True))
     print(f"wrote {out}", flush=True)
 
