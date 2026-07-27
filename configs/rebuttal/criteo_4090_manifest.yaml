@@ -1,0 +1,21 @@
+protocol_tag: criteo_x1_c4_c11_k128_strictv1
+dataset: RecZoo Criteo_x1
+description: LLP-Bench-style Criteo feature-bag experiment
+grouping_key: [C4, C11]
+bag_size: 128
+train_bags: 12000
+validation_bags: 3000
+test_bags: 5000
+seeds: [0, 1, 2]
+methods: [dllp_bce, dllp_mse, easyllp, fsconv]
+optimizer: Adam
+learning_rate: 0.001
+weight_decay: 0.000001
+bag_batch_size: 32
+max_epochs: 12
+gradient_clipping_global_norm: 5.0
+early_stopping_patience: 3
+checkpoint_metric: validation expected-count MAE
+hidden_validation_metrics: false
+final_test_hidden_metrics_once_after_checkpoint_selection: true
+
