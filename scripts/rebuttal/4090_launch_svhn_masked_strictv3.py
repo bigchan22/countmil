@@ -26,8 +26,10 @@ def git_commit() -> str:
     return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
 
 
-def git_clean() -> bool:
-    return not subprocess.check_output(["git", "status", "--short"], cwd=ROOT, text=True).strip()
+def git_source_clean() -> bool:
+    tracked = subprocess.check_output(["git", "status", "--short", "--untracked-files=no"], cwd=ROOT, text=True).strip()
+    staged = subprocess.check_output(["git", "diff", "--cached", "--name-only"], cwd=ROOT, text=True).strip()
+    return not tracked and not staged
 
 
 def gpu_inventory() -> list[dict[str, Any]]:
@@ -56,8 +58,8 @@ def main() -> None:
     head = git_commit()
     if head != args.expected_sha:
         raise SystemExit(f"HEAD {head} does not match expected source SHA {args.expected_sha}")
-    if not git_clean():
-        raise SystemExit("working tree is not clean")
+    if not git_source_clean():
+        raise SystemExit("tracked or staged source tree is not clean")
     gpus = gpu_inventory()
     if not gpus:
         raise SystemExit("nvidia-smi did not report a GPU")
@@ -115,8 +117,8 @@ def main() -> None:
     env["CUDA_VISIBLE_DEVICES"] = str(args.gpu_index)
     env["TORCH_HOME"] = env.get("TORCH_HOME", str(ROOT / ".torch_cache"))
     for method, seed, cmd in commands:
-        if git_commit() != head or not git_clean():
-            raise SystemExit("source tree changed during queue")
+        if git_commit() != head or not git_source_clean():
+            raise SystemExit("tracked or staged source tree changed during queue")
         stamp = utc_stamp()
         key = f"svhn_masked_{method}_s{seed}_{head[:8]}_{stamp}"
         status_path = status_dir / f"{key}.json"
