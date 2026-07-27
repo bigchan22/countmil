@@ -1,0 +1,40 @@
+{
+  "command": [
+    "/home/chanhomin/countmil/.venv/bin/python",
+    "scripts/rebuttal/a5000_train_svhn_scalar.py",
+    "--method",
+    "gaussian_amle",
+    "--seed",
+    "1",
+    "--dataset-root",
+    "data",
+    "--output-root",
+    "results/rebuttal/4090_svhn_masked_strictv3",
+    "--device",
+    "cuda",
+    "--train-bags",
+    "5000",
+    "--val-bags",
+    "600",
+    "--test-bags",
+    "600",
+    "--epochs",
+    "40",
+    "--batch-size",
+    "16"
+  ],
+  "finished_at": "20260727T121955Z",
+  "git_commit": "c4d6c3740141906a7511cc8eb84cfba2f3e26416",
+  "gpu": {
+    "index": 0,
+    "name": "NVIDIA GeForce RTX 4090"
+  },
+  "hostname": "gpusystem",
+  "log_path": "/home/chanhomin/countmil_svhn_masked/results/rebuttal/4090_svhn_masked_strictv3/scheduler/logs/svhn_masked_gaussian_amle_s1_c4d6c374_20260727T120213Z.log",
+  "method": "gaussian_amle",
+  "returncode": 0,
+  "seed": 1,
+  "started_at": "20260727T120213Z",
+  "status": "COMPLETED",
+  "summary_path": "/home/chanhomin/countmil_svhn_masked/results/rebuttal/4090_svhn_masked_strictv3/svhn_summaries/svhn_sum_gaussian_amle_strictv3_masked_n10_train5000_s1.json"
+}

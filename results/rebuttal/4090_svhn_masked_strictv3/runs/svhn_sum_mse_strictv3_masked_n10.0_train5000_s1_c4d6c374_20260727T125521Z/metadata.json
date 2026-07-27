@@ -1,0 +1,25 @@
+{
+  "command": "scripts/rebuttal/a5000_train_svhn_scalar.py --method mse --seed 1 --dataset-root data --output-root results/rebuttal/4090_svhn_masked_strictv3 --device cuda --train-bags 5000 --val-bags 600 --test-bags 600 --epochs 40 --batch-size 16",
+  "cuda_available": true,
+  "cuda_version": "12.8",
+  "git_commit": "c4d6c3740141906a7511cc8eb84cfba2f3e26416",
+  "gpu_index": null,
+  "gpu_name": "NVIDIA GeForce RTX 4090",
+  "hostname": "gpusystem",
+  "manifest_hashes": {
+    "test": "c359e89b138ddb3218c12a4462043a2ee2512c2735283cb3789d259f410f984b",
+    "train": "9e5a23e0d873deff74447381dd6915fa062d9fd77446695218b5e8b4a5590b18",
+    "val": "d206e7cc2c7465349cf6abaa10ff77173d9179b30621b08935039534b8fd4622"
+  },
+  "platform": "Linux-5.15.0-176-generic-x86_64-with-glibc2.35",
+  "pretrained_checkpoint_path": "/home/chanhomin/.cache/torch/hub/checkpoints/resnet18-f37072fd.pth",
+  "pretrained_checkpoint_sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec",
+  "pretrained_weight_identifier": "torchvision.models.ResNet18_Weights.IMAGENET1K_V1",
+  "python_version": "3.9.16 (main, Mar  8 2023, 14:00:05) \n[GCC 11.2.0]",
+  "svhn_test_md5": "eb5a983be6a315427106f1b164d9cef3",
+  "svhn_test_sha256": "cdce80dfb2a2c4c6160906d0bd7c68ec5a99d7ca4831afa54f09182025b6a75b",
+  "svhn_train_md5": "e26dedcc434d2e4c54c9b2d4a06d8373",
+  "svhn_train_sha256": "435e94d69a87fde4fd4d7f3dd208dfc32cb6ae8af2240d066de1df7508d083b8",
+  "torch_version": "2.8.0+cu128",
+  "torchvision_version": "0.23.0+cu128"
+}
