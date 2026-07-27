@@ -1,0 +1,1 @@
+scripts/rebuttal/criteo_train.py --method fsconv --seed 2 --device cuda:0

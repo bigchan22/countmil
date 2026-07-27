@@ -178,5 +178,245 @@
     "required_to_retrain": true,
     "sha256": "02608f423a850656db2ea46fde30c151b0046a967dfea5cd7e511141f60721f9",
     "size": 20359435
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_dllp_bce_s0_dbf3e0860ea5_c046977d_20260727T000953Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_dllp_bce_s0_dbf3e0860ea5_c046977d_20260727T000953Z/checkpoint_best.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "e3f16119f43ffc3932eefddfdf2549cf1241a6db067b9724b27e275b0caa54f1",
+    "size": 67147705
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_dllp_bce_s0_dbf3e0860ea5_c046977d_20260727T000953Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_dllp_bce_s0_dbf3e0860ea5_c046977d_20260727T000953Z/raw_test_probs_labels.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": false,
+    "sha256": "ad3d2fe125607527eeb9ce0c487814abea5e02eb73ca022330616d9fb4765649",
+    "size": 7682005
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_dllp_bce_s1_b78eb4072d4c_c046977d_20260727T001026Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_dllp_bce_s1_b78eb4072d4c_c046977d_20260727T001026Z/checkpoint_best.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "9bb1d2a77a59866516921ebf3473d272406974287ae0e72b9f54da97e0544802",
+    "size": 67147705
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_dllp_bce_s1_b78eb4072d4c_c046977d_20260727T001026Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_dllp_bce_s1_b78eb4072d4c_c046977d_20260727T001026Z/raw_test_probs_labels.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": false,
+    "sha256": "8585b5871bbb7502d20d8d0c664b6a46e592c84a948ab58c2c618e53b0d91dfc",
+    "size": 7682005
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_dllp_bce_s2_cda1e41963a2_c046977d_20260727T001057Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_dllp_bce_s2_cda1e41963a2_c046977d_20260727T001057Z/checkpoint_best.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "1a80fa4e0aab32362e2b72336672ee48f3117a834222313322d81e54e0ddbc0a",
+    "size": 67147833
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_dllp_bce_s2_cda1e41963a2_c046977d_20260727T001057Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_dllp_bce_s2_cda1e41963a2_c046977d_20260727T001057Z/raw_test_probs_labels.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": false,
+    "sha256": "c12d29f52a22b694fe1332f3bb36877af259f981b99dc0455adb8f5b8d272ac7",
+    "size": 7682005
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_dllp_mse_s0_285d9a89786b_c046977d_20260727T000953Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_dllp_mse_s0_285d9a89786b_c046977d_20260727T000953Z/checkpoint_best.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "081686ed0837bd536e553b166c90332e5835e518323bbba13f280bea91d17183",
+    "size": 67147705
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_dllp_mse_s0_285d9a89786b_c046977d_20260727T000953Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_dllp_mse_s0_285d9a89786b_c046977d_20260727T000953Z/raw_test_probs_labels.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": false,
+    "sha256": "81f71208fce1f93ba3fce025c4151b73d7bbb99fb4117f6ce18800c3232b29ef",
+    "size": 7682005
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_dllp_mse_s1_51f08a3f2044_c046977d_20260727T001024Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_dllp_mse_s1_51f08a3f2044_c046977d_20260727T001024Z/checkpoint_best.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "23eb91264411318fdbfd0601eaaf8414932357504eed8206665453b24c0ecc8d",
+    "size": 67147705
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_dllp_mse_s1_51f08a3f2044_c046977d_20260727T001024Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_dllp_mse_s1_51f08a3f2044_c046977d_20260727T001024Z/raw_test_probs_labels.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": false,
+    "sha256": "1f6877a64fb14aa1c3bebbd2d88681b92bd173576b73ce718ee89c89cab2e4d6",
+    "size": 7682005
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_dllp_mse_s2_fd1a9c0b28a9_c046977d_20260727T001053Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_dllp_mse_s2_fd1a9c0b28a9_c046977d_20260727T001053Z/checkpoint_best.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "f99dcad38313c7238bcee0831c8f3307870d4a7b0605ef43076fb0423c0ebaab",
+    "size": 67147833
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_dllp_mse_s2_fd1a9c0b28a9_c046977d_20260727T001053Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_dllp_mse_s2_fd1a9c0b28a9_c046977d_20260727T001053Z/raw_test_probs_labels.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": false,
+    "sha256": "bc7f8e7ad8221fff71c5ab627732bacec94ec01c40a6646518bd5f28f30f8dc3",
+    "size": 7682005
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_easyllp_s0_a7dbedc97469_c046977d_20260727T000952Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_easyllp_s0_a7dbedc97469_c046977d_20260727T000952Z/checkpoint_best.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "ecb2d7d484ab6923c35466d6128601b091e91d110f25a1d5766351daa0cd3bac",
+    "size": 67147641
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_easyllp_s0_a7dbedc97469_c046977d_20260727T000952Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_easyllp_s0_a7dbedc97469_c046977d_20260727T000952Z/raw_test_probs_labels.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": false,
+    "sha256": "07a7d71a665ea9d29ac3a8116c3cb9e947f9c0227b9f91f62362871c7f908901",
+    "size": 7682005
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_easyllp_s1_59ca5390cbd9_c046977d_20260727T001009Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_easyllp_s1_59ca5390cbd9_c046977d_20260727T001009Z/checkpoint_best.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "044bf19367d24e3791d1e5a80f290c18078545679cca24955b9fec95dfc4a1e0",
+    "size": 67147641
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_easyllp_s1_59ca5390cbd9_c046977d_20260727T001009Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_easyllp_s1_59ca5390cbd9_c046977d_20260727T001009Z/raw_test_probs_labels.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": false,
+    "sha256": "770d36f0ddc3c7267a95775e63f871949916464790e5db517c775a5391ed4ded",
+    "size": 7682005
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_easyllp_s2_eed00346e330_c046977d_20260727T001031Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_easyllp_s2_eed00346e330_c046977d_20260727T001031Z/checkpoint_best.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "e5e52e255461a59a70175794dc1f4923807782e584af805b6714ae03c814acc3",
+    "size": 67147769
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_easyllp_s2_eed00346e330_c046977d_20260727T001031Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_easyllp_s2_eed00346e330_c046977d_20260727T001031Z/raw_test_probs_labels.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": false,
+    "sha256": "eba23269a0ab58b16f6aa61457dfa6b6e7eb394d65cbd5fb8525e61f764d1048",
+    "size": 7682005
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_fsconv_s0_dcdb2cd30373_c046977d_20260727T000952Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_fsconv_s0_dcdb2cd30373_c046977d_20260727T000952Z/checkpoint_best.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "49aaa7cdce3426306e450a73c7b8bcd6c02cb06ebfeb47051efabc59be90c724",
+    "size": 67147641
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_fsconv_s0_dcdb2cd30373_c046977d_20260727T000952Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_fsconv_s0_dcdb2cd30373_c046977d_20260727T000952Z/raw_test_probs_labels.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": false,
+    "sha256": "150cd53b0d442b29918760b6a2e4cb92f1dc685da33967f3ae8d1e817939bc5f",
+    "size": 7682005
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_fsconv_s1_f7974758c3ec_c046977d_20260727T001534Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_fsconv_s1_f7974758c3ec_c046977d_20260727T001534Z/checkpoint_best.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "3fdc8f792b78c0bee68b0b0ba1e8e460c81f976d76cb0961ac6780b772d929b4",
+    "size": 67147641
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_fsconv_s1_f7974758c3ec_c046977d_20260727T001534Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_fsconv_s1_f7974758c3ec_c046977d_20260727T001534Z/raw_test_probs_labels.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": false,
+    "sha256": "2c6ee361e0e32678e74a389b351ae36425a5733f8d33931d5b88a37adbd5bc7e",
+    "size": 7682005
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_fsconv_s2_e83c856539b6_c046977d_20260727T002146Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_fsconv_s2_e83c856539b6_c046977d_20260727T002146Z/checkpoint_best.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "73b5967fea1e8222e43fa41bb53732983d3d44892017ff748862add2df294fbc",
+    "size": 67147769
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_fsconv_s2_e83c856539b6_c046977d_20260727T002146Z",
+    "git_sha": "c046977df7835610e6a4d6b693567ad021110e65",
+    "path": "results/rebuttal/4090_criteo_strictv1/runs/criteo_x1_c4_c11_k128_strictv1_fsconv_s2_e83c856539b6_c046977d_20260727T002146Z/raw_test_probs_labels.pt",
+    "producing_command": "scripts/rebuttal/criteo_train.py",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": false,
+    "sha256": "170e28c0decb4672a3201a9018ca5de952dd5a8ad1a4ebcbe105a4d8c5edb49e",
+    "size": 7682005
   }
 ]

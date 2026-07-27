@@ -1,0 +1,1 @@
+scripts/rebuttal/criteo_train.py --method dllp_bce --seed 0 --device cuda:0
