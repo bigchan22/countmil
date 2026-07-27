@@ -6,6 +6,7 @@ from torch import nn
 from countmil.baselines.gaussian_amle import gaussian_integer_bin_nll
 from countmil.masked_forward import forward_valid_instances
 from countmil.strict_protocol import canonical_hash, sample_variable_mnist_manifest, stratified_train_val_split, BagManifestSpec
+from scripts.rebuttal.a5000_train_svhn_scalar import masked_bag_class_probs
 
 
 class BatchSensitiveBackbone(nn.Module):
@@ -28,6 +29,27 @@ def test_forward_valid_instances_independent_of_padding_count():
     out_long = forward_valid_instances(model, long, long_mask)
     assert torch.allclose(out_short[short_mask], out_long[long_mask])
     loss = out_short[short_mask].square().sum()
+    loss.backward()
+    assert valid.grad is not None
+    assert torch.isfinite(valid.grad).all()
+
+
+def test_svhn_masked_bag_probs_do_not_forward_padding():
+    model = BatchSensitiveBackbone()
+    valid = torch.randn(2, 3, 1, 2, 2, requires_grad=True)
+    short = torch.zeros(2, 5, 1, 2, 2)
+    long = torch.zeros(2, 8, 1, 2, 2)
+    short[:, :3] = valid
+    long[:, :3] = valid
+    short_mask = torch.zeros(2, 5, dtype=torch.bool)
+    long_mask = torch.zeros(2, 8, dtype=torch.bool)
+    short_mask[:, :3] = True
+    long_mask[:, :3] = True
+    short_probs = masked_bag_class_probs(model, short, short_mask)
+    long_probs = masked_bag_class_probs(model, long, long_mask)
+    assert torch.allclose(short_probs[short_mask], long_probs[long_mask])
+    assert torch.all(short_probs[~short_mask] == torch.softmax(torch.zeros(4), dim=0))
+    loss = short_probs[short_mask].square().sum()
     loss.backward()
     assert valid.grad is not None
     assert torch.isfinite(valid.grad).all()

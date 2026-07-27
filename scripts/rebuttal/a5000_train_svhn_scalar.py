@@ -32,8 +32,13 @@ if str(ROOT) not in sys.path:
 from countmil.aggregators import AggregatePMF, aggregate_nll, finite_support_convolution
 from countmil.baselines.gaussian_amle import categorical_gaussian_amle_loss, categorical_sum_moments
 from countmil.datasets import SVHNOrdinalSumBags, TensorOrdinalSumBags, collate_ordinal_sum_bags, load_svhn_family
+from countmil.masked_forward import forward_valid_instances
 from countmil.models import make_cifar_classifier
 from countmil.training.seed import set_seed
+
+
+MASKED_SVHN_PROTOCOL_VERSION = "strictv3_train_holdout_val_official_test_no_hidden_val_masked_resnet_bag_forward"
+MASKED_SVHN_OUTPUT_ROOT = "results/rebuttal/4090_svhn_masked_strictv3"
 
 
 def git_commit() -> str:
@@ -70,6 +75,13 @@ def expected_sum_from_probs(class_probs: torch.Tensor, mask: torch.Tensor) -> to
     support = torch.arange(class_probs.shape[-1], device=class_probs.device, dtype=class_probs.dtype)
     instance_means = (class_probs * support).sum(dim=-1)
     return (instance_means * mask.to(class_probs.dtype)).sum(dim=-1)
+
+
+def masked_bag_class_probs(model: torch.nn.Module, images: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+    """Class probabilities for padded bags without forwarding padded images."""
+
+    logits = forward_valid_instances(model, images, mask)
+    return torch.softmax(logits, dim=-1)
 
 
 def gaussian_bin_nll(mean: torch.Tensor, variance: torch.Tensor, target: torch.Tensor, eps: float) -> torch.Tensor:
@@ -254,7 +266,7 @@ def evaluate(
             mask = batch["mask"].to(device)
             targets = batch["sum"].to(device)
             labels = batch["labels"].to(device) if include_instance_metrics else None
-            probs = model.predict_proba(x)
+            probs = masked_bag_class_probs(model, x, mask)
             expected = expected_sum_from_probs(probs, mask)
             pmf = atomic_sum_pmf(probs, mask)
             fs_nll = aggregate_nll(pmf, targets)
@@ -361,7 +373,7 @@ def write_unique_instance_predictions(model: torch.nn.Module, ds: SVHNOrdinalSum
 def build_run_dir(root: Path, cfg: dict[str, Any]) -> Path:
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     short = git_commit()[:8]
-    run_id = f"svhn_sum_{cfg['method']}_strictv2_n{cfg['bag_size_mean']}_train{cfg['train_bags']}_s{cfg['seed']}_{short}_{stamp}"
+    run_id = f"svhn_sum_{cfg['method']}_strictv3_masked_n{cfg['bag_size_mean']}_train{cfg['train_bags']}_s{cfg['seed']}_{short}_{stamp}"
     run_dir = root / "runs" / run_id
     run_dir.mkdir(parents=True, exist_ok=False)
     return run_dir
@@ -373,7 +385,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--dataset-root", default="data")
-    parser.add_argument("--output-root", default="results/rebuttal/a5000_svhn_dependence")
+    parser.add_argument("--output-root", default=MASKED_SVHN_OUTPUT_ROOT)
     parser.add_argument("--train-bags", type=int, default=5000)
     parser.add_argument("--val-bags", type=int, default=600)
     parser.add_argument("--test-bags", type=int, default=600)
@@ -409,7 +421,8 @@ def main() -> None:
         "weight_decay": args.weight_decay,
         "gaussian_eps": args.gaussian_eps,
         "augment": bool(args.augment),
-        "protocol_version": "strictv2_train_holdout_val_no_hidden_val_metrics",
+        "protocol_version": MASKED_SVHN_PROTOCOL_VERSION,
+        "masked_bag_forward": "forward_valid_instances(model, instances, mask) before softmax; padded images are never passed through ResNet-18/BatchNorm",
         "val_image_fraction": args.val_image_fraction,
         "val_image_split_seed": args.val_image_split_seed,
         "validation_split": "deterministic 15% holdout from official SVHN train archive",
@@ -466,7 +479,7 @@ def main() -> None:
             x = batch["instances"].to(device)
             mask = batch["mask"].to(device)
             targets = batch["sum"].to(device)
-            probs = model.predict_proba(x)
+            probs = masked_bag_class_probs(model, x, mask)
             if args.method == "fsconv":
                 loss = aggregate_nll(atomic_sum_pmf(probs, mask), targets).mean()
             elif args.method == "mse":
@@ -520,7 +533,7 @@ def main() -> None:
     (run_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
     summaries = output_root / "svhn_summaries"
     summaries.mkdir(parents=True, exist_ok=True)
-    out = summaries / f"svhn_sum_{args.method}_strictv2_n{int(args.bag_size_mean)}_train{args.train_bags}_s{args.seed}.json"
+    out = summaries / f"svhn_sum_{args.method}_strictv3_masked_n{int(args.bag_size_mean)}_train{args.train_bags}_s{args.seed}.json"
     out.write_text(json.dumps(summary, indent=2, sort_keys=True))
     print(f"wrote {out}", flush=True)
 

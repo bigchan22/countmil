@@ -1,0 +1,24 @@
+{
+  "name": "4090_svhn_masked_strictv3",
+  "protocol_version": "strictv3_train_holdout_val_official_test_no_hidden_val_masked_resnet_bag_forward",
+  "output_root": "results/rebuttal/4090_svhn_masked_strictv3",
+  "dataset_root": "data",
+  "jobs": [
+    {"method": "fsconv", "seed": 0},
+    {"method": "fsconv", "seed": 1},
+    {"method": "fsconv", "seed": 2},
+    {"method": "gaussian_amle", "seed": 0},
+    {"method": "gaussian_amle", "seed": 1},
+    {"method": "gaussian_amle", "seed": 2},
+    {"method": "mse", "seed": 0},
+    {"method": "mse", "seed": 1},
+    {"method": "mse", "seed": 2}
+  ],
+  "common_args": [
+    "--train-bags", "5000",
+    "--val-bags", "600",
+    "--test-bags", "600",
+    "--epochs", "40",
+    "--batch-size", "16"
+  ]
+}
