@@ -1,0 +1,19 @@
+{
+  "checkpoint_metric": "validation expected-count MAE only",
+  "config_hash": "1d88caeea050bad6b2234c0b696e2d4910a7ec99ca7a928f17c5898b94352bb7",
+  "git_commit": "88cef899ecc1a9da2bfd96c3887f76b50713bd79",
+  "global_prior_from_aggregate_train_counts": 0.273060546875,
+  "group_key": "C4+C11",
+  "groups_fit": 6928,
+  "hidden_validation_metrics_logged": false,
+  "method": "group_prior",
+  "protocol_tag": "criteo_x1_c4_c11_k128_strictv1",
+  "run_id": "criteo_x1_c4_c11_k128_strictv1_group_prior_s1_1d88caeea050_88cef899_20260727T043655Z",
+  "seed": 1,
+  "test_input_shard_hash": "84ac39c6b934d58c8da7ed34e783710e6fb860f1f3a64f35819ce7c39a310564",
+  "test_manifest_hash": "e3ad2519a96181e60e596e23a2e5068f1933be46b74d4d128f39b3a09e04d98b",
+  "train_input_shard_hash": "fadd5457d815b951eb029ec03dd7e25261c952f399f213cc2235a920d8d1fa09",
+  "train_manifest_hash": "e7b4a2f6d27701006d493cf5876b37c2155528f09d9575356d8572e9a1212b21",
+  "valid_input_shard_hash": "d6979c859e324f9075093bd32d5d7928474cb9ab09c3bc659509dd4ebd7b9e85",
+  "valid_manifest_hash": "c968b55fa6d80122175ca8250b629feac2f081257de433912ea0e63aba05df37"
+}

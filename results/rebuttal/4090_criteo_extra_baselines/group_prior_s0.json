@@ -1,0 +1,41 @@
+{
+  "best": {
+    "epoch": 0,
+    "val_expected_count_mae": 6.955652236938477,
+    "val_native_objective": 6.955652236938477
+  },
+  "config": {
+    "checkpoint_metric": "validation expected-count MAE only",
+    "config_hash": "64c279d6b9589fe9e1549500c727258b36cfce4f5e987a7c4596f7829a285517",
+    "git_commit": "88cef899ecc1a9da2bfd96c3887f76b50713bd79",
+    "global_prior_from_aggregate_train_counts": 0.2700865885416667,
+    "group_key": "C4+C11",
+    "groups_fit": 6924,
+    "hidden_validation_metrics_logged": false,
+    "method": "group_prior",
+    "protocol_tag": "criteo_x1_c4_c11_k128_strictv1",
+    "seed": 0,
+    "test_input_shard_hash": "c126149c1707b870e01367a3f8e348c63ad247a70c7ad0849437660975777572",
+    "test_manifest_hash": "f7b1d485ad8232dc216dd0f1fcc78e6c7dd68902a3a07cdb1ae5c2b795528b5b",
+    "train_input_shard_hash": "7d6feab1c8b76e0ef9e6d94b9c34aae8f27d991435a2b03cb8022107907956f4",
+    "train_manifest_hash": "517ed3c191606f2ee6e25400c031a98b2495a2621147b6918485f98fd493423b",
+    "valid_input_shard_hash": "afa5480199952d48d3a663d6818d3336c1ea94c41a45c0a153b65d1871940f26",
+    "valid_manifest_hash": "e7b114a87dc366f9a785d003fe47452b0fe7bb0c72a2bcf43815efe165f83e2b"
+  },
+  "run_dir": "results/rebuttal/4090_criteo_extra_baselines/runs/criteo_x1_c4_c11_k128_strictv1_group_prior_s0_64c279d6b958_88cef899_20260727T043652Z",
+  "run_id": "criteo_x1_c4_c11_k128_strictv1_group_prior_s0_64c279d6b958_88cef899_20260727T043652Z",
+  "selection_metric": "deterministic aggregate-only validation expected-count MAE; no hidden validation metrics",
+  "status": "COMPLETED",
+  "test": {
+    "accuracy_0p5": 0.7388062477111816,
+    "brier": 0.18072813749313354,
+    "ece_15": 0.004146122839301825,
+    "expected_count_mae": 5.793704032897949,
+    "log_loss": 0.5407858138111566,
+    "pmf_mode_count_acc": 0.06780000030994415,
+    "poisson_binomial_nll": 3.953294515609741,
+    "pr_auc": 0.49174867921899773,
+    "roc_auc": 0.6989923134366904,
+    "rounded_expected_count_acc": 0.06700000166893005
+  }
+}

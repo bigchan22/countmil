@@ -1,0 +1,117 @@
+{
+  "dllp_bce": {
+    "expected_count_mae": {
+      "ci95_percentile": [
+        -0.12039848735789457,
+        0.0991427512814601
+      ],
+      "mean_difference_method_minus_reference": -8.094291289647189e-05
+    },
+    "poisson_binomial_nll": {
+      "ci95_percentile": [
+        -0.04993180689374605,
+        0.04010847146928308
+      ],
+      "mean_difference_method_minus_reference": 0.0006810162107149751
+    }
+  },
+  "dllp_mse": {
+    "expected_count_mae": {
+      "ci95_percentile": [
+        -0.12044601937641701,
+        0.028234844362537037
+      ],
+      "mean_difference_method_minus_reference": -0.043325825806458794
+    },
+    "poisson_binomial_nll": {
+      "ci95_percentile": [
+        -0.01584569989154736,
+        0.04447003046770889
+      ],
+      "mean_difference_method_minus_reference": 0.013732678822676342
+    }
+  },
+  "easyllp": {
+    "expected_count_mae": {
+      "ci95_percentile": [
+        30.143545367331704,
+        33.188791709264514
+      ],
+      "mean_difference_method_minus_reference": 31.855077494176232
+    },
+    "poisson_binomial_nll": {
+      "ci95_percentile": [
+        23.428723263381897,
+        23.77420323791593
+      ],
+      "mean_difference_method_minus_reference": 23.60644173067821
+    }
+  },
+  "genbags": {
+    "expected_count_mae": {
+      "ci95_percentile": [
+        0.05703404249404868,
+        0.6784074403299889
+      ],
+      "mean_difference_method_minus_reference": 0.2952585291882356
+    },
+    "poisson_binomial_nll": {
+      "ci95_percentile": [
+        0.082310264437745,
+        0.37552888476610186
+      ],
+      "mean_difference_method_minus_reference": 0.19661772376298906
+    }
+  },
+  "group_prior": {
+    "expected_count_mae": {
+      "ci95_percentile": [
+        1.015708996548752,
+        1.2904800720415512
+      ],
+      "mean_difference_method_minus_reference": 1.1599490055680275
+    },
+    "poisson_binomial_nll": {
+      "ci95_percentile": [
+        0.6262512157545488,
+        0.7598822373405099
+      ],
+      "mean_difference_method_minus_reference": 0.6924285226305326
+    }
+  },
+  "n_boot": 10000,
+  "ot_llp": {
+    "expected_count_mae": {
+      "ci95_percentile": [
+        1.04859178575784,
+        1.3047180793230733
+      ],
+      "mean_difference_method_minus_reference": 1.1808227308630943
+    },
+    "poisson_binomial_nll": {
+      "ci95_percentile": [
+        5.024303649740319,
+        5.973681331107368
+      ],
+      "mean_difference_method_minus_reference": 5.585512979489565
+    }
+  },
+  "reference": "fsconv",
+  "resampling_unit": "whole test bags within seed",
+  "supervised_oracle": {
+    "expected_count_mae": {
+      "ci95_percentile": [
+        -0.009417579361399014,
+        0.3247478302962581
+      ],
+      "mean_difference_method_minus_reference": 0.16113542732397715
+    },
+    "poisson_binomial_nll": {
+      "ci95_percentile": [
+        -0.009841461965044339,
+        0.1083055063998699
+      ],
+      "mean_difference_method_minus_reference": 0.05448248013257981
+    }
+  }
+}

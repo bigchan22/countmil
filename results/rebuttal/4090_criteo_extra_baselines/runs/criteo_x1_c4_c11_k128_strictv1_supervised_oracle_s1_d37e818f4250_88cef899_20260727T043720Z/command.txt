@@ -1,0 +1,1 @@
+scripts/rebuttal/criteo_train.py --method supervised_oracle --seed 1 --device cuda:0 --result-root results/rebuttal/4090_criteo_extra_baselines
