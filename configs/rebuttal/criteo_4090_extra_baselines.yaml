@@ -1,0 +1,42 @@
+protocol_tag: criteo_x1_c4_c11_k128_strictv1
+source_branch: exp/4090-criteo-extra-baselines
+base_strictv1_commit: f7396879a1bbbbb1441b1e330bfcb37e92a76169
+google_research_llp_bench_commit: ec7c3d346277b737bc2decffcd1b533d4b7ec105
+artifact_root: /home/chanhomin/datasets/criteo_x1/strictv1
+result_root: results/rebuttal/4090_criteo_extra_baselines
+shared_protocol:
+  grouping_key: [C4, C11]
+  bag_size: 128
+  train_bags: 12000
+  validation_bags: 3000
+  test_bags: 5000
+  seeds: [0, 1, 2]
+  validation_checkpoint_metric: expected_count_mae
+  hidden_validation_metrics: false
+model:
+  architecture: criteo_shared_tabular_mlp
+  hidden_layers: [256, 128]
+  categorical_embedding_dim: 8
+training:
+  optimizer: adam
+  learning_rate: 0.001
+  weight_decay: 0.000001
+  bag_batch_size: 32
+  max_epochs: 12
+  gradient_clip_norm: 5.0
+  early_stopping_patience: 3
+new_methods:
+  genbags:
+    block_size: 4
+    generated_bags_per_block: 60
+    generated_bags_per_8_original_bags: 120
+    covariance: "1.331 * I - 0.33 * ones"
+  ot_llp:
+    assignment: "top-k logits per bag, exactly observed count positives"
+  group_prior:
+    group_key: [C4, C11]
+    fitting_labels: aggregate_counts_only
+    unseen_group_fallback: global_aggregate_click_rate
+  supervised_oracle:
+    training_labels: instance_click_labels
+    role: upper_reference_only

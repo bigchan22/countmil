@@ -20,7 +20,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from countmil.criteo.constants import BAG_SIZE, PROTOCOL_TAG
 from countmil.criteo.data import artifact_record
-from countmil.criteo.losses import aggregate_metrics, dllp_bce_loss, dllp_mse_loss, easyllp_loss, expected_count_mae, fsconv_nll_loss, instance_metrics
+from countmil.criteo.losses import (
+    aggregate_metrics,
+    dllp_bce_loss,
+    dllp_mse_loss,
+    easyllp_loss,
+    expected_count_mae,
+    fsconv_nll_loss,
+    genbags_loss,
+    instance_metrics,
+    ot_llp_loss,
+)
 from countmil.criteo.model import CriteoInstanceModel, infer_categorical_layout
 from countmil.strict_protocol import canonical_hash
 from countmil.training.run import git_commit
@@ -37,13 +47,19 @@ def _flatten(batch: dict[str, torch.Tensor], device: torch.device) -> tuple[torc
     return num.reshape(-1, num.shape[-1]), cat.reshape(-1, cat.shape[-1])
 
 
-def _loss(method: str, logits: torch.Tensor, counts: torch.Tensor, global_prior: float) -> torch.Tensor:
+def _loss(method: str, logits: torch.Tensor, counts: torch.Tensor, global_prior: float, *, training: bool) -> torch.Tensor:
     if method == "dllp_bce":
         return dllp_bce_loss(logits, counts, BAG_SIZE)
     if method == "dllp_mse":
         return dllp_mse_loss(logits, counts)
     if method == "easyllp":
         return easyllp_loss(logits, counts, bag_size=BAG_SIZE, global_prior=global_prior)
+    if method == "genbags":
+        return genbags_loss(logits, counts, stochastic=training)
+    if method == "ot_llp":
+        return ot_llp_loss(logits, counts)
+    if method == "supervised_oracle":
+        return dllp_bce_loss(logits, counts, BAG_SIZE)
     if method == "fsconv":
         return fsconv_nll_loss(logits, counts)
     raise ValueError(method)
@@ -61,7 +77,7 @@ def _validate(model: CriteoInstanceModel, loader: DataLoader, device: torch.devi
             counts = batch["counts"].to(device)
             logits = model(num, cat).reshape(counts.shape[0], BAG_SIZE)
             maes.append(expected_count_mae(logits, counts).detach().cpu())
-            native.append(_loss(method, logits, counts, global_prior).detach().cpu().reshape(1))
+            native.append(_loss(method, logits, counts, global_prior, training=False).detach().cpu().reshape(1))
     return {
         "val_expected_count_mae": float(torch.cat(maes).mean().item()),
         "val_native_objective": float(torch.cat(native).mean().item()),
@@ -113,14 +129,19 @@ def _test_eval(model: CriteoInstanceModel, shard: dict[str, Any], device: torch.
     return out
 
 
-def _make_loaders(train: dict[str, Any], valid: dict[str, Any], batch_size: int, seed: int) -> tuple[DataLoader, DataLoader]:
+def _make_loaders(train: dict[str, Any], valid: dict[str, Any], batch_size: int, seed: int, *, expose_train_labels: bool = False) -> tuple[DataLoader, DataLoader]:
     def assert_no_hidden(shard: dict[str, Any], name: str) -> None:
         if "hidden_labels" in shard:
             raise RuntimeError(f"{name} shard exposes hidden labels to train/validation")
     assert_no_hidden(train, "train")
     assert_no_hidden(valid, "valid")
     g = torch.Generator().manual_seed(seed)
-    train_ds = [{"numeric": train["numeric"][i], "categorical": train["categorical"][i], "counts": train["counts"][i]} for i in range(train["counts"].shape[0])]
+    train_ds = []
+    for i in range(train["counts"].shape[0]):
+        item = {"numeric": train["numeric"][i], "categorical": train["categorical"][i], "counts": train["counts"][i]}
+        if expose_train_labels:
+            item["hidden_labels"] = train["hidden_labels_external_only"][i]
+        train_ds.append(item)
     val_ds = [{"numeric": valid["numeric"][i], "categorical": valid["categorical"][i], "counts": valid["counts"][i]} for i in range(valid["counts"].shape[0])]
     return (
         DataLoader(train_ds, batch_size=batch_size, shuffle=True, generator=g, num_workers=2, pin_memory=True),
@@ -130,11 +151,11 @@ def _make_loaders(train: dict[str, Any], valid: dict[str, Any], batch_size: int,
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--method", choices=["dllp_bce", "dllp_mse", "easyllp", "fsconv"], required=True)
+    p.add_argument("--method", choices=["dllp_bce", "dllp_mse", "easyllp", "fsconv", "genbags", "ot_llp", "supervised_oracle"], required=True)
     p.add_argument("--seed", type=int, required=True)
     p.add_argument("--device", default="cuda:0")
     p.add_argument("--artifact-root", default="/home/chanhomin/datasets/criteo_x1/strictv1")
-    p.add_argument("--result-root", default="results/rebuttal/4090_criteo_strictv1")
+    p.add_argument("--result-root", default="results/rebuttal/4090_criteo_extra_baselines")
     p.add_argument("--epochs", type=int, default=12)
     p.add_argument("--batch-size", type=int, default=32)
     p.add_argument("--lr", type=float, default=1e-3)
@@ -175,6 +196,7 @@ def main() -> None:
         "categorical_cardinalities": cardinalities,
         "checkpoint_metric": "validation expected-count MAE only",
         "hidden_validation_metrics_logged": False,
+        "supervised_training_labels_used": args.method == "supervised_oracle",
     }
     cfg_hash = canonical_hash({"config": {k: v for k, v in cfg.items() if isinstance(v, (str, int, float, bool, list)) or v is None}})
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
@@ -194,7 +216,7 @@ def main() -> None:
     }
     (run_dir / "environment.json").write_text(json.dumps(metadata, indent=2, sort_keys=True))
     device = torch.device(args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu")
-    train_loader, val_loader = _make_loaders(train, valid, args.batch_size, args.seed)
+    train_loader, val_loader = _make_loaders(train, valid, args.batch_size, args.seed, expose_train_labels=args.method == "supervised_oracle")
     global_prior = float(train["counts"].sum().item() / (train["counts"].numel() * BAG_SIZE))
     model = CriteoInstanceModel(categorical_cardinalities=cardinalities, shared_categorical=shared).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
@@ -211,7 +233,11 @@ def main() -> None:
                 num, cat = _flatten(batch, device)
                 counts = batch["counts"].to(device)
                 logits = model(num, cat).reshape(counts.shape[0], BAG_SIZE)
-                loss = _loss(args.method, logits, counts, global_prior)
+                if args.method == "supervised_oracle":
+                    labels = batch["hidden_labels"].to(device).float()
+                    loss = torch.nn.functional.binary_cross_entropy_with_logits(logits, labels)
+                else:
+                    loss = _loss(args.method, logits, counts, global_prior, training=True)
                 if not torch.isfinite(loss):
                     raise RuntimeError(f"non-finite loss at epoch {epoch}")
                 opt.zero_grad(set_to_none=True)
