@@ -1,0 +1,182 @@
+[
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_train_seed0",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed0/train_seed0_shard.pt",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "2b4668ac41d6b1c49d5c059eb1ae40ace610f0c21e9456bf602b9406772ab070",
+    "size": 424035911
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_train_seed0",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed0/train_seed0_selected.parquet",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "b4c1e8a96f323b9a6e7c495ede447fb1f978038dc26d61d67469685fdc34921c",
+    "size": 49769003
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_valid_seed0",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed0/valid_seed0_shard.pt",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "87499ca6f5660ced78ea4fed921d5058a15183afb9a4bcea611a96fafcad46af",
+    "size": 106011911
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_valid_seed0",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed0/valid_seed0_selected.parquet",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "e33e42cf41941b620d51a224268c4acd5d32bf199790cea35a09de28c980d353",
+    "size": 12216702
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_test_seed0",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed0/test_seed0_shard.pt",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": true,
+    "sha256": "4076693cfe3ad4b9262031191b2b44492c958767c2250c2eaa12f6fc3d78755e",
+    "size": 176683900
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_test_seed0",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed0/test_seed0_selected.parquet",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": true,
+    "sha256": "82db4cbfee5c086b48273b7b07945d860f597b975ff1c8df95c337f5e4f98c1d",
+    "size": 20266485
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_train_seed1",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed1/train_seed1_shard.pt",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "39871b2c9a7afc926cc39574b35053ba903f4129d70b1f9fce8195908e80faa0",
+    "size": 424035911
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_train_seed1",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed1/train_seed1_selected.parquet",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "d4c9fc356901d70c6e383a8b6c3f275e1a97dc967f6029da5f9c511d79a57324",
+    "size": 49703056
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_valid_seed1",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed1/valid_seed1_shard.pt",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "042cbab553de6efbe5a4c01da4019766c63ad98a6249d4824df871ac0cfc0df5",
+    "size": 106011911
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_valid_seed1",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed1/valid_seed1_selected.parquet",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "d4d0bf574ee1869e35a255fb20ab8e9c85139041b6cbf203941ff687a90f3f6f",
+    "size": 12303955
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_test_seed1",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed1/test_seed1_shard.pt",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": true,
+    "sha256": "454264a6c1b2811239ae121ee8657f020e5571bdafd0adc1b5effdf2bad9c981",
+    "size": 176683900
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_test_seed1",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed1/test_seed1_selected.parquet",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": true,
+    "sha256": "d8a506a148423e3804c85c9661d2ccf89b1727cd42832bce74d1f568810da65f",
+    "size": 20498307
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_train_seed2",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed2/train_seed2_shard.pt",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "4efec22e4734c0b066ecc3c79c3a1a382a352e5ece309c74efecb116d68a1df5",
+    "size": 424035911
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_train_seed2",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed2/train_seed2_selected.parquet",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "04d37032f70d4d2d89ae8089ca6d5450d70f14378cf676980ddd24aef53bf6b3",
+    "size": 49779215
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_valid_seed2",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed2/valid_seed2_shard.pt",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "91e57cac28b497d4b2b449390198dff8d1761654993d123bf9727a441518aaa6",
+    "size": 106011911
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_valid_seed2",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed2/valid_seed2_selected.parquet",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": false,
+    "required_to_retrain": true,
+    "sha256": "28d2c0a60f5200706ed029782242d7a1a2d884509501e035afd9ac6a398345b2",
+    "size": 12307784
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_test_seed2",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed2/test_seed2_shard.pt",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": true,
+    "sha256": "c52c7bc8ff2b2a971e9f61376af27e2c500aa945c728b24f64293398ed5211f7",
+    "size": 176683900
+  },
+  {
+    "associated_run": "criteo_x1_c4_c11_k128_strictv1_test_seed2",
+    "git_sha": "691a5bfda49a25c09ec424ae7b748a7bebea41f6",
+    "path": "/home/chanhomin/datasets/criteo_x1/strictv1/seed2/test_seed2_selected.parquet",
+    "producing_command": "PYTHONPATH=.:src /home/chanhomin/countmil/.venv/bin/python scripts/rebuttal/criteo_build_bags.py --data-root /home/chanhomin/datasets/criteo_x1 --artifact-root /home/chanhomin/datasets/criteo_x1/strictv1",
+    "required_to_reconstruct_metrics": true,
+    "required_to_retrain": true,
+    "sha256": "02608f423a850656db2ea46fde30c151b0046a967dfea5cd7e511141f60721f9",
+    "size": 20359435
+  }
+]
